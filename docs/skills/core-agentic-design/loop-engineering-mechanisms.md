@@ -39,3 +39,10 @@ This skill teaches the agent how to design rigorous self-correction loops and va
 ### 3. Exit Conditions & Escapes
 * Every reasoning or correction loop must define a strict `max_iterations` counter (typically capped at 3).
 * If the counter is reached without passing validation, stop execution, freeze state, and trigger `escalation_trigger` to hand off to a human reviewer.
+
+## References
+
+| File | Summary |
+|------|---------|
+| `references/loop_mitigation_patterns.md` | Pydantic validation structures, machine-readable observation formats, oscillation monitors, and human escalation triggers |
+
