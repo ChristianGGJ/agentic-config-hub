@@ -36,3 +36,10 @@ This skill teaches the agent how to implement production-grade, typed agent inte
 ### 3. Context & Relational Data Strategies
 * **Context Optimization**: Restrict relational data extracts (SQL queries, entity graphs) to small, structured DTO lists. Do not dump entire database rows into the LLM context.
 * **Security Boundaries**: Validate user and tenant boundaries in the native C# code of the tool before executing queries. Never trust the agent to enforce security constraints in prompts.
+
+## References
+
+| File | Summary |
+|------|---------|
+| `references/enterprise_integration_patterns.md` | DI configurations, scoped agents factories, class-based AIFunction tool definitions, relational DTO data optimizations, and OpenTelemetryActivity tracking |
+
