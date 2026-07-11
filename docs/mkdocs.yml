@@ -1,0 +1,83 @@
+site_name: Agentic Config Hub
+site_description: Curated library of production-ready AI configurations for agents and agentic systems
+site_url: https://ChristianGGJ.github.io/agentic-config-hub/
+
+theme:
+  name: material
+  palette:
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: indigo
+      accent: indigo
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: indigo
+      accent: indigo
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+  features:
+    - navigation.tabs
+    - navigation.sections
+    - content.code.copy
+
+plugins:
+  - search
+
+markdown_extensions:
+  - pymdownx.highlight:
+      anchor_linenums: true
+      line_spans: __span
+      pygments_lang_class: true
+  - pymdownx.inlinehilite
+  - pymdownx.snippets
+  - pymdownx.superfences
+  - attr_list
+  - md_in_html
+
+docs_dir: .
+
+nav:
+  - Home: index.md
+  - "Core Agentic Design":
+    - "Core Agentic Design Skills": skills/core-agentic-design/index.md
+    - "Agentic System Architect": skills/core-agentic-design/agentic-system-architect.md
+    - "Agent Designer": skills/core-agentic-design/agent-designer.md
+    - "Agent Workflow Designer": skills/core-agentic-design/agent-workflow-designer.md
+    - "Spec-Driven Workflow": skills/core-agentic-design/spec-driven-workflow.md
+    - "AgentHub": skills/core-agentic-design/agenthub.md
+  - "Prompts & Quality":
+    - "Prompts & Quality Skills": skills/prompts-quality/index.md
+    - "Prompt Governance": skills/prompts-quality/prompt-governance.md
+    - "Senior Prompt Engineer": skills/prompts-quality/senior-prompt-engineer.md
+    - "Self Evaluation": skills/prompts-quality/self-eval.md
+    - "Skill Tester": skills/prompts-quality/skill-tester.md
+    - "Focused Fix": skills/prompts-quality/focused-fix.md
+  - "Autonomy & Security":
+    - "Autonomy & Security Skills": skills/autonomy-security/index.md
+    - "Self-Improving Agent": skills/autonomy-security/self-improving-agent.md
+    - "AI Security": skills/autonomy-security/ai-security.md
+    - "Adversarial Reviewer": skills/autonomy-security/adversarial-reviewer.md
+    - "Skill Security Auditor": skills/autonomy-security/skill-security-auditor.md
+    - "Autoresearch Agent": skills/autonomy-security/autoresearch-agent.md
+  - "Infrastructure":
+    - "Infrastructure Skills": skills/infrastructure/index.md
+    - "MCP Server Builder": skills/infrastructure/mcp-server-builder.md
+    - "RAG Architect": skills/infrastructure/rag-architect.md
+    - "LLM Cost Optimizer": skills/infrastructure/llm-cost-optimizer.md
+    - "Browser Automation": skills/infrastructure/browser-automation.md
+  - "Agents":
+    - "AI Coding Agents": agents/index.md
+    - "Agentic System Architect": agents/cs-agentic-system-architect.md
+    - "Agent Designer": agents/cs-agent-designer.md
+    - "Prompt Engineer": agents/cs-prompt-engineer.md
+    - "Agent Security Auditor": agents/cs-agent-security-auditor.md
+  - "Commands":
+    - "Slash Commands": commands/index.md
+    - "Audit Agent": commands/audit-agent.md
+    - "Validate Gates": commands/validate-gates.md
+    - "Scaffold Ecosystem": commands/scaffold-ecosystem.md
+    - "Analyze Trace": commands/analyze-trace.md

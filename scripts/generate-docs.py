@@ -7,53 +7,91 @@ import shutil
 
 REPO_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 DOCS_DIR = os.path.join(REPO_ROOT, "docs")
+GITHUB_BASE = "https://github.com/ChristianGGJ/agentic-config-hub/tree/main"
 
-# Domain mapping: directory prefix -> (section name, sort order, icon, plugin_name)
+# Domain mapping: directory name -> (section name, sort order, icon, plugin_name)
 DOMAINS = {
-    "engineering-team": ("Engineering - Core", 1, ":material-code-braces:", "engineering-skills"),
-    "engineering": ("Engineering - POWERFUL", 2, ":material-rocket-launch:", "engineering-advanced-skills"),
-    "product-team": ("Product", 3, ":material-lightbulb-outline:", "product-skills"),
-    "marketing-skill": ("Marketing", 4, ":material-bullhorn-outline:", "marketing-skills"),
-    "project-management": ("Project Management", 5, ":material-clipboard-check-outline:", "pm-skills"),
-    "c-level-advisor": ("C-Level Advisory", 6, ":material-account-tie:", "c-level-skills"),
-    "ra-qm-team": ("Regulatory & Quality", 7, ":material-shield-check-outline:", "ra-qm-skills"),
-    "business-growth": ("Business & Growth", 8, ":material-trending-up:", "business-growth-skills"),
-    "finance": ("Finance", 9, ":material-calculator-variant:", "finance-skills"),
+    "core-agentic-design": ("Core Agentic Design", 1, ":material-robot:", "core-agentic-design"),
+    "prompts-quality": ("Prompts & Quality", 2, ":material-clipboard-check:", "prompts-quality"),
+    "autonomy-security": ("Autonomy & Security", 3, ":material-shield-lock:", "autonomy-security"),
+    "infrastructure": ("Infrastructure", 4, ":material-server:", "infrastructure"),
 }
 
-# Skills to skip (nested assets, samples, etc.)
-SKIP_PATTERNS = [
-    "assets/sample-skill",
-    "medium-content-pro 2",  # duplicate with space
-]
+# Mapping flat skills to domains
+SKILL_DOMAINS = {
+    # Core Agentic Design
+    "agentic-system-architect": "core-agentic-design",
+    "agent-designer": "core-agentic-design",
+    "agent-workflow-designer": "core-agentic-design",
+    "spec-driven-workflow": "core-agentic-design",
+    "agenthub": "core-agentic-design",
+    
+    # Prompts & Quality
+    "prompt-governance": "prompts-quality",
+    "senior-prompt-engineer": "prompts-quality",
+    "self-eval": "prompts-quality",
+    "skill-tester": "prompts-quality",
+    "focused-fix": "prompts-quality",
+    
+    # Autonomy & Security
+    "self-improving-agent": "autonomy-security",
+    "ai-security": "autonomy-security",
+    "adversarial-reviewer": "autonomy-security",
+    "skill-security-auditor": "autonomy-security",
+    "autoresearch-agent": "autonomy-security",
+    
+    # Infrastructure
+    "mcp-server-builder": "infrastructure",
+    "rag-architect": "infrastructure",
+    "llm-cost-optimizer": "infrastructure",
+    "browser-automation": "infrastructure"
+}
+
+# SEO keyword mapping: domain_key -> differentiating keywords for <title> tags
+DOMAIN_SEO_SUFFIX = {
+    "core-agentic-design": "Core Agentic Design & Loop Safety",
+    "prompts-quality": "Prompts Optimization & Quality Rubrics",
+    "autonomy-security": "Autonomous Guardrails & Threat Modeling",
+    "infrastructure": "MCP Servers & RAG Architectures",
+}
+
+# Domain-specific description context for pages without frontmatter descriptions
+DOMAIN_SEO_CONTEXT = {
+    "core-agentic-design": "core agentic design patterns and loop safety audits for autonomous systems",
+    "prompts-quality": "prompt engineering optimization, validation test suites, and quality scoring rubrics",
+    "autonomy-security": "adversarial review, prompt injection mitigation, and skill package safety auditing",
+    "infrastructure": "model-routing optimization, browser automation, and model context protocol server design",
+}
 
 
 def find_skill_files():
     """Walk the repo and find all SKILL.md files, grouped by domain."""
     skills = {}
-    for root, dirs, files in os.walk(REPO_ROOT):
-        if "SKILL.md" not in files:
+    skills_dir = os.path.join(REPO_ROOT, "skills")
+    if not os.path.isdir(skills_dir):
+        return skills
+        
+    for skill_folder in sorted(os.listdir(skills_dir)):
+        skill_path = os.path.join(skills_dir, skill_folder)
+        if not os.path.isdir(skill_path):
             continue
-        rel_path = os.path.relpath(root, REPO_ROOT)
-        if any(skip in rel_path for skip in SKIP_PATTERNS):
+        skill_md_path = os.path.join(skill_path, "SKILL.md")
+        if not os.path.isfile(skill_md_path):
             continue
-        # Determine domain
-        parts = rel_path.split(os.sep)
-        domain_key = parts[0]
-        if domain_key not in DOMAINS:
-            continue
-        skill_name = parts[-1]  # last directory component
-        skill_path = os.path.join(root, "SKILL.md")
-        # Determine nesting (e.g., playwright-pro/skills/generate)
-        is_sub_skill = len(parts) > 2
-        parent = parts[1] if len(parts) > 2 else None
-
+            
+        domain_key = SKILL_DOMAINS.get(skill_folder)
+        if not domain_key:
+            domain_key = "core-agentic-design"
+            
+        is_sub_skill = False
+        parent = None
+        
         if domain_key not in skills:
             skills[domain_key] = []
         skills[domain_key].append({
-            "name": skill_name,
-            "path": skill_path,
-            "rel_path": rel_path,
+            "name": skill_folder,
+            "path": skill_md_path,
+            "rel_path": f"skills/{skill_folder}",
             "is_sub_skill": is_sub_skill,
             "parent": parent,
         })
@@ -68,7 +106,6 @@ def extract_title(filepath):
                 line = line.strip()
                 # Skip YAML frontmatter
                 if line == "---":
-                    in_frontmatter = True
                     for line2 in f:
                         if line2.strip() == "---":
                             break
@@ -105,10 +142,7 @@ def extract_subtitle(filepath):
 
 
 def extract_description_from_frontmatter(filepath):
-    """Extract the description field from YAML frontmatter.
-
-    Handles single-line, quoted, and multi-line (| or >) YAML descriptions.
-    """
+    """Extract the description field from YAML frontmatter."""
     try:
         with open(filepath, "r", encoding="utf-8") as f:
             content = f.read()
@@ -141,38 +175,32 @@ def extract_description_from_frontmatter(filepath):
     return None
 
 
+def extract_field_from_frontmatter(filepath, field_name):
+    """Extract a specific field from YAML frontmatter."""
+    try:
+        with open(filepath, "r", encoding="utf-8") as f:
+            content = f.read()
+        match = re.match(r"^---\n(.*?)---\n", content, re.DOTALL)
+        if not match:
+            return None
+        fm = match.group(1)
+        m = re.search(fr'{field_name}:\s*"([^"]+)"', fm)
+        if m:
+            return m.group(1).strip()
+        m = re.search(fr"{field_name}:\s*'([^']+)'", fm)
+        if m:
+            return m.group(1).strip()
+        m = re.search(fr"{field_name}:\s+([^\n\"'][^\n]+)", fm)
+        if m:
+            return m.group(1).strip()
+    except Exception:
+        pass
+    return None
+
+
 def slugify(name):
     """Convert a skill name to a URL-friendly slug."""
     return re.sub(r"[^a-z0-9-]", "-", name.lower()).strip("-")
-
-
-# SEO keyword mapping: domain_key -> differentiating keywords for <title> tags
-# site_name already carries "Claude Code Skills" on every page,
-# so per-page suffixes emphasize complementary terms: agent skill, Codex, OpenClaw, domain
-DOMAIN_SEO_SUFFIX = {
-    "engineering-team": "Agent Skill & Codex Plugin",
-    "engineering": "Agent Skill for Codex & OpenClaw",
-    "product-team": "Agent Skill for Product Teams",
-    "marketing-skill": "Agent Skill for Marketing",
-    "project-management": "Agent Skill for PM",
-    "c-level-advisor": "Agent Skill for Executives",
-    "ra-qm-team": "Agent Skill for Compliance",
-    "business-growth": "Agent Skill for Growth",
-    "finance": "Agent Skill for Finance",
-}
-
-# Domain-specific description context for pages without frontmatter descriptions
-DOMAIN_SEO_CONTEXT = {
-    "engineering-team": "engineering agent skill and Claude Code plugin for code generation, DevOps, architecture, and testing",
-    "engineering": "advanced agent-native skill and Claude Code plugin for AI agent design, infrastructure, and automation",
-    "product-team": "product management agent skill and Claude Code plugin for PRDs, discovery, analytics, and roadmaps",
-    "marketing-skill": "marketing agent skill and Claude Code plugin for content, SEO, CRO, and growth",
-    "project-management": "project management agent skill and Claude Code plugin for sprints, Jira, and Confluence",
-    "c-level-advisor": "executive advisory agent skill and Claude Code plugin for strategic decisions and board meetings",
-    "ra-qm-team": "regulatory and quality management agent skill for ISO 13485, MDR, FDA, and GDPR compliance",
-    "business-growth": "business growth agent skill and Claude Code plugin for customer success, sales, and revenue ops",
-    "finance": "finance agent skill and Claude Code plugin for DCF valuation, budgeting, and SaaS metrics",
-}
 
 
 def prettify(name):
@@ -182,37 +210,22 @@ def prettify(name):
 
 def strip_content(content):
     """Strip frontmatter and first H1 from content, handling edge cases."""
-    # Strip YAML frontmatter
     content = re.sub(r"^---\n.*?---\n", "", content, flags=re.DOTALL)
-    # Strip leading whitespace
     content = content.lstrip()
-    # Remove the first H1 if it exists (avoid duplicate)
     content = re.sub(r"^#\s+.+\n", "", content, count=1)
-    # Remove leading hr after title
     content = re.sub(r"^\s*---\s*\n", "", content)
     return content
 
 
-GITHUB_BASE = "https://github.com/alirezarezvani/claude-skills/tree/main"
-
-
 def rewrite_skill_internal_links(content, skill_rel_path):
-    """Rewrite skill-internal relative links to GitHub source URLs.
-
-    SKILL.md files contain links like references/foo.md, scripts/bar.py,
-    assets/template.md, README.md — these exist in the repo but not in docs/.
-    Convert them to absolute GitHub URLs.
-    """
-    # Patterns that are skill-internal (not other docs pages)
+    """Rewrite skill-internal relative links to GitHub source URLs."""
     internal_prefixes = ("references/", "scripts/", "assets/", "templates/", "tools/")
 
     def resolve_internal(match):
         text = match.group(1)
         target = match.group(2)
-        # Skip anchors, absolute URLs, and links to other docs pages
         if target.startswith(("#", "http://", "https://", "mailto:")):
             return match.group(0)
-        # Rewrite skill-internal links
         if (target.startswith(internal_prefixes) or target == "README.md"
                 or target.endswith((".py", ".json", ".yaml", ".yml", ".sh"))):
             github_url = f"{GITHUB_BASE}/{skill_rel_path}/{target}"
@@ -224,49 +237,33 @@ def rewrite_skill_internal_links(content, skill_rel_path):
 
 
 def rewrite_relative_links(content, source_rel_path):
-    """Rewrite relative markdown links (../../, ../) to absolute GitHub URLs.
-
-    Agent and command source files use relative paths like ../../product-team/SKILL.md
-    which break when rendered in the docs site. Convert them to GitHub source links.
-    """
+    """Rewrite relative markdown links (../../, ../) to absolute GitHub URLs."""
     source_dir = os.path.dirname(source_rel_path)
 
     def resolve_link(match):
         text = match.group(1)
         rel_target = match.group(2)
-        # Only rewrite relative paths that go up (../)
         if not rel_target.startswith("../"):
             return match.group(0)
-        # Resolve against source directory
         resolved = os.path.normpath(os.path.join(source_dir, rel_target))
-        # Keep links to sibling .md files in the same docs directory
-        # e.g. agents/product/cs-foo.md linking to cs-bar.md (same-level agent docs)
-        # These resolve to agents/product/cs-bar.md — only keep if they're
-        # a docs page we generate (agent .md that isn't CLAUDE.md)
         if (resolved.startswith("agents/") and resolved.count("/") == 1
                 and resolved.endswith(".md") and "CLAUDE" not in resolved):
-            # This is a sibling agent doc link — rewrite to flat docs slug
             sibling = os.path.basename(resolved).replace(".md", "") + ".md"
             return f"[{text}]({sibling})"
         return f"[{text}]({GITHUB_BASE}/{resolved})"
 
     content = re.sub(r"\[([^\]]+)\]\((\.\.[^\)]+)\)", resolve_link, content)
 
-    # Also rewrite backtick code references like `../../product-team/foo/SKILL.md`
-    # Convert to clickable GitHub links
     def resolve_backtick(match):
         rel_target = match.group(1)
         if not rel_target.startswith("../"):
             return match.group(0)
         resolved = os.path.normpath(os.path.join(source_dir, rel_target))
-        # Make the path a clickable link to the GitHub source
-        # Show parent/filename for context (e.g., product-analytics/SKILL.md)
         parts = resolved.split("/")
         display = "/".join(parts[-2:]) if len(parts) >= 2 else resolved
         return f"[`{display}`]({GITHUB_BASE}/{resolved})"
 
     content = re.sub(r"`(\.\./[^`]+)`", resolve_backtick, content)
-
     return content
 
 
@@ -276,9 +273,7 @@ def generate_skill_page(skill, domain_key):
     with open(skill_md_path, "r", encoding="utf-8") as f:
         content = f.read()
 
-    # Extract title or generate one
     title = extract_title(skill_md_path) or prettify(skill["name"])
-    # Clean title of markdown artifacts and strip domain labels
     title = re.sub(r"[*_`]", "", title)
     title = re.sub(r"\s*[-—]\s*(POWERFUL|Core|Advanced)\s*$", "", title, flags=re.IGNORECASE)
 
@@ -289,12 +284,9 @@ def generate_skill_page(skill, domain_key):
     fm_desc = extract_description_from_frontmatter(skill_md_path)
     desc_platforms = "Claude Code, Codex CLI, Gemini CLI, OpenClaw"
     if fm_desc:
-        # Strip quotes and clean
         clean = fm_desc.strip("'\"").replace('"', "'")
-        # Check if platform keywords already present
         has_platform = any(k in clean.lower() for k in ["claude code", "codex", "gemini"])
         if len(clean) > 150:
-            # Truncate at last word boundary before 150 chars
             truncated = clean[:150].rsplit(" ", 1)[0].rstrip(".,;:—-")
             description = f"{truncated}." if has_platform else f"{truncated}. Agent skill for {desc_platforms}."
         else:
@@ -303,11 +295,11 @@ def generate_skill_page(skill, domain_key):
     else:
         seo_ctx = DOMAIN_SEO_CONTEXT.get(domain_key, f"agent skill for {domain_name}")
         description = f"{title} — {seo_ctx}. Works with {desc_platforms}."
-    subtitle = extract_subtitle(skill_md_path) or ""
-    # Clean subtitle of markdown artifacts for the intro
-    subtitle_clean = re.sub(r"[*_`\[\]]", "", subtitle)
 
-    # Build the page with design system
+    content_clean = strip_content(content)
+    content_clean = rewrite_skill_internal_links(content_clean, skill["rel_path"])
+    content_clean = rewrite_relative_links(content_clean, os.path.join(skill["rel_path"], "SKILL.md"))
+
     page = f'''---
 title: "{seo_title}"
 description: "{description}"
@@ -318,22 +310,14 @@ description: "{description}"
 <div class="page-meta" markdown>
 <span class="meta-badge">{domain_icon} {domain_name}</span>
 <span class="meta-badge">:material-identifier: `{skill["name"]}`</span>
-<span class="meta-badge">:material-github: <a href="https://github.com/alirezarezvani/claude-skills/tree/main/{skill["rel_path"]}/SKILL.md">Source</a></span>
+<span class="meta-badge">:material-github: <a href="{GITHUB_BASE}/{skill["rel_path"]}/SKILL.md">Source</a></span>
 </div>
 
-'''
-    # Add install banner
-    page += f'''<div class="install-banner" markdown>
+<div class="install-banner" markdown>
 <span class="install-label">Install:</span> <code>claude /plugin install {plugin_name}</code>
 </div>
 
-'''
-
-    content_clean = strip_content(content)
-    content_clean = rewrite_skill_internal_links(content_clean, skill["rel_path"])
-    content_clean = rewrite_relative_links(content_clean, os.path.join(skill["rel_path"], "SKILL.md"))
-    page += content_clean
-
+{content_clean}'''
     return page
 
 
@@ -344,11 +328,7 @@ def generate_nav_entry(skills_by_domain):
 
     for domain_key, skills in sorted_domains:
         domain_name = DOMAINS[domain_key][0]
-        # Group sub-skills under their parent
-        top_level = [s for s in skills if not s["is_sub_skill"]]
-        sub_skills = [s for s in skills if s["is_sub_skill"]]
-        top_level.sort(key=lambda s: s["name"])
-
+        top_level = sorted([s for s in skills if not s["is_sub_skill"]], key=lambda s: s["name"])
         nav_lines.append(f"    - {domain_name}:")
         for skill in top_level:
             slug = slugify(skill["name"])
@@ -356,21 +336,16 @@ def generate_nav_entry(skills_by_domain):
             title = extract_title(skill["path"]) or prettify(skill["name"])
             title = re.sub(r"[*_`]", "", title)
             nav_lines.append(f"      - \"{title}\": {page_path}")
-
-            # Add sub-skills under parent
-            children = [s for s in sub_skills if s["parent"] == skill["name"]]
-            children.sort(key=lambda s: s["name"])
-            for child in children:
-                child_slug = slugify(child["name"])
-                child_path = f"skills/{domain_key}/{slug}-{child_slug}.md"
-                child_title = extract_title(child["path"]) or prettify(child["name"])
-                child_title = re.sub(r"[*_`]", "", child_title)
-                nav_lines.append(f"        - \"{child_title}\": {child_path}")
-
     return "\n".join(nav_lines)
 
 
 def main():
+    # Clean previous generated folders inside docs/
+    for sub in ["skills", "agents", "commands"]:
+        d = os.path.join(DOCS_DIR, sub)
+        if os.path.exists(d):
+            shutil.rmtree(d)
+
     skills_by_domain = find_skill_files()
 
     # Create docs/skills/ directories
@@ -381,8 +356,6 @@ def main():
     # Generate individual skill pages
     for domain_key, skills in skills_by_domain.items():
         top_level = [s for s in skills if not s["is_sub_skill"]]
-        sub_skills = [s for s in skills if s["is_sub_skill"]]
-
         for skill in top_level:
             slug = slugify(skill["name"])
             page_content = generate_skill_page(skill, domain_key)
@@ -391,25 +364,13 @@ def main():
                 f.write(page_content)
             total += 1
 
-            # Generate sub-skill pages
-            children = [s for s in sub_skills if s["parent"] == skill["name"]]
-            for child in children:
-                child_slug = slugify(child["name"])
-                child_content = generate_skill_page(child, domain_key)
-                child_path = os.path.join(DOCS_DIR, "skills", domain_key, f"{slug}-{child_slug}.md")
-                with open(child_path, "w", encoding="utf-8") as f:
-                    f.write(child_content)
-                total += 1
-
     # Generate domain index pages
     sorted_domains = sorted(skills_by_domain.items(), key=lambda x: DOMAINS[x[0]][1])
     for domain_key, skills in sorted_domains:
         domain_name, _, domain_icon, plugin_name = DOMAINS[domain_key]
         top_level = sorted([s for s in skills if not s["is_sub_skill"]], key=lambda s: s["name"])
-        sub_skills = [s for s in skills if s["is_sub_skill"]]
         skill_count = len(skills)
 
-        # Build grid cards for skills
         cards = ""
         for skill in top_level:
             slug = slugify(skill["name"])
@@ -417,15 +378,11 @@ def main():
             title = re.sub(r"[*_`]", "", title)
             subtitle = extract_subtitle(skill["path"]) or f"`{skill['name']}`"
             subtitle = re.sub(r"[*_`\[\]]", "", subtitle)
-            # Truncate long subtitles
             if len(subtitle) > 120:
                 subtitle = subtitle[:117] + "..."
-            children = sorted([s for s in sub_skills if s["parent"] == skill["name"]], key=lambda s: s["name"])
-            sub_count = len(children)
-            sub_text = f" + {sub_count} sub-skills" if sub_count > 0 else ""
 
             cards += f"""
--   **[{title}]({slug}.md)**{sub_text}
+-   **[{title}]({slug}.md)**
 
     ---
 
@@ -459,62 +416,42 @@ description: "{skill_count} {domain_name.lower()} skills — {domain_seo_ctx}. W
         with open(index_path, "w", encoding="utf-8") as f:
             f.write(index_content)
 
-    # Generate agent pages
+    # Generate agent pages (flat agents/cs-*.md)
     agents_dir = os.path.join(REPO_ROOT, "agents")
     agents_docs_dir = os.path.join(DOCS_DIR, "agents")
     os.makedirs(agents_docs_dir, exist_ok=True)
     agent_count = 0
     agent_entries = []
 
-    # Agent domain mapping for display
-    AGENT_DOMAINS = {
-        "business-growth": ("Business & Growth", ":material-trending-up:"),
-        "c-level": ("C-Level Advisory", ":material-account-tie:"),
-        "engineering-team": ("Engineering - Core", ":material-code-braces:"),
-        "engineering": ("Engineering - POWERFUL", ":material-rocket-launch:"),
-        "finance": ("Finance", ":material-calculator-variant:"),
-        "marketing": ("Marketing", ":material-bullhorn-outline:"),
-        "product": ("Product", ":material-lightbulb-outline:"),
-        "project-management": ("Project Management", ":material-clipboard-check-outline:"),
-        "ra-qm-team": ("Regulatory & Quality", ":material-shield-check-outline:"),
-    }
-
     if os.path.isdir(agents_dir):
-        for domain_folder in sorted(os.listdir(agents_dir)):
-            domain_path = os.path.join(agents_dir, domain_folder)
-            if not os.path.isdir(domain_path):
+        for agent_file in sorted(os.listdir(agents_dir)):
+            if not agent_file.endswith(".md") or agent_file == "CLAUDE.md":
                 continue
-            domain_info = AGENT_DOMAINS.get(domain_folder, (prettify(domain_folder), ":material-account:"))
-            domain_label, domain_icon = domain_info
-            for agent_file in sorted(os.listdir(domain_path)):
-                if not agent_file.endswith(".md"):
-                    continue
-                agent_name = agent_file.replace(".md", "")
-                agent_path = os.path.join(domain_path, agent_file)
-                rel = os.path.relpath(agent_path, REPO_ROOT)
-                title = extract_title(agent_path) or prettify(agent_name)
-                title = re.sub(r"[*_`]", "", title)
-                # If H1 is a raw slug (cs-foo-bar), prettify it
-                if re.match(r"^cs-[a-z-]+$", title):
-                    title = prettify(title.removeprefix("cs-"))
+            agent_name = agent_file.replace(".md", "")
+            agent_path = os.path.join(agents_dir, agent_file)
+            rel = os.path.relpath(agent_path, REPO_ROOT)
+            title = extract_title(agent_path) or prettify(agent_name)
+            title = re.sub(r"[*_`]", "", title)
+            if re.match(r"^cs-[a-z-]+$", title):
+                title = prettify(title.removeprefix("cs-"))
 
-                with open(agent_path, "r", encoding="utf-8") as f:
-                    content = f.read()
+            with open(agent_path, "r", encoding="utf-8") as f:
+                content = f.read()
 
-                content_clean = strip_content(content)
-                content_clean = rewrite_relative_links(content_clean, rel)
+            content_clean = strip_content(content)
+            content_clean = rewrite_relative_links(content_clean, rel)
 
-                agent_seo_title = f"{title} — AI Coding Agent & Codex Skill"
-                agent_fm_desc = extract_description_from_frontmatter(agent_path)
-                if agent_fm_desc:
-                    agent_clean = agent_fm_desc.strip("'\"").replace('"', "'")
-                    if len(agent_clean) > 150:
-                        agent_clean = agent_clean[:150].rsplit(" ", 1)[0].rstrip(".,;:—-")
-                    agent_desc = f"{agent_clean}. Agent-native orchestrator for Claude Code, Codex, Gemini CLI."
-                else:
-                    agent_desc = f"{title} — agent-native AI orchestrator for {domain_label}. Works with Claude Code, Codex CLI, Gemini CLI, and OpenClaw."
+            agent_seo_title = f"{title} — AI Coding Agent"
+            agent_fm_desc = extract_description_from_frontmatter(agent_path)
+            if agent_fm_desc:
+                agent_clean = agent_fm_desc.strip("'\"").replace('"', "'")
+                if len(agent_clean) > 150:
+                    agent_clean = agent_clean[:150].rsplit(" ", 1)[0].rstrip(".,;:—-")
+                agent_desc = f"{agent_clean}. Agent-native orchestrator for Claude Code."
+            else:
+                agent_desc = f"{title} — agent-native AI orchestrator. Works with Claude Code."
 
-                page = f'''---
+            page = f'''---
 title: "{agent_seo_title}"
 description: "{agent_desc}"
 ---
@@ -523,33 +460,32 @@ description: "{agent_desc}"
 
 <div class="page-meta" markdown>
 <span class="meta-badge">:material-robot: Agent</span>
-<span class="meta-badge">{domain_icon} {domain_label}</span>
-<span class="meta-badge">:material-github: <a href="https://github.com/alirezarezvani/claude-skills/tree/main/{rel}">Source</a></span>
+<span class="meta-badge">:material-github: <a href="{GITHUB_BASE}/{rel}">Source</a></span>
 </div>
 
 {content_clean}'''
-                slug = slugify(agent_name)
-                out_path = os.path.join(agents_docs_dir, f"{slug}.md")
-                with open(out_path, "w", encoding="utf-8") as f:
-                    f.write(page)
-                agent_count += 1
-                agent_entries.append((title, slug, domain_label, domain_icon))
+            slug = slugify(agent_name)
+            out_path = os.path.join(agents_docs_dir, f"{slug}.md")
+            with open(out_path, "w", encoding="utf-8") as f:
+                f.write(page)
+            agent_count += 1
+            agent_entries.append((title, slug))
 
     # Generate agents index
     if agent_entries:
         agent_cards = ""
-        for title, slug, domain, icon in agent_entries:
+        for title, slug in agent_entries:
             agent_cards += f"""
--   {icon}{{ .lg .middle }} **[{title}]({slug}.md)**
+-   :material-robot:{{ .lg .middle }} **[{title}]({slug}.md)**
 
     ---
 
-    {domain}
+    Role-bound Agentic Orchestrator
 """
 
         idx = f'''---
-title: "AI Coding Agents — Agent-Native Orchestrators & Codex Skills"
-description: "{agent_count} agent-native orchestrators for Claude Code, Codex CLI, and Gemini CLI — multi-skill AI agents across engineering, product, marketing, and more."
+title: "AI Coding Agents — Agent-Native Orchestrators"
+description: "{agent_count} agent-native orchestrators for Claude Code, Codex, and Gemini CLI."
 ---
 
 <div class="domain-header" markdown>
@@ -608,7 +544,7 @@ description: "{cmd_desc}"
 
 <div class="page-meta" markdown>
 <span class="meta-badge">:material-console: Slash Command</span>
-<span class="meta-badge">:material-github: <a href="https://github.com/alirezarezvani/claude-skills/tree/main/{rel}">Source</a></span>
+<span class="meta-badge">:material-github: <a href="{GITHUB_BASE}/{rel}">Source</a></span>
 </div>
 
 {content_clean}'''
@@ -636,8 +572,8 @@ description: "{cmd_desc}"
 """
 
         idx = f'''---
-title: "Slash Commands — AI Coding Agent Commands & Codex Shortcuts"
-description: "{cmd_count} slash commands for Claude Code, Codex CLI, and Gemini CLI — sprint planning, tech debt analysis, PRDs, OKRs, and more."
+title: "Slash Commands — AI Coding Agent Commands"
+description: "{cmd_count} slash commands for Claude Code, Codex CLI, and Gemini CLI."
 ---
 
 <div class="domain-header" markdown>
@@ -654,6 +590,22 @@ description: "{cmd_count} slash commands for Claude Code, Codex CLI, and Gemini 
 '''
         with open(os.path.join(commands_docs_dir, "index.md"), "w", encoding="utf-8") as f:
             f.write(idx)
+
+    # Copy root README.md to docs/index.md for home page
+    readme_src = os.path.join(REPO_ROOT, "README.md")
+    readme_dest = os.path.join(DOCS_DIR, "index.md")
+    if os.path.isfile(readme_src):
+        with open(readme_src, "r", encoding="utf-8") as f:
+            readme_content = f.read()
+        readme_content_clean = strip_content(readme_content)
+        readme_page = f'''---
+title: "Agentic Config Hub"
+description: "Curated library of production-ready configurations for AI agents and agentic systems."
+---
+
+{readme_content_clean}'''
+        with open(readme_dest, "w", encoding="utf-8") as f:
+            f.write(readme_page)
 
     # Print summary
     print(f"Generated {total} skill pages across {len(skills_by_domain)} domains.")
