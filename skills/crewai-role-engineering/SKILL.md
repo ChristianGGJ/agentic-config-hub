@@ -29,3 +29,10 @@ This skill teaches the agent how to engineer distinct agent personas and task al
 * **Short-Term Memory**: Holds active conversation context during the execution of a single Crew.
 * **Long-Term Memory**: Persists learnings and feedback across historical runs.
 * **Entity Memory**: Identifies and links key concepts (e.g., product names, user preferences) across different tasks.
+
+## References
+
+| File | Summary |
+|------|---------|
+| `references/role_engineering_patterns.md` | Persona formulations, hierarchical crews, memory synch configurations, and asynchronous task execution patterns |
+
