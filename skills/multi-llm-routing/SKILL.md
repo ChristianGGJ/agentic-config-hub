@@ -26,3 +26,10 @@ This skill teaches the agent how to plan and route tasks to the most cost-effici
 ### 3. Cost & Latency Balancing
 * Minimize tokens sent to the Reasoning Tier by offloading preprocessing and preprocessing verification to Utility models.
 * For multi-stage workflows, define model overrides per node/agent rather than using a single model for the entire workflow.
+
+## References
+
+| File | Summary |
+|------|---------|
+| `references/routing_strategies.md` | Models classification matrix, dynamic classifier routing code pattern, and token compression policies |
+

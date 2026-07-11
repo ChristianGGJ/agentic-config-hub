@@ -38,3 +38,10 @@ This skill teaches the agent how to configure complete observability, trace mapp
   - Token consumption (Prompt vs. Completion tokens).
   - Native `AIFunction` tool execution times and parameter values.
   - LLM response latencies.
+
+## References
+
+| File | Summary |
+|------|---------|
+| `references/telemetry_instrumentation.md` | Environment tracer configurations, LangSmith metadata mappings, AgentOps session trackers, and C# OpenTelemetry setups |
+
