@@ -26,3 +26,10 @@ This skill teaches the agent how to implement long-term memory sync and hybrid r
 ### 3. Microsoft Agent Framework Memory Stores
 * Bind implementations of `IMemoryStore` to backends (e.g. pgvector or Azure AI Search).
 * Partition memories cleanly by user and session keys to prevent cross-tenant data leaks.
+
+## References
+
+| File | Summary |
+|------|---------|
+| `references/rag_memory_patterns.md` | Reciprocal Rank Fusion (RRF) C# implementation codes, search results merging, and Postgres persistent checkpointer setups |
+

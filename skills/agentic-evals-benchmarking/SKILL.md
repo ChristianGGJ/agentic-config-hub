@@ -26,3 +26,10 @@ This skill teaches the agent how to design automated, quantitative test suites t
 
 ### 3. Synthetic Data Generation
 * Generate diverse test cases synthetically by extracting key entities and query templates from source domain documentation.
+
+## References
+
+| File | Summary |
+|------|---------|
+| `references/eval_methodologies.md` | LLM-as-a-Judge Python code patterns, audit verification schemas, and faithfulness/relevance metrics calculations |
+
