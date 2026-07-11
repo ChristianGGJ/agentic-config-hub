@@ -26,3 +26,10 @@ This skill teaches the agent how to design defensive semantic security layers ar
 
 ### 3. Middleware Integration
 * Implement guardrails as middleware decorators or pipeline handlers (`DelegatingHandler` in .NET, FastAPI dependencies in Python) to keep core agent logic clean.
+
+## References
+
+| File | Summary |
+|------|---------|
+| `references/security_guardrail_patterns.md` | Input jailbreak middleware codes (FastAPI), outbound PII regex redactors, and strict JSON output schema enforcers |
+
