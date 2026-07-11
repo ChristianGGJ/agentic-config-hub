@@ -1,13 +1,13 @@
 ---
 title: "Core Agentic Design Skills — Agent Skills & Codex Plugins"
-description: "5 core agentic design skills — core agentic design patterns and loop safety audits for autonomous systems. Works with Claude Code, Codex CLI, Gemini CLI, and OpenClaw."
+description: "7 core agentic design skills — core agentic design patterns and loop safety audits for autonomous systems. Works with Claude Code, Codex CLI, Gemini CLI, and OpenClaw."
 ---
 
 <div class="domain-header" markdown>
 
 # :material-robot: Core Agentic Design
 
-<p class="domain-count">5 skills in this domain</p>
+<p class="domain-count">7 skills in this domain</p>
 
 </div>
 
@@ -40,6 +40,18 @@ description: "5 core agentic design skills — core agentic design patterns and 
     ---
 
     Tier: POWERFUL
+
+-   **[Skill: crewai-role-engineering](crewai-role-engineering.md)**
+
+    ---
+
+    This skill teaches the agent how to engineer distinct agent personas and task allocations within a collaborative Crew...
+
+-   **[Skill: loop-engineering-mechanisms](loop-engineering-mechanisms.md)**
+
+    ---
+
+    This skill teaches the agent how to design rigorous self-correction loops and validation gates to prevent infinite re...
 
 -   **[Spec-Driven Workflow — POWERFUL](spec-driven-workflow.md)**
 

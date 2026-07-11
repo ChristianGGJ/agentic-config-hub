@@ -44,7 +44,17 @@ SKILL_DOMAINS = {
     "mcp-server-builder": "infrastructure",
     "rag-architect": "infrastructure",
     "llm-cost-optimizer": "infrastructure",
-    "browser-automation": "infrastructure"
+    "browser-automation": "infrastructure",
+    "microsoft-agent-framework": "infrastructure",
+    "langgraph-state-design": "infrastructure",
+    "crewai-role-engineering": "core-agentic-design",
+    "ms-agent-framework-enterprise": "infrastructure",
+    "loop-engineering-mechanisms": "core-agentic-design",
+    "multi-llm-routing": "infrastructure",
+    "agentic-observability-telemetry": "infrastructure",
+    "agentic-evals-benchmarking": "prompts-quality",
+    "hybrid-rag-memory": "infrastructure",
+    "agentic-guardrails-security": "autonomy-security"
 }
 
 # SEO keyword mapping: domain_key -> differentiating keywords for <title> tags

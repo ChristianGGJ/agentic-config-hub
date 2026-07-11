@@ -1,0 +1,40 @@
+---
+title: "Skill: crewai-role-engineering — Core Agentic Design & Loop Safety"
+description: "Design sequential and hierarchical multi-agent teams using CrewAI, optimizing backstories, goals, task scopes, memory sync, and manager coordination. Agent skill for Claude Code, Codex CLI, Gemini CLI, OpenClaw."
+---
+
+# Skill: crewai-role-engineering
+
+<div class="page-meta" markdown>
+<span class="meta-badge">:material-robot: Core Agentic Design</span>
+<span class="meta-badge">:material-identifier: `crewai-role-engineering`</span>
+<span class="meta-badge">:material-github: <a href="https://github.com/ChristianGGJ/agentic-config-hub/tree/main/skills/crewai-role-engineering/SKILL.md">Source</a></span>
+</div>
+
+<div class="install-banner" markdown>
+<span class="install-label">Install:</span> <code>claude /plugin install core-agentic-design</code>
+</div>
+
+
+This skill teaches the agent how to engineer distinct agent personas and task allocations within a collaborative CrewAI team.
+
+## Capability
+
+**This skill does exactly one thing:** authors precise agent parameters (`role`, `goal`, `backstory`), configures sequential/hierarchical task delegations, and sets up short/long-term/entity memory synchronization.
+
+## Core Principles
+
+### 1. Agent Psychology & Alignment
+* **Role**: Clear, bounded job titles (e.g. `Senior Code Auditor`) that establish clear domains.
+* **Goal**: Actionable, measurable mission statements.
+* **Backstory**: Explains the perspective, expertise, and constraints of the agent to shape its thinking and tone. Prevents responsibility overlap.
+
+### 2. Task Allocation & Delegation
+* **Tasks**: Define atomic inputs, descriptions, and expected outputs per task.
+* **Delegation**: Set `allow_delegation=True` only for supervisor/manager roles. Keep worker agents focused on their specific tasks with `allow_delegation=False` to prevent chaotic messaging.
+* **Manager Agent**: Use hierarchical execution when task dependencies require dynamic routing and review.
+
+### 3. Memory Architectures
+* **Short-Term Memory**: Holds active conversation context during the execution of a single Crew.
+* **Long-Term Memory**: Persists learnings and feedback across historical runs.
+* **Entity Memory**: Identifies and links key concepts (e.g., product names, user preferences) across different tasks.

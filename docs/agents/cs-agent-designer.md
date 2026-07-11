@@ -23,7 +23,7 @@ This agent is guided by three core disciplines:
 ## Operating Modes
 
 ### GENERAL (default)
-Focuses on planning individual agent personas, defining task responsibilities, mapping tools, and drafting JSON tool schemas. Best for scoping individual roles and defining API interfaces.
+Focuses on planning individual agent personas, defining task responsibilities, mapping tools, and drafting JSON tool schemas. When designing multi-agent teams, always map roles and communication topologies to their specialized frameworks (CrewAI, LangGraph, or Microsoft Agent Framework 1.0) according to Rule 22 and Rule 23. Best for scoping individual roles and defining API interfaces.
 
 ### SYSTEM_DESIGN (on demand)
 Focuses on multi-agent collaboration structures, communication patterns, consensus protocols, and evaluating complex trace logs to diagnose multi-agent bottlenecks.
@@ -111,6 +111,11 @@ Every design loop and trace evaluation this agent executes is bounded by strict 
    - **Content:** Performance metrics, latency logging, cost calculation, and error classification rubrics.
    - **Use Case:** Auditing a multi-agent system after deployment.
 
+4. **Multi-Framework Orchestration & Microservices**
+   - **Location:** [`skills\agentic-system-architect\references\multi_framework_orchestration.md`](https://github.com/ChristianGGJ/agentic-config-hub/tree/main/skills\agentic-system-architect\references\multi_framework_orchestration.md)
+   - **Content:** Task distribution rubric across CrewAI, LangGraph, and Microsoft Agent Framework, and API-First agential microservices design rules.
+   - **Use Case:** Aligning multi-agent team designs and topologies to framework specialization constraints.
+
 ### Assets
 
 1. **Sample System Requirements**
@@ -122,6 +127,86 @@ Every design loop and trace evaluation this agent executes is bounded by strict 
 3. **Sample Execution Logs**
    - **Location:** [`skills\agent-designer\assets\sample_execution_logs.json`](https://github.com/ChristianGGJ/agentic-config-hub/tree/main/skills\agent-designer\assets\sample_execution_logs.json)
    - **Content:** Template of agent run traces for testing evaluation scoring.
+
+### Microsoft Agent Framework Skill
+
+**Skill Location:** [`skills\microsoft-agent-framework`](https://github.com/ChristianGGJ/agentic-config-hub/tree/main/skills\microsoft-agent-framework)
+
+1. **Microsoft Agent Framework C# Mapping Reference**
+   - **Location:** [`skills\microsoft-agent-framework\references\agent_framework_mapping.md`](https://github.com/ChristianGGJ/agentic-config-hub/tree/main/skills\microsoft-agent-framework\references\agent_framework_mapping.md)
+   - **Content:** Translation patterns from YAML/Markdown configurations to C# `ChatClientAgent` definitions, `AIFunction` tool representations, and agent-to-agent (A2A) orchestrations.
+
+### LangGraph State Design Skill
+
+**Skill Location:** [`skills\langgraph-state-design`](https://github.com/ChristianGGJ/agentic-config-hub/tree/main/skills\langgraph-state-design)
+
+1. **LangGraph State Design Specification**
+   - **Location:** [`skills\langgraph-state-design\SKILL.md`](https://github.com/ChristianGGJ/agentic-config-hub/tree/main/skills\langgraph-state-design\SKILL.md)
+   - **Content:** Principles for global state dictionary schemas, nodes, conditional edges, checkpointers, and Human-in-the-Loop gateway interrupts.
+
+### CrewAI Role Engineering Skill
+
+**Skill Location:** [`skills\crewai-role-engineering`](https://github.com/ChristianGGJ/agentic-config-hub/tree/main/skills\crewai-role-engineering)
+
+1. **CrewAI Role Engineering Specification**
+   - **Location:** [`skills\crewai-role-engineering\SKILL.md`](https://github.com/ChristianGGJ/agentic-config-hub/tree/main/skills\crewai-role-engineering\SKILL.md)
+   - **Content:** Personas parameters definition (`role`, `goal`, `backstory`), task synchronization, allowing/disallowing automatic delegation, and memory persistence configuration.
+
+### Microsoft Agent Framework Enterprise Skill
+
+**Skill Location:** [`skills\ms-agent-framework-enterprise`](https://github.com/ChristianGGJ/agentic-config-hub/tree/main/skills\ms-agent-framework-enterprise)
+
+1. **Microsoft Agent Framework Enterprise Specification**
+   - **Location:** [`skills\ms-agent-framework-enterprise\SKILL.md`](https://github.com/ChristianGGJ/agentic-config-hub/tree/main/skills\ms-agent-framework-enterprise\SKILL.md)
+   - **Content:** Creating native C# `ChatClientAgent` class models, exposing services as `AIFunction` tools, dependency injection binding, and relational database data context window mapping strategies.
+
+### Loop Engineering Mechanisms Skill
+
+**Skill Location:** [`skills\loop-engineering-mechanisms`](https://github.com/ChristianGGJ/agentic-config-hub/tree/main/skills\loop-engineering-mechanisms)
+
+1. **Loop Engineering Mechanisms Specification**
+   - **Location:** [`skills\loop-engineering-mechanisms\SKILL.md`](https://github.com/ChristianGGJ/agentic-config-hub/tree/main/skills\loop-engineering-mechanisms\SKILL.md)
+   - **Content:** Designing output validation gates, structured error report formatters, machine-readable observation messages, and iteration exit counter escapes.
+
+### Multi-LLM Routing Skill
+
+**Skill Location:** [`skills\multi-llm-routing`](https://github.com/ChristianGGJ/agentic-config-hub/tree/main/skills\multi-llm-routing)
+
+1. **Multi-LLM Routing Specification**
+   - **Location:** [`skills\multi-llm-routing\SKILL.md`](https://github.com/ChristianGGJ/agentic-config-hub/tree/main/skills\multi-llm-routing\SKILL.md)
+   - **Content:** Complexity analysis rules to allocate Reasoning Tier models vs. fast/local Utility Tier models to optimize token budgets and latency.
+
+### Agentic Observability & Telemetry Skill
+
+**Skill Location:** [`skills\agentic-observability-telemetry`](https://github.com/ChristianGGJ/agentic-config-hub/tree/main/skills\agentic-observability-telemetry)
+
+1. **Agentic Observability & Telemetry Specification**
+   - **Location:** [`skills\agentic-observability-telemetry\SKILL.md`](https://github.com/ChristianGGJ/agentic-config-hub/tree/main/skills\agentic-observability-telemetry\SKILL.md)
+   - **Content:** Configuring trace backends (LangSmith, AgentOps), OpenTelemetry integration, and token/latency logging.
+
+### Agentic Evals & Benchmarking Skill
+
+**Skill Location:** [`skills\agentic-evals-benchmarking`](https://github.com/ChristianGGJ/agentic-config-hub/tree/main/skills\agentic-evals-benchmarking)
+
+1. **Agentic Evals & Benchmarking Specification**
+   - **Location:** [`skills\agentic-evals-benchmarking\SKILL.md`](https://github.com/ChristianGGJ/agentic-config-hub/tree/main/skills\agentic-evals-benchmarking\SKILL.md)
+   - **Content:** Organizing synthetic test datasets, scoring frameworks (DeepEval/Ragas), and setting up regression testing metrics (faithfulness, recall).
+
+### Hybrid RAG & Memory Skill
+
+**Skill Location:** [`skills\hybrid-rag-memory`](https://github.com/ChristianGGJ/agentic-config-hub/tree/main/skills\hybrid-rag-memory)
+
+1. **Hybrid RAG & Memory Specification**
+   - **Location:** [`skills\hybrid-rag-memory\SKILL.md`](https://github.com/ChristianGGJ/agentic-config-hub/tree/main/skills\hybrid-rag-memory\SKILL.md)
+   - **Content:** Long-term memory synchronization schemes, BM25 + vector hybrid search architectures, and memory session persistence.
+
+### Agentic Guardrails & Security Skill
+
+**Skill Location:** [`skills\agentic-guardrails-security`](https://github.com/ChristianGGJ/agentic-config-hub/tree/main/skills\agentic-guardrails-security)
+
+1. **Agentic Guardrails & Security Specification**
+   - **Location:** [`skills\agentic-guardrails-security\SKILL.md`](https://github.com/ChristianGGJ/agentic-config-hub/tree/main/skills\agentic-guardrails-security\SKILL.md)
+   - **Content:** Semantic firewall filters, PII redaction policies, and prompt injection mitigation middlewares.
 
 ## Core Workflows
 

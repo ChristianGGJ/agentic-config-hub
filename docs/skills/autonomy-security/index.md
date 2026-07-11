@@ -1,13 +1,13 @@
 ---
 title: "Autonomy & Security Skills — Agent Skills & Codex Plugins"
-description: "5 autonomy & security skills — adversarial review, prompt injection mitigation, and skill package safety auditing. Works with Claude Code, Codex CLI, Gemini CLI, and OpenClaw."
+description: "6 autonomy & security skills — adversarial review, prompt injection mitigation, and skill package safety auditing. Works with Claude Code, Codex CLI, Gemini CLI, and OpenClaw."
 ---
 
 <div class="domain-header" markdown>
 
 # :material-shield-lock: Autonomy & Security
 
-<p class="domain-count">5 skills in this domain</p>
+<p class="domain-count">6 skills in this domain</p>
 
 </div>
 
@@ -22,6 +22,12 @@ description: "5 autonomy & security skills — adversarial review, prompt inject
     ---
 
     Adversarial code review skill that forces genuine perspective shifts through three hostile reviewer personas (Saboteu...
+
+-   **[Skill: agentic-guardrails-security](agentic-guardrails-security.md)**
+
+    ---
+
+    This skill teaches the agent how to design defensive semantic security layers around LLM inputs and outputs.
 
 -   **[AI Security](ai-security.md)**
 

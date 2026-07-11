@@ -1,13 +1,13 @@
 ---
 title: "Prompts & Quality Skills — Agent Skills & Codex Plugins"
-description: "5 prompts & quality skills — prompt engineering optimization, validation test suites, and quality scoring rubrics. Works with Claude Code, Codex CLI, Gemini CLI, and OpenClaw."
+description: "6 prompts & quality skills — prompt engineering optimization, validation test suites, and quality scoring rubrics. Works with Claude Code, Codex CLI, Gemini CLI, and OpenClaw."
 ---
 
 <div class="domain-header" markdown>
 
 # :material-clipboard-check: Prompts & Quality
 
-<p class="domain-count">5 skills in this domain</p>
+<p class="domain-count">6 skills in this domain</p>
 
 </div>
 
@@ -16,6 +16,12 @@ description: "5 prompts & quality skills — prompt engineering optimization, va
 </div>
 
 <div class="grid cards" markdown>
+
+-   **[Skill: agentic-evals-benchmarking](agentic-evals-benchmarking.md)**
+
+    ---
+
+    This skill teaches the agent how to design automated, quantitative test suites to measure and prevent regressions in ...
 
 -   **[Focused Fix — Deep-Dive Feature Repair](focused-fix.md)**
 

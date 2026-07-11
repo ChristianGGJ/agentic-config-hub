@@ -1,6 +1,6 @@
 ---
 name: "agentic-config-hub-architecture"
-version: "1.0.0"
+version: "1.1.0"
 description: "Numbered, mechanically testable architecture rules for agentic-config-hub"
 type: "context"
 ---
@@ -83,9 +83,12 @@ type: "context"
     specification.
 21. Canonical names from `context/glossary.md` are used exactly as written in
     all generated code, docs, and manifests.
+22. Any agentic system design must partition task execution based on specialized framework roles: CrewAI for creative/role-playing sequential collaboration, LangGraph for loop engineering, state management, and strict cyclic self-correction loops, and Microsoft Agent Framework 1.0 for C# enterprise backend integration and native API plugin bindings.
+23. The standard system topology for hybrid multi-framework orchestrations is the API-First Agential Approach, where CrewAI and LangGraph processes are hosted as isolated FastAPI microservices (Python) consumed by the core application/backend (C# / Node) via HTTP/gRPC.
 
 ## Change Log
 
 | Version | Date | Change | Author |
 |---|---|---|---|
+| 1.1.0 | 2026-07-11 | Add multi-framework selection and API-first microservices rules (Rules 22-23). | ChristianGGJ |
 | 1.0.0 | 2026-07-10 | Initial architecture rules (1-21). | ChristianGGJ |

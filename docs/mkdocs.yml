@@ -49,6 +49,8 @@ nav:
     - "Agent Workflow Designer": skills/core-agentic-design/agent-workflow-designer.md
     - "Spec-Driven Workflow": skills/core-agentic-design/spec-driven-workflow.md
     - "AgentHub": skills/core-agentic-design/agenthub.md
+    - "CrewAI Role Engineering": skills/core-agentic-design/crewai-role-engineering.md
+    - "Loop Engineering Mechanisms": skills/core-agentic-design/loop-engineering-mechanisms.md
   - "Prompts & Quality":
     - "Prompts & Quality Skills": skills/prompts-quality/index.md
     - "Prompt Governance": skills/prompts-quality/prompt-governance.md
@@ -56,6 +58,7 @@ nav:
     - "Self Evaluation": skills/prompts-quality/self-eval.md
     - "Skill Tester": skills/prompts-quality/skill-tester.md
     - "Focused Fix": skills/prompts-quality/focused-fix.md
+    - "Agentic Evals & Benchmarking": skills/prompts-quality/agentic-evals-benchmarking.md
   - "Autonomy & Security":
     - "Autonomy & Security Skills": skills/autonomy-security/index.md
     - "Self-Improving Agent": skills/autonomy-security/self-improving-agent.md
@@ -63,12 +66,19 @@ nav:
     - "Adversarial Reviewer": skills/autonomy-security/adversarial-reviewer.md
     - "Skill Security Auditor": skills/autonomy-security/skill-security-auditor.md
     - "Autoresearch Agent": skills/autonomy-security/autoresearch-agent.md
+    - "Agentic Guardrails & Security": skills/autonomy-security/agentic-guardrails-security.md
   - "Infrastructure":
     - "Infrastructure Skills": skills/infrastructure/index.md
     - "MCP Server Builder": skills/infrastructure/mcp-server-builder.md
     - "RAG Architect": skills/infrastructure/rag-architect.md
     - "LLM Cost Optimizer": skills/infrastructure/llm-cost-optimizer.md
     - "Browser Automation": skills/infrastructure/browser-automation.md
+    - "Microsoft Agent Framework": skills/infrastructure/microsoft-agent-framework.md
+    - "LangGraph State Design": skills/infrastructure/langgraph-state-design.md
+    - "Microsoft Agent Framework Enterprise": skills/infrastructure/ms-agent-framework-enterprise.md
+    - "Multi-LLM Routing": skills/infrastructure/multi-llm-routing.md
+    - "Agentic Observability & Telemetry": skills/infrastructure/agentic-observability-telemetry.md
+    - "Hybrid RAG & Memory": skills/infrastructure/hybrid-rag-memory.md
   - "Agents":
     - "AI Coding Agents": agents/index.md
     - "Agentic System Architect": agents/cs-agentic-system-architect.md

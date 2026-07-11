@@ -320,6 +320,8 @@ Project documentation exists. Phase 1 absorbs it into context packs, and from th
 | `references/react_reasoning_patterns.md` | ReAct, Reflexion, and Plan-and-Execute in depth: when to use each, trace structure, and anti-patterns |
 | `references/hitl_defensive_architectures.md` | Gate placement strategies, irreversibility classification, rollback design, and escalation paths |
 | `references/four_pillar_ecosystem.md` | The context/skills/agents/workflows architecture: responsibilities, knowledge flow, atomicity, and directory conventions |
+| `references/multi_framework_orchestration.md` | Task distribution rubric across CrewAI, LangGraph, and Microsoft Agent Framework, and API-First agential microservices design rules |
+
 
 ## Assets
 
