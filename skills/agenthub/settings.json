@@ -1,14 +1,14 @@
 {
   "name": "agenthub",
   "displayName": "AgentHub",
-  "version": "2.1.2",
+  "version": "0.1.0",
   "description": "Multi-agent collaboration — spawn N parallel agents that compete on code, content, research, or strategy tasks. Evaluate by metric or LLM judge, merge the winner.",
-  "author": "Alireza Rezvani",
+  "author": "ChristianGGJ",
   "license": "MIT",
   "platforms": ["claude-code", "openclaw", "codex"],
   "category": "engineering",
   "tags": ["multi-agent", "collaboration", "parallel", "git-dag", "orchestration", "competition", "content-generation", "research", "optimization"],
-  "repository": "https://github.com/alirezarezvani/claude-skills",
+  "repository": "https://github.com/ChristianGGJ/agentic-config-hub",
   "commands": {
     "init": "/hub:init",
     "spawn": "/hub:spawn",

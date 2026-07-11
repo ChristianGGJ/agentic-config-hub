@@ -1,0 +1,126 @@
+{
+  "name": "agentic-config-hub",
+  "owner": {
+    "name": "ChristianGGJ",
+    "url": "https://github.com/ChristianGGJ"
+  },
+  "description": "Production-ready AI configurations for agents and agentic systems: 19 atomic skill packages, cs-* role agents, gated multi-agent workflows, and project context, anchored by the agentic-system-architect flagship with 4 loop-safety audit tools.",
+  "homepage": "https://github.com/ChristianGGJ/agentic-config-hub",
+  "repository": "https://github.com/ChristianGGJ/agentic-config-hub",
+  "metadata": {
+    "description": "19 production-ready agentic skills organized in a four-pillar structure (context, skills, agents, workflows) with loop-engineering audit tooling, HITL gate validation, and quality-gate CI.",
+    "version": "0.1.0"
+  },
+  "plugins": [
+    {
+      "name": "agentic-system-architect",
+      "source": "./skills/agentic-system-architect",
+      "description": "Design complete agentic configuration ecosystems (context, skills, agents, workflows), harden autonomous agents with loop-engineering controls (exit conditions, counters, self-reflection), apply ReAct reasoning patterns, and add Human-in-the-Loop approval gates with the 5-phase protocol. Ships 4 audit tools: ecosystem scaffolder, loop auditor, ReAct trace analyzer, and HITL gate validator.",
+      "version": "0.1.0",
+      "author": {
+        "name": "ChristianGGJ"
+      },
+      "keywords": [
+        "agentic-systems",
+        "loop-engineering",
+        "react",
+        "hitl",
+        "exit-conditions",
+        "multi-agent",
+        "orchestration",
+        "audit"
+      ],
+      "category": "engineering"
+    },
+    {
+      "name": "agenthub",
+      "source": "./skills/agenthub",
+      "description": "Multi-agent collaboration plugin that spawns N parallel subagents competing on the same task via git worktree isolation. Agents work independently, results are evaluated by metric or LLM judge, and the best branch is merged. Requires a git repo.",
+      "version": "0.1.0",
+      "author": {
+        "name": "ChristianGGJ"
+      },
+      "keywords": [
+        "multi-agent",
+        "parallel",
+        "git-worktree",
+        "competition",
+        "evaluation",
+        "subagents"
+      ],
+      "category": "engineering"
+    },
+    {
+      "name": "autoresearch-agent",
+      "source": "./skills/autoresearch-agent",
+      "description": "Autonomous experiment loop that optimizes any file by a measurable metric. The agent edits a target file, runs a fixed evaluation, keeps improvements (git commit), discards failures (git reset), and loops. Requires a target file, an evaluation command that outputs a metric, and a git repo.",
+      "version": "0.1.0",
+      "author": {
+        "name": "ChristianGGJ"
+      },
+      "keywords": [
+        "optimization",
+        "experiment-loop",
+        "metrics",
+        "autonomous",
+        "evaluation",
+        "self-improvement"
+      ],
+      "category": "engineering"
+    },
+    {
+      "name": "llm-cost-optimizer",
+      "source": "./skills/llm-cost-optimizer",
+      "description": "Reduce LLM API spend, control token usage, route between models by cost/quality, implement prompt caching, and build cost observability for AI features.",
+      "version": "0.1.0",
+      "author": {
+        "name": "ChristianGGJ"
+      },
+      "keywords": [
+        "llm",
+        "cost-optimization",
+        "tokens",
+        "prompt-caching",
+        "model-routing",
+        "observability"
+      ],
+      "category": "engineering"
+    },
+    {
+      "name": "prompt-governance",
+      "source": "./skills/prompt-governance",
+      "description": "Manage prompts in production at scale: prompt versioning, A/B testing, prompt registries, regression prevention, and eval pipelines for production AI features.",
+      "version": "0.1.0",
+      "author": {
+        "name": "ChristianGGJ"
+      },
+      "keywords": [
+        "prompts",
+        "versioning",
+        "ab-testing",
+        "evals",
+        "registry",
+        "regression"
+      ],
+      "category": "engineering"
+    },
+    {
+      "name": "self-improving-agent",
+      "source": "./skills/self-improving-agent",
+      "description": "Curate Claude Code auto-memory into durable project knowledge: analyze MEMORY.md for patterns, promote proven learnings to CLAUDE.md and .claude/rules/, extract recurring solutions into reusable skills, and check memory health and capacity.",
+      "version": "0.1.0",
+      "author": {
+        "name": "ChristianGGJ"
+      },
+      "keywords": [
+        "memory",
+        "knowledge-curation",
+        "claude-code",
+        "rules",
+        "learning",
+        "skills"
+      ],
+      "category": "engineering"
+    }
+  ]
+}

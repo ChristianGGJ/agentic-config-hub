@@ -1,0 +1,21 @@
+# Python
+__pycache__/
+*.pyc
+
+# OS
+.DS_Store
+
+# Editors
+.vscode/
+
+# Environment files
+.env*
+
+# Node
+node_modules/
+
+# MkDocs build output
+site/
+
+# Claude Code local settings
+.claude/settings.local.json

@@ -1,8 +1,7 @@
 ---
 name: cs-agentic-system-architect
 description: Universal agentic system architect for designing four-pillar AI config ecosystems (context, skills, agents, workflows) with loop engineering, ReAct patterns, and defensive human-in-the-loop controls. Spawn when users need to design agent architectures, harden autonomous agents with exit conditions, or add approval gates to agent workflows.
-skills: engineering/agentic-system-architect
-domain: engineering
+skills: skills/agentic-system-architect
 model: opus
 tools: [Read, Write, Bash, Grep, Glob]
 ---
@@ -26,7 +25,7 @@ it produces with three advanced disciplines:
 This agent does not merely write agent prompts. It architects governed systems: every deliverable
 ships with exit conditions, boundaries, approval gates, rollback plans, and an explicit output
 contract, and every deliverable is verified with the deterministic audit tools from the
-`engineering/agentic-system-architect` skill before handoff.
+`skills/agentic-system-architect` skill before handoff.
 
 ## Operating Modes
 
@@ -111,61 +110,61 @@ suggestion; each row states the success criteria for stopping.
 
 ## Skill Integration
 
-**Skill Location:** `../../engineering/agentic-system-architect/`
+**Skill Location:** `../skills/agentic-system-architect/`
 
 ### Python Tools
 
 1. **Ecosystem Scaffolder**
    - **Purpose:** Scaffold the four-pillar directory tree (context/, skills/, agents/, workflows/) with starter files
-   - **Path:** `../../engineering/agentic-system-architect/scripts/ecosystem_scaffolder.py`
-   - **Usage:** `python ../../engineering/agentic-system-architect/scripts/ecosystem_scaffolder.py --help`
+   - **Path:** `../skills/agentic-system-architect/scripts/ecosystem_scaffolder.py`
+   - **Usage:** `python ../skills/agentic-system-architect/scripts/ecosystem_scaffolder.py --help`
 
 2. **Loop Auditor**
    - **Purpose:** Score an agent config .md against the 100-point loop-safety rubric (grades: HARDENED, PRODUCTION-READY, NEEDS-CONTROLS, UNSAFE-FOR-AUTONOMY)
-   - **Path:** `../../engineering/agentic-system-architect/scripts/loop_auditor.py`
-   - **Usage:** `python ../../engineering/agentic-system-architect/scripts/loop_auditor.py agent-config.md`
+   - **Path:** `../skills/agentic-system-architect/scripts/loop_auditor.py`
+   - **Usage:** `python ../skills/agentic-system-architect/scripts/loop_auditor.py agent-config.md`
 
 3. **ReAct Trace Analyzer**
    - **Purpose:** Analyze a ReAct execution trace (canonical JSON schema) for runaway patterns D1-D7 and compute a health score with a HEALTHY/DEGRADED/RUNAWAY verdict
-   - **Path:** `../../engineering/agentic-system-architect/scripts/react_trace_analyzer.py`
-   - **Usage:** `python ../../engineering/agentic-system-architect/scripts/react_trace_analyzer.py trace.json`
+   - **Path:** `../skills/agentic-system-architect/scripts/react_trace_analyzer.py`
+   - **Usage:** `python ../skills/agentic-system-architect/scripts/react_trace_analyzer.py trace.json`
 
 4. **HITL Gate Validator**
    - **Purpose:** Validate a workflow definition against gate rules R1-R6 (irreversible steps gated, rollback defined, escalation present, acyclic dependencies) with a PASS/FAIL result
-   - **Path:** `../../engineering/agentic-system-architect/scripts/hitl_gate_validator.py`
-   - **Usage:** `python ../../engineering/agentic-system-architect/scripts/hitl_gate_validator.py workflow.json`
+   - **Path:** `../skills/agentic-system-architect/scripts/hitl_gate_validator.py`
+   - **Usage:** `python ../skills/agentic-system-architect/scripts/hitl_gate_validator.py workflow.json`
 
 ### Knowledge Bases
 
 1. **Loop Engineering Patterns**
-   - **Location:** `../../engineering/agentic-system-architect/references/loop_engineering_patterns.md`
+   - **Location:** `../skills/agentic-system-architect/references/loop_engineering_patterns.md`
    - **Content:** Self-reflection, evaluation, and error-mitigation loop designs; the six canonical exit-condition types with counters and thresholds
 2. **ReAct Reasoning Patterns**
-   - **Location:** `../../engineering/agentic-system-architect/references/react_reasoning_patterns.md`
+   - **Location:** `../skills/agentic-system-architect/references/react_reasoning_patterns.md`
    - **Content:** Thought -> Action -> Observation cycles, Reflexion, Plan-and-Execute, and mitigations mapped to trace findings D1-D7
 3. **HITL Defensive Architectures**
-   - **Location:** `../../engineering/agentic-system-architect/references/hitl_defensive_architectures.md`
+   - **Location:** `../skills/agentic-system-architect/references/hitl_defensive_architectures.md`
    - **Content:** The 5-Phase Protocol, gate placement strategies, irreversibility classification, rollback and escalation design
 4. **Four-Pillar Ecosystem**
-   - **Location:** `../../engineering/agentic-system-architect/references/four_pillar_ecosystem.md`
+   - **Location:** `../skills/agentic-system-architect/references/four_pillar_ecosystem.md`
    - **Content:** How context/, skills/, agents/, and workflows/ compose; atomic-skill decomposition and anti-duplication rules
 
 ### Templates
 
 1. **Agent Spec Template**
-   - **Location:** `../../engineering/agentic-system-architect/assets/agent-spec-template.md`
+   - **Location:** `../skills/agentic-system-architect/assets/agent-spec-template.md`
    - **Use Case:** Authoring a new agent with built-in exit conditions, boundaries, and output contract
 2. **Workflow Template**
-   - **Location:** `../../engineering/agentic-system-architect/assets/workflow-template.md`
+   - **Location:** `../skills/agentic-system-architect/assets/workflow-template.md`
    - **Use Case:** Authoring a gated multi-step workflow with rollback and escalation defined per step
 3. **Context Pack Template**
-   - **Location:** `../../engineering/agentic-system-architect/assets/context-pack-template.md`
+   - **Location:** `../skills/agentic-system-architect/assets/context-pack-template.md`
    - **Use Case:** Absorbing project docs into a bounded context pack (contextualized mode)
 4. **Atomic Skill Template**
-   - **Location:** `../../engineering/agentic-system-architect/assets/atomic-skill-template.md`
+   - **Location:** `../skills/agentic-system-architect/assets/atomic-skill-template.md`
    - **Use Case:** Extracting one shared capability into a reusable atomic skill
 5. **Sample ReAct Trace**
-   - **Location:** `../../engineering/agentic-system-architect/assets/sample_react_trace.json`
+   - **Location:** `../skills/agentic-system-architect/assets/sample_react_trace.json`
    - **Use Case:** Canonical trace format example for the ReAct trace analyzer
 
 ## Core Workflows
@@ -226,20 +225,20 @@ suggestion; each row states the success criteria for stopping.
 
 ```bash
 # Audit an agent config for loop safety (human-readable)
-python ../../engineering/agentic-system-architect/scripts/loop_auditor.py my-agent.md
+python ../skills/agentic-system-architect/scripts/loop_auditor.py my-agent.md
 
 # Same audit, machine-readable for CI gates
-python ../../engineering/agentic-system-architect/scripts/loop_auditor.py my-agent.md --json
+python ../skills/agentic-system-architect/scripts/loop_auditor.py my-agent.md --json
 
 # Analyze a captured ReAct trace for runaway behavior
-python ../../engineering/agentic-system-architect/scripts/react_trace_analyzer.py \
-  ../../engineering/agentic-system-architect/assets/sample_react_trace.json
+python ../skills/agentic-system-architect/scripts/react_trace_analyzer.py \
+  ../skills/agentic-system-architect/assets/sample_react_trace.json
 
 # Validate a workflow's HITL gates (works on .json, or extracts the first json block from .md)
-python ../../engineering/agentic-system-architect/scripts/hitl_gate_validator.py workflow.json
+python ../skills/agentic-system-architect/scripts/hitl_gate_validator.py workflow.json
 
 # Scaffold a new four-pillar ecosystem after the manifest is approved
-python ../../engineering/agentic-system-architect/scripts/ecosystem_scaffolder.py --help
+python ../skills/agentic-system-architect/scripts/ecosystem_scaffolder.py --help
 ```
 
 ## Success Metrics
@@ -252,11 +251,11 @@ python ../../engineering/agentic-system-architect/scripts/ecosystem_scaffolder.p
 
 ## Related Agents
 
-- [cs-senior-engineer](cs-senior-engineer.md) — implementation counterpart: once this agent
-  delivers the architecture and governed configs, cs-senior-engineer implements the underlying
-  systems, pipelines, and code the ecosystem orchestrates.
+- This is the founding agent of agentic-config-hub. As new cs-* counterparts are added
+  (e.g. cs-agent-designer, cs-prompt-engineer), list them here following the conventions in
+  [CLAUDE.md](CLAUDE.md) in this directory.
 
 ## References
 
-- [Skill Documentation](../../engineering/agentic-system-architect/SKILL.md)
-- [Agent Development Guide](../CLAUDE.md)
+- [Skill Documentation](../skills/agentic-system-architect/SKILL.md)
+- [Agent Development Guide](./CLAUDE.md)

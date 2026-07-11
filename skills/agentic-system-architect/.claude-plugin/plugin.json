@@ -1,0 +1,12 @@
+{
+  "name": "agentic-system-architect",
+  "description": "Use when the user asks to design complete agentic configuration ecosystems (context, skills, agents, workflows), harden autonomous agents with loop-engineering controls (exit conditions, counters, self-reflection), apply ReAct reasoning patterns, or add Human-in-the-Loop approval gates and 5-phase protocols to agent workflows.",
+  "version": "0.1.0",
+  "author": {
+    "name": "ChristianGGJ"
+  },
+  "homepage": "https://github.com/ChristianGGJ/agentic-config-hub",
+  "repository": "https://github.com/ChristianGGJ/agentic-config-hub",
+  "license": "MIT",
+  "skills": "./"
+}
