@@ -26,3 +26,10 @@ This skill teaches the agent how to plan and design robust, non-linear multi-age
 ### 3. Checkpointing & Human Gateways
 * **Checkpointers**: Enable memory persistence (MemorySaver) to allow time-travel debugging, rollbacks, and session resumes.
 * **Interrupts**: Configure `interrupt_before` or `interrupt_after` on specific nodes to pause execution, allowing human review and state modification before resuming the graph.
+
+## References
+
+| File | Summary |
+|------|---------|
+| `references/state_design_patterns.md` | Code patterns for state overwriting prevention, structured routing conditional edges, human interrupts, and parent-child hierarchical subgraphs |
+
