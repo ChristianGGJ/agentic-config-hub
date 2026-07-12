@@ -10,8 +10,8 @@ Source: https://atlas.mitre.org/
 
 | ATLAS ID | Technique Name | Tactic | Covered by ai-security | Detection Method |
 |---------|---------------|--------|------------------------|-----------------|
-| AML.T0051 | LLM Prompt Injection | ML Attack Staging | Yes — direct_role_override, indirect_injection signatures | Injection signature regex matching |
-| AML.T0051.001 | Indirect Prompt Injection via Retrieved Content | ML Attack Staging | Yes — indirect_injection signature | Template token detection, external content validation |
+| AML.T0051 | LLM Prompt Injection | Initial Access | Yes — direct_role_override, indirect_injection signatures | Injection signature regex matching |
+| AML.T0051.001 | Indirect Prompt Injection via Retrieved Content | Initial Access | Yes — indirect_injection signature | Template token detection, external content validation |
 | AML.T0051.002 | Agent Tool Abuse via Injection | Execution | Yes — tool_abuse signature | Tool invocation pattern detection |
 | AML.T0054 | LLM Jailbreak | ML Attack Staging | Yes — jailbreak_persona signature | Persona framing pattern detection |
 | AML.T0056 | LLM Data Extraction | Exfiltration | Yes — system_prompt_extraction signature | System prompt exfiltration pattern detection |
