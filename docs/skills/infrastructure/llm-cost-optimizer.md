@@ -22,6 +22,8 @@ You are an expert in LLM cost engineering with deep experience reducing AI API s
 
 AI API costs are engineering costs. Treat them like database query costs: measure first, optimize second, monitor always.
 
+**Skill boundary.** This skill owns the *pay-less-per-token* mechanics: prompt caching, Batch APIs, token/output compression, and cost observability. *Which model* serves each task -- tier selection, cascade routing, provider failover -- belongs to the sibling **multi-llm-routing** skill. This skill assumes the model is already chosen and cuts the cost of calling it; route to multi-llm-routing for the tier matrix and routing logic rather than duplicating them here.
+
 ## Before Starting
 
 **Check for context first:** If project-context.md exists, read it before asking questions. Pull the tech stack, architecture, and AI feature details already there.
@@ -70,11 +72,15 @@ Sort by: feature x model x token count. Usually 2-3 endpoints drive the majority
 
 **Step 3 -- Classify Requests by Complexity**
 
-| Complexity | Characteristics | Right Model Tier |
-|---|---|---|
-| Simple | Classification, extraction, yes/no, short output | Small (Haiku, GPT-4o-mini, Gemini Flash) |
-| Medium | Summarization, structured output, moderate reasoning | Mid (Sonnet, GPT-4o) |
-| Complex | Multi-step reasoning, code gen, long context | Large (Opus, GPT-4o, o3) |
+Tag each top cost driver by task complexity:
+
+| Complexity | Characteristics |
+|---|---|
+| Simple | Classification, extraction, yes/no, short output |
+| Medium | Summarization, structured output, moderate reasoning |
+| Complex | Multi-step reasoning, code gen, long context |
+
+This split is the *input* to tier selection -- but the model-family matrix and routing decision are **owned by multi-llm-routing**. Produce the complexity classification here, then take it there to pick the concrete tier and route. Do not maintain a parallel tier table in this skill.
 
 ---
 
@@ -82,20 +88,49 @@ Sort by: feature x model x token count. Usually 2-3 endpoints drive the majority
 
 Apply techniques in this order (highest ROI first):
 
-### 1. Model Routing (typically 60-80% cost reduction on routed traffic)
+### 1. Model Routing -- owned by multi-llm-routing (usually the largest single lever)
 
-Route by task complexity, not by default. Use a lightweight classifier or rule engine.
+Sending every request to a frontier model is the #1 overspend pattern, and routing cheaper-capable traffic down a tier is usually the biggest single saving. But the routing **mechanics** -- the tier matrix, complexity signals, cheapest-first cascade with verified escalation, and provider failover -- live in the sibling **multi-llm-routing** skill; this skill does not duplicate them. Establish routing there, then apply the caching, batch, and token levers below to cut the cost of whatever model each request lands on.
 
-Decision framework:
-- **Use small models** for: classification, extraction, simple Q&A, formatting, short summaries
-- **Use mid models** for: structured output, moderate summarization, code completion
-- **Use large models** for: complex reasoning, long-context analysis, agentic tasks, code generation
+### 2. Prompt Caching (40-90% reduction on the cached prefix)
 
-### 2. Prompt Caching (40-90% reduction on cacheable traffic)
+Caching is the single biggest lever this skill owns. It bills a large, stable prefix once and serves it at a deep discount on every later request that reuses it. Cache-eligible content: system prompts, static context, document chunks, few-shot examples, long tool definitions.
 
-Supported by: Anthropic (cache_control), OpenAI (prompt caching, automatic on some models), Google (context caching).
+**The one invariant: caching is a prefix match.** The cache key is the exact bytes of the rendered prompt up to each breakpoint. A single byte change anywhere in the prefix invalidates the cache for everything after it. Design prompts **stable-first, volatile-last**:
 
-Cache-eligible content: system prompts, static context, document chunks, few-shot examples.
+- Render order (Anthropic): `tools` -> `system` -> `messages`. Put the frozen system prompt and a deterministic (sorted) tool list first; put timestamps, per-request IDs, and the varying user turn *after* the last breakpoint.
+- Never interpolate `datetime.now()`, a UUID, or a per-user ID into the system prompt -- each makes the prefix unique and defeats caching across requests. Serialize any JSON in the prefix with sorted keys.
+- Don't change the tool set or switch models mid-conversation -- tools render at position 0 and caches are model-scoped, so either invalidates the whole prefix.
+
+**Breakpoint placement (Anthropic `cache_control`).** Mark the last content block of the stable region with `cache_control: {"type": "ephemeral"}`. Max **4 breakpoints** per request; a breakpoint may sit on a system text block, a tool definition, or a message content block. Top-level auto-caching (`cache_control` on the request itself) places one breakpoint on the last cacheable block -- the simplest option when you don't need fine-grained placement. In multi-turn chats, mark the last block of the most-recent turn so each request reuses the growing prefix.
+
+**Minimum cacheable prefix (Anthropic; verify against current docs).** A prefix shorter than the model minimum silently will not cache -- no error, `cache_creation_input_tokens` stays 0:
+
+| Model tier | Minimum cacheable prefix |
+|---|---|
+| Opus family, current Haiku | ~4096 tokens |
+| current Sonnet, older Haiku | ~2048 tokens |
+| prior Sonnet generations | ~1024 tokens |
+
+**TTL options.** Default TTL is 5 minutes; a 1-hour TTL is available (`{"type": "ephemeral", "ttl": "1h"}`). Re-warm before the TTL expires (a `max_tokens: 0` prefill request warms without generating), or the next request pays a fresh write. If real traffic arrives more often than the TTL, it keeps the cache warm on its own -- no separate re-warm needed.
+
+**Cache-write premium vs cache-read discount** (relative to the base input price):
+
+| Token class | Relative cost |
+|---|---|
+| Cache read (served from cache) | ~0.1x base input |
+| Cache write, 5-min TTL | ~1.25x base input |
+| Cache write, 1-hour TTL | ~2x base input |
+| Uncached input | 1x |
+
+Break-even follows directly: with 5-min TTL, caching pays off from the **2nd** reuse (1.25x write + 0.1x read = 1.35x vs 2x uncached); with 1-hour TTL, from the **3rd** (2x write + 2x0.1x read = 2.2x vs 3x). Below break-even a breakpoint only adds the write premium with no payoff -- don't cache a prefix you won't reuse within the TTL. Run the numbers for your workload with `scripts/cache_savings_calculator.py`.
+
+**Cross-provider surfaces (verify against current docs):**
+- **Anthropic** -- explicit `cache_control` breakpoints (above), plus top-level auto-caching.
+- **OpenAI** -- automatic prompt caching on eligible models: prefixes above a size threshold are cached with no marker and no write premium, and cached input bills at a reduced rate. You still must keep the prefix stable-first to get hits.
+- **Google (Gemini)** -- explicit context caching (a `CachedContent` object you create and reference) plus implicit caching on recent models; explicit caching also bills cache storage by duration.
+
+**Verify the cache is working.** Read the usage counters every deploy: `cache_read_input_tokens` (served cheap), `cache_creation_input_tokens` (written at the premium), and `input_tokens` (full price). Total prompt size is the sum of the three. If `cache_read_input_tokens` stays zero across repeated identical-prefix requests, a silent invalidator is in the prefix -- diff the rendered bytes between two requests to find it.
 
 Cache hit rates to target: >60% for document Q&A, >40% for chatbots with static system prompts.
 
@@ -127,9 +162,20 @@ Tools: GPTCache, LangChain cache, custom Redis + embedding lookup.
 
 Threshold guidance: cosine similarity >0.95 = safe to serve cached response.
 
-### 6. Request Batching (10-25% reduction via amortized overhead)
+### 6. Batch APIs (~50% reduction on non-urgent traffic)
 
-Batch non-latency-sensitive requests. Process async queues off-peak.
+For any workload that does not need a synchronous response -- overnight scoring, bulk classification/extraction, evals, embeddings backfills -- submit it through a provider **Batch API** instead of the real-time endpoint. This is the Mode-2 **async** cost lever: same models, same features, roughly **half price**, in exchange for latency (turnaround typically hours, capped around 24h).
+
+| Provider | Surface | Discount | Window | Notes (verify against current docs) |
+|---|---|---|---|---|
+| Anthropic | Message Batches API | ~50% off input + output | most < 1h, max 24h | Up to ~100k requests / 256 MB per batch; results retained ~29 days; supports caching, tools, vision |
+| OpenAI | Batch API | ~50% off input + output | ~24h target | Submit a JSONL file of requests; poll for completion |
+
+Batch discounts **stack with prompt caching** -- a cached prefix inside a batch bills at (batch rate) x (cache multiplier). Route latency-tolerant traffic to batch first; it is usually a larger, lower-risk win than shaving prompt tokens. Not offered on every deployment platform (some managed cloud resellers omit it) -- verify for your provider/region. Estimate the combined caching + batch saving with `scripts/cache_savings_calculator.py`.
+
+### 7. Fine-tuning & distillation (structural, longer-horizon lever)
+
+When a high-volume task is narrow and stable, distilling it onto a smaller model -- fine-tune, or train a small/local model on frontier-model outputs -- can beat any per-request tactic, because it moves the task down a cost tier permanently. Higher up-front cost and MLOps burden; only worth it above sustained volume and when the task won't drift. The model-family choice for the distilled target is a routing decision -- see multi-llm-routing.
 
 ---
 
@@ -141,9 +187,46 @@ Build these controls in before launch:
 
 **Routing Layer** -- classify then route then call. Never call the large model by default.
 
-**Cost Observability** -- dashboard with: spend by feature, spend by model, cost per active user, week-over-week trend, anomaly alerts.
+**Cost Observability** -- dashboard with: spend by feature, spend by model, cost per active user, week-over-week trend, anomaly alerts. The *instrumentation* -- OpenTelemetry spans, LangSmith / AgentOps backends, per-run token/cost/latency telemetry, and which loop exit condition fired -- is owned by **agentic-observability-telemetry**; this skill defines *what cost signals to watch*, that skill defines *how to emit them*. Emit `budget_consumed` and the fired exit condition per run so cost attribution and runaway detection work on real traffic.
 
-**Graceful Degradation** -- when budget exceeded: switch to smaller model, return cached response, queue for async processing.
+**Graceful Degradation** -- when budget exceeded: switch to smaller model, return cached response, queue for async (batch) processing.
+
+---
+
+## Agent-Loop Cost Control
+
+Agentic loops are where LLM spend runs away: an unbounded reason-act-observe loop can burn thousands of tokens per task with no ceiling. Cost control here is a **loop exit condition**, not a prompt tweak.
+
+This maps directly to the hub `budget` exit condition -- one of the six canonical exit-condition types. See `agentic-system-architect/references/loop_engineering_patterns.md` for the taxonomy, the iteration-ledger counter design, and the anti-runaway rules; do not reimplement that theory here. The cost-specific angle:
+
+- **Per-iteration token ceiling.** Cap tokens (or tool calls) per loop pass and track cumulative spend in the loop's iteration ledger, checked *before* each resource-consuming step.
+- **Budget-triggered loop exit.** Declare a cumulative token/cost budget before iteration 1. When consumption reaches it, the loop **stops and reports** (budget consumed vs allocated, work done, work remaining) -- it never silently borrows against an extension. A budget firing twice for the same subtask escalates (hub two-strikes rule -> `escalation_trigger`).
+- **API-native pacing (Anthropic, beta; verify against current docs).** `task_budget` inside `output_config` (beta header `task-budgets-2026-03-13`) gives an agentic turn a token countdown the model can see, so it paces itself and wraps up gracefully instead of being hard-cut by `max_tokens`. Minimum budget is ~20k tokens. It is distinct from `max_tokens`, which is an enforced ceiling the model is unaware of -- use `task_budget` for self-moderation and `max_tokens` as the hard cap.
+
+Prompt caching compounds here: caching the stable agent prefix (system prompt, tool defs) means every loop iteration reads it cheap instead of re-billing it, so a bounded loop with a cached prefix is dramatically cheaper than an unbounded one without.
+
+---
+
+## Pricing Anchors
+
+> **Dated snapshot -- verify against current provider pricing before quoting.** Absolute $/MTok prices change frequently and vary by provider and platform; the **ratios between tiers and the cache/batch multipliers are far more stable than the absolute numbers**. Snapshot: 2026-06, Anthropic list prices.
+
+| Tier (current families) | Input $/MTok | Output $/MTok |
+|---|---|---|
+| Frontier reasoning (Claude Opus, Claude Fable) | ~$5-10 | ~$25-50 |
+| Balanced (Claude Sonnet) | ~$3 | ~$15 |
+| Utility (Claude Haiku) | ~$1 | ~$5 |
+
+Multipliers applied on top of the input/output price above (stable; still verify):
+
+| Modifier | Multiplier |
+|---|---|
+| Cache read | ~0.1x input |
+| Cache write (5-min TTL) | ~1.25x input |
+| Cache write (1-hour TTL) | ~2x input |
+| Batch API | ~0.5x input + output |
+
+Output tokens cost ~3-5x their input tokens across every tier, so controlling output length (section 3) attacks the more expensive side of the bill. Use these ratios for back-of-envelope routing/caching math; pull live per-model numbers from the provider before committing a budget.
 
 ---
 
@@ -194,10 +277,21 @@ All output follows the structured standard:
 | Treating cost optimization as a one-time project | Model pricing changes, traffic patterns shift, and new features launch — costs drift | Set up continuous cost monitoring with weekly spend reports and anomaly alerts |
 | Compressing prompts to the point of ambiguity | Over-compressed prompts cause the model to hallucinate or produce low-quality output, requiring retries | Compress filler words and redundant context but preserve all task-critical instructions |
 
+## Tools
+
+| Tool | Purpose |
+|---|---|
+| `scripts/cache_savings_calculator.py` | Deterministic cost estimate for a repeated-prefix workload: compares uncached vs cached (5m/1h TTL) vs Batch API vs batch+cache, reports the cache break-even reuse count, and recommends the cheapest option. `--realtime-only` excludes async batch; `--json` for CI. Prices are relative or absolute; the cache/batch multipliers are stable. Exit 0 if a lever beats the uncached baseline, 1 if none does. |
+
+```bash
+python scripts/cache_savings_calculator.py --stable-tokens 20000 --output-tokens 800 --requests 50 --input-price 5 --output-price 25 --min-cacheable-tokens 4096
+python scripts/cache_savings_calculator.py --stable-tokens 8000 --requests 200 --realtime-only --json
+```
+
 ## Related Skills
 
+- **multi-llm-routing**: Owns tier selection, cheapest-first cascade routing, and provider failover -- *which model* serves each task. This skill owns *how to pay less* for the chosen model (caching, batch, token mechanics). Cross-reference it for the tier matrix and routing logic instead of duplicating them here.
+- **agentic-observability-telemetry**: Owns tracing/metrics/logging implementation -- including per-run token, latency, and cost telemetry and which loop exit condition fired. It *measures* cost; this skill *reduces* it. Pair them for cost dashboards and anomaly alerts.
+- **agentic-system-architect**: Owns the loop exit-condition taxonomy (including `budget`) and the 5-Phase Protocol -- cited above for agent-loop cost control.
 - **rag-architect**: Use when designing retrieval pipelines. NOT for cost optimization of the LLM calls within RAG (that is this skill).
 - **senior-prompt-engineer**: Use when improving prompt quality and effectiveness. NOT for token reduction or cost control (that is this skill).
-- **observability-designer**: Use when designing the broader monitoring stack. Pairs with this skill for LLM cost dashboards.
-- **performance-profiler**: Use for latency profiling. Pairs with this skill when optimizing the cost-latency tradeoff.
-- **api-design-reviewer**: Use when reviewing AI feature APIs. Cross-reference for cost-per-endpoint analysis.

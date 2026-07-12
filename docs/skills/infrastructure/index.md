@@ -17,11 +17,11 @@ description: "10 infrastructure skills — model-routing optimization, browser a
 
 <div class="grid cards" markdown>
 
--   **[Skill: agentic-observability-telemetry](agentic-observability-telemetry.md)**
+-   **[Agentic Observability & Telemetry](agentic-observability-telemetry.md)**
 
     ---
 
-    This skill teaches the agent how to configure complete observability, trace mapping, and latency/token telemetry acro...
+    Instrument multi-agent runtimes so every run answers three questions: what did it
 
 -   **[Browser Automation - POWERFUL](browser-automation.md)**
 
@@ -33,19 +33,19 @@ description: "10 infrastructure skills — model-routing optimization, browser a
 
     ---
 
-    This skill teaches the agent how to implement long-term memory sync and hybrid retrieval databases for corporate mult...
+    This skill designs memory and persistence for agentic systems: what an agent
 
 -   **[Skill: langgraph-state-design](langgraph-state-design.md)**
 
     ---
 
-    This skill teaches the agent how to plan and design robust, non-linear multi-agent state machines using LangGraph (Py...
+    API version assumption: everything in this skill targets LangGraph 1.x (Python),
 
 -   **[LLM Cost Optimizer](llm-cost-optimizer.md)**
 
     ---
 
-    > Originally contributed by chad848(https://github.com/chad848) — enhanced and integrated by the agentic-config-hub team.
+    > Originally contributed by chad848(https://github.com/chad848) — enhanced and integrated by the agentic-config-hub t...
 
 -   **[MCP Server Builder](mcp-server-builder.md)**
 
@@ -57,19 +57,19 @@ description: "10 infrastructure skills — model-routing optimization, browser a
 
     ---
 
-    This skill teaches agents how to design and scaffold C# implementations using the unified Microsoft Agent Framework 1.0.
+    This is a knowledge and mapping skill. It defines the canonical rules for translating this hub's four-pillar configur...
 
 -   **[Skill: ms-agent-framework-enterprise](ms-agent-framework-enterprise.md)**
 
     ---
 
-    This skill teaches the agent how to implement production-grade, typed agent integrations within enterprise C#/.NET 9 ...
+    This skill covers the integration layer between Microsoft Agent Framework and
 
--   **[Skill: multi-llm-routing](multi-llm-routing.md)**
+-   **[Multi-LLM Routing](multi-llm-routing.md)**
 
     ---
 
-    This skill teaches the agent how to plan and route tasks to the most cost-efficient and performant LLM tier based on ...
+    Routing is the discipline of sending every task to the cheapest model that can
 
 -   **[RAG Architect - POWERFUL](rag-architect.md)**
 

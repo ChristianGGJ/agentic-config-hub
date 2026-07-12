@@ -1,6 +1,6 @@
 ---
 title: "Agent Designer - Multi-Agent System Architecture — Core Agentic Design & Loop Safety"
-description: "Use when the user asks to design multi-agent systems, create agent architectures, define agent communication patterns, or build autonomous agent. Agent skill for Claude Code, Codex CLI, Gemini CLI, OpenClaw."
+description: "Use when the user asks to design a single agent's persona, system prompt, or tool schemas, or to architect multi-agent systems — selecting. Agent skill for Claude Code, Codex CLI, Gemini CLI, OpenClaw."
 ---
 
 # Agent Designer - Multi-Agent System Architecture
@@ -22,7 +22,14 @@ description: "Use when the user asks to design multi-agent systems, create agent
 
 ## Overview
 
-Agent Designer is a comprehensive toolkit for designing, architecting, and evaluating multi-agent systems. It provides structured approaches to agent architecture patterns, tool design principles, communication strategies, and performance evaluation frameworks for building robust, scalable AI agent systems.
+Agent Designer is a comprehensive toolkit for designing individual agents (persona, system prompt, tools) and architecting multi-agent systems. It provides structured approaches to agent architecture patterns, persona and system-prompt authoring, tool design principles, communication strategies, and performance evaluation frameworks for building robust, scalable AI agent systems.
+
+## When NOT to Use This Skill
+
+- **Workflow orchestration** — sequencing multi-step workflows, wiring step handoffs, scaffolding workflow configs -> use **agent-workflow-designer**. This skill designs the agents; that one sequences them.
+- **Ecosystem governance** — four-pillar ecosystem design (context/skills/agents/workflows), loop-safety hardening and auditing, HITL approval gates, the 5-Phase Protocol -> use **agentic-system-architect**. This skill designs an agent's persona, prompt, and tools; that one hardens it for autonomy and governs the ecosystem it lives in.
+
+This skill owns: single-agent persona/system-prompt/tool design (see `references/agent_prompt_design.md`) and multi-agent architecture pattern selection.
 
 ## Core Capabilities
 
@@ -97,6 +104,8 @@ Agent Designer is a comprehensive toolkit for designing, architecting, and evalu
 - Anomaly detection and reporting
 - Compliance and audit trail maintenance
 
+**Persona and system-prompt authoring:** turning an archetype into a deployable agent means writing its system prompt. Use the three-layer method (Role Definition -> Boundaries -> Output Contract) in `references/agent_prompt_design.md`, which includes one complete worked system prompt per archetype above.
+
 ### 3. Tool Design Principles
 
 #### Schema Design
@@ -137,6 +146,8 @@ Agent Designer is a comprehensive toolkit for designing, architecting, and evalu
 - **Event Processing:** Real-time, batch, stream processing
 - **Event Schema:** Versioned event formats, backward compatibility
 
+Concrete message envelope schema, a full handoff payload example, and delivery-guarantee selection rules (at-most-once vs at-least-once vs exactly-once): see `references/communication_protocols.md`.
+
 ### 5. Guardrails and Safety
 
 #### Input Validation
@@ -156,6 +167,23 @@ Agent Designer is a comprehensive toolkit for designing, architecting, and evalu
 - **Escalation Triggers:** Confidence thresholds, risk assessment
 - **Override Mechanisms:** Human judgment precedence
 - **Feedback Loops:** Human corrections improve system behavior
+
+The canonical gate taxonomy (Pre-Execution Approval, Checkpoint, Escalation, Override/Abort), irreversibility classification, and the 5-Phase Protocol are owned by **agentic-system-architect** — use that skill when designing gates for irreversible actions. This section covers only per-agent guardrail concerns.
+
+#### Loop Safety (Exit Conditions)
+
+Any agent that iterates (retry, refine, re-plan) must declare exit conditions in its prompt and spec. The six canonical types:
+
+| Exit condition | Terminates when |
+|----------------|-----------------|
+| `max_iterations` | The loop counter reaches a hard ceiling |
+| `no_progress` | N consecutive iterations produce no state change |
+| `oscillation` | The agent alternates between the same states/actions (A-B-A-B) |
+| `budget` | Tokens, time, tool calls, or cost are exhausted |
+| `success_predicate` | A machine-checkable success condition holds |
+| `escalation_trigger` | A defined condition transfers control to a human |
+
+Rule of thumb: `success_predicate` alone is never enough — pair it with a bounding condition (`max_iterations` or `budget`). The full taxonomy, counter design, loop pattern catalog, and the >= 90 HARDENED audit gate are owned by **agentic-system-architect**; harden any agent there before it runs autonomously.
 
 ### 6. Evaluation Frameworks
 
@@ -202,6 +230,8 @@ Agent Designer is a comprehensive toolkit for designing, architecting, and evalu
 - **Hierarchical Coordination:** Multiple orchestration levels
 - **Context-Dependent:** Strategy selection based on task type
 - **Load Balancing:** Distribute coordination responsibility
+
+Orchestration at ecosystem scale — gating, sequencing, and governance across many agents — is owned by **agentic-system-architect**; plain workflow scaffolding by **agent-workflow-designer**. This section informs which topology an individual agent is designed to live in.
 
 ### 8. Memory Patterns
 

@@ -23,11 +23,11 @@ description: "6 autonomy & security skills — adversarial review, prompt inject
 
     Adversarial code review skill that forces genuine perspective shifts through three hostile reviewer personas (Saboteu...
 
--   **[Skill: agentic-guardrails-security](agentic-guardrails-security.md)**
+-   **[Agentic Guardrails & Security](agentic-guardrails-security.md)**
 
     ---
 
-    This skill teaches the agent how to design defensive semantic security layers around LLM inputs and outputs.
+    Design and implement the defensive semantic layer around an LLM application: a layered firewall with checkpoints at i...
 
 -   **[AI Security](ai-security.md)**
 

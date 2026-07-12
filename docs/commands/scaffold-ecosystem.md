@@ -1,6 +1,6 @@
 ---
 title: "/scaffold-ecosystem — Slash Command for AI Coding Agents"
-description: "Scaffold a four-pillar agentic config ecosystem (context/, skills/, agents/, workflows/). Usage: /scaffold-ecosystem <stack-name> [--output DIR]. Slash command for Claude Code, Codex CLI, Gemini CLI."
+description: "Scaffold a four-pillar agentic config ecosystem (context/, skills/, agents/, workflows/) in the product plane. Usage: /scaffold-ecosystem. Slash command for Claude Code, Codex CLI, Gemini CLI."
 ---
 
 # /scaffold-ecosystem
@@ -11,34 +11,54 @@ description: "Scaffold a four-pillar agentic config ecosystem (context/, skills/
 </div>
 
 
-Scaffold the directory structure for a new four-pillar agentic configuration stack, seeded with hardened template examples. Target: `$ARGUMENTS`.
+Scaffold the directory structure for a new four-pillar agentic configuration ecosystem, seeded with hardened template examples. Target: `$ARGUMENTS`.
 
-If `$ARGUMENTS` is empty, ask the user what name to give the new configuration stack (e.g. `my-agent-stack`).
+If `$ARGUMENTS` is empty, ask the user what name to give the new ecosystem (kebab-case, e.g. `erp-mobilefirst`).
 
 ## Usage
 
 ```bash
-/scaffold-ecosystem my-agent-stack
-/scaffold-ecosystem my-agent-stack --output ./workspace
+/scaffold-ecosystem erp-mobilefirst                     # -> ecosystems/erp-mobilefirst/
+/scaffold-ecosystem client-x --output ecosystems/_local # private client work (git-ignored)
 ```
 
-## Step 1: Execute Scaffolder
+## Where Ecosystems Live
 
-Run the scaffolding tool using:
+- **Default output is `ecosystems/`** — the product plane. Never scaffold a product into the hub's root pillars (boundaries rule F10).
+- Client-sensitive or experimental work goes to `ecosystems/_local/` (git-ignored, rule F11).
+- A different `--output` is allowed only when the user explicitly asks for an out-of-repo destination.
+
+## Step 1: Dry Run (Manifest for the HUMAN GATE)
+
+Print the file plan first and show it to the user for approval:
 
 ```bash
-python skills/agentic-system-architect/scripts/ecosystem_scaffolder.py {stack_name} --output {output_dir}
+python skills/agentic-system-architect/scripts/ecosystem_scaffolder.py {project_name} --output ecosystems --dry-run
 ```
 
-Add `--force` if you need to overwrite an existing directory, or `--dry-run` to print the file tree without writing anything to disk.
+This is the Phase 3 HUMAN GATE: do not write anything until the user confirms the plan. Offer `--pillars context,agents` style subsets if the user only needs part of the structure.
 
-## Step 2: Output and Next Steps
+## Step 2: Execute Scaffolder
 
-The tool will create:
-* `context/README.md` and basic boundary specifications.
-* `skills/sample-skill/SKILL.md` (and scripts/references/assets subdirectories).
-* `agents/cs-sample-agent.md` (audited template).
-* `workflows/sample-workflow.md` (validated gated workflow).
-* `README.md` explaining the stack structure.
+After confirmation:
 
-Verify that the scaffolding executed correctly and report the created file tree to the user.
+```bash
+python skills/agentic-system-architect/scripts/ecosystem_scaffolder.py {project_name} --output ecosystems
+```
+
+Add `--force` only if the user explicitly wants to overwrite an existing ecosystem.
+
+## Step 3: Gate the Generated Components
+
+```bash
+python skills/agentic-system-architect/scripts/loop_auditor.py ecosystems/{project_name}/agents/example-agent.md --min-score 90
+python skills/agentic-system-architect/scripts/hitl_gate_validator.py ecosystems/{project_name}/workflows/example-workflow.md
+```
+
+Both must pass (HARDENED / PASS) before reporting success.
+
+## Step 4: Register and Hand Off
+
+1. Add a row to the registry table in `ecosystems/README.md` (name, target project, status `draft`, creation date).
+2. Create `ecosystems/{project_name}/MANIFEST.md` from the approved plan with frontmatter `status: draft` (use the Change Manifest template in `skills/agentic-system-architect/references/hitl_defensive_architectures.md`).
+3. Report the created file tree, the audit results, and the next step: fill `context/` with the target project's ground truth (CONTEXTUALIZED mode) and author components against the manifest.

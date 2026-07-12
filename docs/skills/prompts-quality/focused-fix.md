@@ -48,9 +48,10 @@ digraph when_to_use {
 
 ```
 NO FIXES WITHOUT COMPLETING SCOPE → TRACE → DIAGNOSE FIRST
+NO FIXES WITHOUT AN APPROVED DIAGNOSIS
 ```
 
-If you haven't finished Phase 3, you cannot propose fixes. Period.
+If you haven't finished Phase 3, you cannot propose fixes. If the diagnosis has not passed the Human Gate (below), you cannot apply them. Period.
 
 **Violating the letter of these phases is violating the spirit of focused repair.**
 
@@ -62,10 +63,12 @@ digraph phases {
     SCOPE [shape=box, label="Phase 1\nSCOPE"];
     TRACE [shape=box, label="Phase 2\nTRACE"];
     DIAGNOSE [shape=box, label="Phase 3\nDIAGNOSE"];
+    GATE [shape=diamond, label="HUMAN GATE\napprove diagnosis"];
     FIX [shape=box, label="Phase 4\nFIX"];
     VERIFY [shape=box, label="Phase 5\nVERIFY"];
 
-    SCOPE -> TRACE -> DIAGNOSE -> FIX -> VERIFY;
+    SCOPE -> TRACE -> DIAGNOSE -> GATE -> FIX -> VERIFY;
+    GATE -> DIAGNOSE [label="rejected or\nrevise"];
     FIX -> DIAGNOSE [label="fix broke\nsomething else"];
     FIX -> ESCALATE [label="3+ fixes\ncreate new issues"];
     ESCALATE [shape=doubleoctagon, label="STOP\nQuestion Architecture\nDiscuss with User"];

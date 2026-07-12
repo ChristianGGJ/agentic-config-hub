@@ -224,6 +224,10 @@ python scripts/ecosystem_scaffolder.py my-project --output ./ecosystems --json
 - `file` (positional) - agent config .md file to audit
 - `--json` - machine-readable report with per-check results
 - `--min-score` - fail (exit 1) if the score is below this threshold; use `--min-score 90` as the CI deployment gate
+- `--history <ledger.json>` - append this run's verdict (file, score, grade, failed check ids, timestamp) to a JSON audit-history ledger, then read prior records for the same file and print a **recurring-findings digest**: `score_delta` vs the last run, a `no_progress` flag (>= 2 consecutive runs with no score increase and an identical failed-check set), an `oscillation` flag (a check that failed, was fixed, then failed again), and the checks that recur across runs. Without this flag the tool is stateless and behaves exactly as before.
+- `--timestamp <iso8601>` - timestamp recorded in the ledger for this run (default: current UTC time); ignored without `--history`.
+
+The `--history` ledger is the deterministic, git-versionable critique memory that turns the single-trial evaluator-optimizer audit loop into a Reflexion-style episodic-memory loop: a recurring or oscillating finding is a candidate to graduate into an enforced authoring rule via the **self-improving-agent** promotion pipeline (`/si:review` -> human gate -> `/si:promote`). See `references/self_reflection_critique_loops.md`. The ledger stays stdlib-only with no LLM or network calls, and the digest never auto-edits any config - crystallizing a finding into a rule is always a human-gated action.
 
 **Grades:** >= 90 HARDENED, 75-89 PRODUCTION-READY, 50-74 NEEDS-CONTROLS, < 50 UNSAFE-FOR-AUTONOMY. The report includes a per-category breakdown and a remediation hint for every failed check.
 
@@ -232,6 +236,7 @@ python scripts/ecosystem_scaffolder.py my-project --output ./ecosystems --json
 ```bash
 python scripts/loop_auditor.py path/to/agent.md --json
 python scripts/loop_auditor.py agents/deploy-agent.md --min-score 90
+python scripts/loop_auditor.py agents/deploy-agent.md --history .audit/ledger.json
 ```
 
 ### 3. react_trace_analyzer.py
@@ -328,6 +333,7 @@ Project documentation exists. Phase 1 absorbs it into context packs, and from th
 | File | Summary |
 |------|---------|
 | `references/loop_engineering_patterns.md` | Pattern catalog for self-reflection, evaluator-optimizer, error-mitigation, and convergence loops, with the full exit-condition taxonomy and counter design |
+| `references/self_reflection_critique_loops.md` | Named catalog mapping Reflexion, Self-Refine, CRITIC, Constitutional AI self-critique, and the Evaluator-Optimizer workflow to the hub's machinery, with the framework-track API table (LangGraph/CrewAI/MS Agent Framework/LlamaIndex/DSPy); explains why `loop_auditor.py` is a CRITIC-grounded evaluator-optimizer loop and how `--history` + the self-improving-agent bridge add Reflexion's cross-session memory |
 | `references/react_reasoning_patterns.md` | ReAct, Reflexion, and Plan-and-Execute in depth: when to use each, trace structure, and anti-patterns |
 | `references/hitl_defensive_architectures.md` | Gate placement strategies, irreversibility classification, rollback design, and escalation paths |
 | `references/four_pillar_ecosystem.md` | The context/skills/agents/workflows architecture: responsibilities, knowledge flow, atomicity, and directory conventions |

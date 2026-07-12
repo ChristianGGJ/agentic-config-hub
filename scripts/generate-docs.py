@@ -32,6 +32,7 @@ SKILL_DOMAINS = {
     "self-eval": "prompts-quality",
     "skill-tester": "prompts-quality",
     "focused-fix": "prompts-quality",
+    "agent-self-optimization": "prompts-quality",
     
     # Autonomy & Security
     "self-improving-agent": "autonomy-security",
@@ -277,6 +278,38 @@ def rewrite_relative_links(content, source_rel_path):
     return content
 
 
+def rewrite_repo_links(content, source_rel_path):
+    """Final pass: rewrite any leftover relative link to a repo file (./x, dir/x)
+    into a GitHub source URL, so nothing 404s on the published site. Intra-docs
+    sibling links (a bare filename with no path separator, e.g. `slug.md` in index
+    cards) are preserved. Already-rewritten http(s) links are left untouched."""
+    source_dir = os.path.dirname(source_rel_path)
+    exts = (".md", ".py", ".json", ".yaml", ".yml", ".sh", ".txt")
+
+    repo_dirs = ("skills/", "agents/", "commands/", "workflows/", "context/",
+                 "ecosystems/", "standards/", "scripts/", "evals/", "templates/",
+                 "documentation/", "references/", "reference/", "assets/")
+
+    def resolve(match):
+        text = match.group(1)
+        target = match.group(2)
+        if target.startswith(("http://", "https://", "#", "mailto:")):
+            return match.group(0)
+        path_part = target.split("#", 1)[0]
+        is_file = path_part.endswith(exts)
+        is_repo_dir = path_part.endswith("/") and (
+            path_part.startswith(repo_dirs) or path_part.startswith(("./", "../")))
+        if not (is_file or is_repo_dir):
+            return match.group(0)
+        # Intra-docs sibling link (bare filename, no separator, not ./ or ../): keep.
+        if is_file and "/" not in path_part and not path_part.startswith("."):
+            return match.group(0)
+        resolved = os.path.normpath(os.path.join(source_dir, path_part)).replace(os.sep, "/")
+        return f"[{text}]({GITHUB_BASE}/{resolved})"
+
+    return re.sub(r"\[([^\]]+)\]\(([^)]+)\)", resolve, content)
+
+
 def generate_skill_page(skill, domain_key):
     """Generate a docs page for a single skill."""
     skill_md_path = skill["path"]
@@ -309,6 +342,7 @@ def generate_skill_page(skill, domain_key):
     content_clean = strip_content(content)
     content_clean = rewrite_skill_internal_links(content_clean, skill["rel_path"])
     content_clean = rewrite_relative_links(content_clean, os.path.join(skill["rel_path"], "SKILL.md"))
+    content_clean = rewrite_repo_links(content_clean, os.path.join(skill["rel_path"], "SKILL.md"))
 
     page = f'''---
 title: "{seo_title}"
@@ -450,6 +484,7 @@ description: "{skill_count} {domain_name.lower()} skills — {domain_seo_ctx}. W
 
             content_clean = strip_content(content)
             content_clean = rewrite_relative_links(content_clean, rel)
+            content_clean = rewrite_repo_links(content_clean, rel)
 
             agent_seo_title = f"{title} — AI Coding Agent"
             agent_fm_desc = extract_description_from_frontmatter(agent_path)
@@ -535,6 +570,7 @@ description: "{agent_count} agent-native orchestrators for Claude Code, Codex, a
 
             content_clean = strip_content(content)
             content_clean = rewrite_relative_links(content_clean, rel)
+            content_clean = rewrite_repo_links(content_clean, rel)
 
             cmd_fm_desc = extract_description_from_frontmatter(cmd_path)
             if cmd_fm_desc:
@@ -608,6 +644,8 @@ description: "{cmd_count} slash commands for Claude Code, Codex CLI, and Gemini 
         with open(readme_src, "r", encoding="utf-8") as f:
             readme_content = f.read()
         readme_content_clean = strip_content(readme_content)
+        readme_content_clean = rewrite_relative_links(readme_content_clean, "README.md")
+        readme_content_clean = rewrite_repo_links(readme_content_clean, "README.md")
         readme_page = f'''---
 title: "Agentic Config Hub"
 description: "Curated library of production-ready configurations for AI agents and agentic systems."
