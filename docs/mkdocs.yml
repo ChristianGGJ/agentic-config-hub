@@ -59,6 +59,7 @@ nav:
     - "Skill Tester": skills/prompts-quality/skill-tester.md
     - "Focused Fix": skills/prompts-quality/focused-fix.md
     - "Agentic Evals & Benchmarking": skills/prompts-quality/agentic-evals-benchmarking.md
+    - "Agent Self-Optimization": skills/prompts-quality/agent-self-optimization.md
   - "Autonomy & Security":
     - "Autonomy & Security Skills": skills/autonomy-security/index.md
     - "Self-Improving Agent": skills/autonomy-security/self-improving-agent.md
@@ -91,3 +92,5 @@ nav:
     - "Validate Gates": commands/validate-gates.md
     - "Scaffold Ecosystem": commands/scaffold-ecosystem.md
     - "Analyze Trace": commands/analyze-trace.md
+    - "Focused Fix": commands/focused-fix.md
+    - "Plugin Audit": commands/plugin-audit.md

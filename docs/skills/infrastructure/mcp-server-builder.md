@@ -1,6 +1,6 @@
 ---
 title: "MCP Server Builder — MCP Servers & RAG Architectures"
-description: "MCP Server Builder. Agent skill for Claude Code, Codex CLI, Gemini CLI, OpenClaw."
+description: "Use when building, scaffolding, or validating MCP servers - converting OpenAPI specs to MCP tools, choosing stdio vs Streamable HTTP transports."
 ---
 
 # MCP Server Builder
@@ -28,12 +28,15 @@ The workflow supports both Python and TypeScript MCP implementations and treats 
 
 ## Core Capabilities
 
+- Explain the MCP protocol layer: JSON-RPC framing, initialize handshake, capabilities
 - Convert OpenAPI paths/operations into MCP tool definitions
-- Generate starter server scaffolds (Python or TypeScript)
+- Generate starter server scaffolds (Python FastMCP or TypeScript official SDK)
+- Cover all three server primitives: tools, resources, and prompts
+- Select and configure transports (stdio vs Streamable HTTP)
 - Enforce naming, descriptions, and schema consistency
 - Validate MCP tool manifests for common production failures
 - Apply versioning and backward-compatibility checks
-- Separate transport/runtime decisions from tool contract design
+- Wire servers into clients (.mcp.json, claude_desktop_config.json)
 
 ## When to Use
 
@@ -77,18 +80,20 @@ python3 scripts/mcp_validator.py --input out/tool_manifest.json --strict --forma
 
 Checks include duplicate names, invalid schema shape, missing descriptions, empty required fields, and naming hygiene.
 
-### 3. Runtime Selection
+### 3. Runtime & Transport Selection
 
 - Choose **Python** for fast iteration and data-heavy backends.
 - Choose **TypeScript** for unified JS stacks and tighter frontend/backend contract reuse.
+- Choose **stdio** (default) for developer tools and per-user local credentials; choose **Streamable HTTP** for shared multi-user infrastructure with central secrets — full decision table in [references/mcp-transports.md](https://github.com/ChristianGGJ/agentic-config-hub/tree/main/skills/mcp-server-builder/references/mcp-transports.md).
 - Keep tool contracts stable even if transport/runtime changes.
 
 ### 4. Auth & Safety Design
 
 - Keep secrets in env, not in tool schemas.
 - Prefer explicit allowlists for outbound hosts.
-- Return structured errors (`code`, `message`, `details`) for agent recovery.
+- Return structured errors (`code`, `message`, `details`) as `isError` tool results — never as JSON-RPC protocol errors (see [references/mcp-protocol-basics.md](https://github.com/ChristianGGJ/agentic-config-hub/tree/main/skills/mcp-server-builder/references/mcp-protocol-basics.md) section 5).
 - Avoid destructive operations without explicit confirmation inputs.
+- Set spec annotations honestly (`readOnlyHint`, `destructiveHint`, `idempotentHint`, `openWorldHint`) so clients can gate confirmations — hints complement, never replace, the confirmation-input pattern.
 
 ### 5. Versioning Strategy
 
@@ -127,6 +132,8 @@ Checks include duplicate names, invalid schema shape, missing descriptions, empt
 
 ## Reference Material
 
+- [references/mcp-protocol-basics.md](https://github.com/ChristianGGJ/agentic-config-hub/tree/main/skills/mcp-server-builder/references/mcp-protocol-basics.md) — JSON-RPC framing, initialize handshake, capabilities, tools/resources/prompts, the two error layers, annotations/outputSchema, client registration (`.mcp.json`)
+- [references/mcp-transports.md](https://github.com/ChristianGGJ/agentic-config-hub/tree/main/skills/mcp-server-builder/references/mcp-transports.md) — stdio vs Streamable HTTP (and legacy SSE status), selection criteria, packaging and deployment per transport
 - [references/openapi-extraction-guide.md](https://github.com/ChristianGGJ/agentic-config-hub/tree/main/skills/mcp-server-builder/references/openapi-extraction-guide.md)
 - [references/python-server-template.md](https://github.com/ChristianGGJ/agentic-config-hub/tree/main/skills/mcp-server-builder/references/python-server-template.md)
 - [references/typescript-server-template.md](https://github.com/ChristianGGJ/agentic-config-hub/tree/main/skills/mcp-server-builder/references/typescript-server-template.md)
@@ -149,16 +156,17 @@ Before publishing a manifest:
 1. Every tool has clear verb-first name.
 2. Every tool description explains intent and expected result.
 3. Every required field is explicitly typed.
-4. Destructive actions include confirmation parameters.
+4. Destructive actions include confirmation parameters and honest `destructiveHint`/`readOnlyHint` annotations.
 5. Error payload format is consistent across all tools.
 6. Validator returns zero errors in strict mode.
 
 ## Testing Strategy
 
+- Interactive: exercise the server with `npx @modelcontextprotocol/inspector <command>` — lists tools/resources/prompts, invokes them with arbitrary arguments, and shows the raw JSON-RPC exchange. First stop for any new server.
 - Unit: validate transformation from OpenAPI operation to MCP tool schema.
 - Contract: snapshot `tool_manifest.json` and review diffs in PR.
 - Integration: call generated tool handlers against staging API.
-- Resilience: simulate 4xx/5xx upstream errors and verify structured responses.
+- Resilience: simulate 4xx/5xx upstream errors and verify structured `isError` responses (not protocol errors).
 
 ## Deployment Practices
 

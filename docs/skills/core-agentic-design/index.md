@@ -41,17 +41,17 @@ description: "7 core agentic design skills — core agentic design patterns and 
 
     Tier: POWERFUL
 
--   **[Skill: crewai-role-engineering](crewai-role-engineering.md)**
+-   **[CrewAI Role Engineering](crewai-role-engineering.md)**
 
     ---
 
-    This skill teaches the agent how to engineer distinct agent personas and task allocations within a collaborative Crew...
+    Design CrewAI agent teams whose behavior is shaped by engineered personas, whose
 
--   **[Skill: loop-engineering-mechanisms](loop-engineering-mechanisms.md)**
+-   **[Loop Engineering Mechanisms](loop-engineering-mechanisms.md)**
 
     ---
 
-    This skill teaches the agent how to design rigorous self-correction loops and validation gates to prevent infinite re...
+    This skill is the runnable implementation companion to the hub's loop-engineering
 
 -   **[Spec-Driven Workflow — POWERFUL](spec-driven-workflow.md)**
 

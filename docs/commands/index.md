@@ -41,7 +41,7 @@ description: "6 slash commands for Claude Code, Codex CLI, and Gemini CLI."
 
     ---
 
-    Scaffold the directory structure for a new four-pillar agentic configuration stack, seeded with hardened template exa...
+    Scaffold the directory structure for a new four-pillar agentic configuration ecosystem, seeded with hardened template...
 
 -   :material-console:{ .lg .middle } **[`/validate-gates`](validate-gates.md)**
 

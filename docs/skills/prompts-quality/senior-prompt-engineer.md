@@ -1,6 +1,6 @@
 ---
 title: "Senior Prompt Engineer — Prompts Optimization & Quality Rubrics"
-description: "This skill should be used when the user asks to 'optimize prompts', 'design prompt templates', 'evaluate LLM outputs', 'build agentic systems'. Agent skill for Claude Code, Codex CLI, Gemini CLI, OpenClaw."
+description: "Use when the user asks to optimize prompts, design prompt templates, evaluate LLM outputs, debug prompt failures (format drift, hallucination. Agent skill for Claude Code, Codex CLI, Gemini CLI, OpenClaw."
 ---
 
 # Senior Prompt Engineer
@@ -29,6 +29,7 @@ Prompt engineering patterns, LLM evaluation frameworks, and agentic system desig
   - [Prompt Optimization Workflow](#prompt-optimization-workflow)
   - [Few-Shot Example Design](#few-shot-example-design-workflow)
   - [Structured Output Design](#structured-output-design-workflow)
+- [Context Engineering](#context-engineering)
 - [Reference Documentation](#reference-documentation)
 - [Common Patterns Quick Reference](#common-patterns-quick-reference)
 
@@ -80,7 +81,7 @@ python scripts/prompt_optimizer.py prompt.txt --analyze
 python scripts/prompt_optimizer.py prompt.txt --optimize --output optimized.txt
 
 # Count tokens for cost estimation
-python scripts/prompt_optimizer.py prompt.txt --tokens --model gpt-4
+python scripts/prompt_optimizer.py prompt.txt --tokens --model gpt
 
 # Extract and manage few-shot examples
 python scripts/prompt_optimizer.py prompt.txt --extract-examples --output examples.json
@@ -121,9 +122,8 @@ python scripts/rag_evaluator.py --contexts retrieved.json --questions eval_set.j
 #   1. Improve chunking strategy for technical documents
 #   2. Add metadata filtering for date-sensitive queries
 
-# Evaluate with custom metrics
-python scripts/rag_evaluator.py --contexts retrieved.json --questions eval_set.json \
-    --metrics relevance,faithfulness,coverage
+# Evaluate context relevance and answer faithfulness
+python scripts/rag_evaluator.py --contexts retrieved.json --questions eval_set.json
 
 # Export detailed results
 python scripts/rag_evaluator.py --contexts retrieved.json --questions eval_set.json \
@@ -318,12 +318,36 @@ IMPORTANT: Respond ONLY with valid JSON. No markdown, no explanation.
 Start your response with { and end with }
 ```
 
-**Step 4: Validate outputs**
+**Step 4: Validate the structured-output examples in the prompt**
 ```bash
-python scripts/prompt_optimizer.py structured_prompt.txt --validate-schema schema.json
+python scripts/prompt_optimizer.py structured_prompt.txt --validate-examples
 ```
 
 ---
+
+## Context Engineering
+
+Prompt engineering optimizes the instruction; context engineering optimizes
+*everything else in the window* — what information the model sees, in what order,
+and how much. As tasks move from single prompts to agentic loops, context quality
+dominates output quality.
+
+- **Budget the window by zone.** Reserve explicit shares for system/instructions,
+  retrieved context, conversation history, and the live turn. When a zone overflows
+  its share, compress that zone — never let history silently evict the instructions.
+- **Order for attention.** Put the stable, high-value content (system contract,
+  task definition) at the front where it caches and anchors; put the volatile,
+  lower-value content (long history) in the middle, which models attend to least
+  ("lost in the middle").
+- **Prefer retrieval over stuffing.** Past roughly 60% of the window, adding raw
+  context degrades retrieval-in-context accuracy. Switch to RAG (see the
+  `hybrid-rag-memory` and `rag-architect` skills) instead of enlarging the prompt.
+- **Summarize history on a threshold, not every turn.** Keep the system message and
+  the last user turn verbatim; compress the middle into a running summary once a
+  token threshold is crossed (deterministic, auditable).
+- **Separate provenance.** Keep untrusted retrieved/tool content in a clearly
+  delimited zone so instructions cannot be overridden by injected text (defense
+  detailed in `agentic-guardrails-security`).
 
 ## Reference Documentation
 

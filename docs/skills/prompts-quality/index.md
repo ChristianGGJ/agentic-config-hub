@@ -1,13 +1,13 @@
 ---
 title: "Prompts & Quality Skills — Agent Skills & Codex Plugins"
-description: "6 prompts & quality skills — prompt engineering optimization, validation test suites, and quality scoring rubrics. Works with Claude Code, Codex CLI, Gemini CLI, and OpenClaw."
+description: "7 prompts & quality skills — prompt engineering optimization, validation test suites, and quality scoring rubrics. Works with Claude Code, Codex CLI, Gemini CLI, and OpenClaw."
 ---
 
 <div class="domain-header" markdown>
 
 # :material-clipboard-check: Prompts & Quality
 
-<p class="domain-count">6 skills in this domain</p>
+<p class="domain-count">7 skills in this domain</p>
 
 </div>
 
@@ -17,11 +17,17 @@ description: "6 prompts & quality skills — prompt engineering optimization, va
 
 <div class="grid cards" markdown>
 
--   **[Skill: agentic-evals-benchmarking](agentic-evals-benchmarking.md)**
+-   **[Agent Self-Optimization](agent-self-optimization.md)**
 
     ---
 
-    This skill teaches the agent how to design automated, quantitative test suites to measure and prevent regressions in ...
+    You optimize agent prompts and policies from a measured signal, then stop and hand the diff to a human. The signal co...
+
+-   **[Agentic Evals & Benchmarking](agentic-evals-benchmarking.md)**
+
+    ---
+
+    This skill owns evaluation methodology for the hub: how to measure whether an agent
 
 -   **[Focused Fix — Deep-Dive Feature Repair](focused-fix.md)**
 
@@ -33,7 +39,7 @@ description: "6 prompts & quality skills — prompt engineering optimization, va
 
     ---
 
-    > Originally contributed by chad848(https://github.com/chad848) — enhanced and integrated by the agentic-config-hub team.
+    > Originally contributed by chad848(https://github.com/chad848) — enhanced and integrated by the agentic-config-hub t...
 
 -   **[Self-Eval: Honest Work Evaluation](self-eval.md)**
 

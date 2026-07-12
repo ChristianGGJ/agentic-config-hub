@@ -20,6 +20,69 @@ description: "Use when the user asks to design RAG pipelines, optimize retrieval
 
 The RAG (Retrieval-Augmented Generation) Architect skill provides comprehensive tools and knowledge for designing, implementing, and optimizing production-grade RAG pipelines. This skill covers the entire RAG ecosystem from document chunking strategies to evaluation frameworks, enabling you to build scalable, efficient, and accurate retrieval systems.
 
+## Tools
+
+Three deterministic Python CLIs live in `scripts/` (stdlib-only, no network or LLM calls). Run them from the skill folder; every flag below is the real argparse surface (`--help` documents the same).
+
+### 1. `scripts/chunking_optimizer.py` — recommend a chunking strategy for a corpus
+
+Analyzes documents in a directory (structure, length distribution, heading density) and recommends the chunking strategy plus size/overlap parameters.
+
+```bash
+python scripts/chunking_optimizer.py <directory>
+python scripts/chunking_optimizer.py ./docs --output analysis.json
+python scripts/chunking_optimizer.py ./docs --extensions .md .txt --verbose
+python scripts/chunking_optimizer.py ./docs --config chunking_config.json
+```
+
+- `directory` (positional) — folder containing text/markdown documents
+- `--output / -o` — write results as JSON to a file
+- `--config / -c` — JSON configuration file
+- `--extensions` — file extensions to process (space-separated)
+- `--verbose / -v` — verbose output
+
+### 2. `scripts/rag_pipeline_designer.py` — design a pipeline from requirements
+
+Takes a JSON requirements file (scale, latency, quality targets, budget) and emits a pipeline design: chunking, embedding model class, vector DB, retrieval strategy.
+
+```bash
+python scripts/rag_pipeline_designer.py requirements.json
+python scripts/rag_pipeline_designer.py requirements.json --output pipeline.json --verbose
+```
+
+- `requirements` (positional) — JSON file containing system requirements
+- `--output / -o` — write pipeline design as JSON to a file
+- `--verbose / -v` — verbose output
+
+### 3. `scripts/retrieval_evaluator.py` — score a retrieval setup against ground truth
+
+Evaluates retrieval quality (precision@k, recall@k, NDCG@k, MRR) for a query set against a corpus with relevance judgments.
+
+```bash
+python scripts/retrieval_evaluator.py queries.json ./corpus ground_truth.json
+python scripts/retrieval_evaluator.py queries.json ./corpus ground_truth.json --k-values 1 3 5 10
+python scripts/retrieval_evaluator.py queries.json ./corpus ground_truth.json --extensions .md --output eval.json
+```
+
+- `queries` (positional) — JSON file containing queries
+- `corpus` (positional) — directory containing the document corpus
+- `ground_truth` (positional) — JSON file with relevance judgments
+- `--k-values` — K values for precision@k / recall@k / NDCG@k (space-separated)
+- `--output / -o` — write results as JSON to a file
+- `--extensions` — file extensions to include from the corpus
+- `--verbose / -v` — verbose output
+
+## References
+
+Expert knowledge bases in `references/`:
+
+| File | Use it for |
+|------|-----------|
+| `references/chunking_strategies_comparison.md` | Side-by-side chunking strategy comparison with parameters and tradeoffs |
+| `references/embedding_model_benchmark.md` | Embedding model selection: quality/speed/cost tiers and current-model landscape |
+| `references/rag_evaluation_framework.md` | Metric definitions and evaluation methodology for RAG pipelines |
+| `references/agentic_rag_patterns.md` | Agentic RAG, GraphRAG, Self-RAG/CRAG, multi-hop retrieval — when to use each and failure modes |
+
 ## Core Competencies
 
 ### 1. Document Processing & Chunking Strategies
@@ -81,16 +144,19 @@ The RAG (Retrieval-Augmented Generation) Architect skill provides comprehensive 
 - **2048+ dimensions**: Maximum quality, specialized use cases, significant resources
 
 #### Speed vs Quality Tradeoffs
-- **Fast models**: sentence-transformers/all-MiniLM-L6-v2 (384 dim, ~14k tokens/sec)
-- **Balanced models**: sentence-transformers/all-mpnet-base-v2 (768 dim, ~2.8k tokens/sec)
-- **Quality models**: text-embedding-ada-002 (1536 dim, OpenAI API)
+- **Fast models**: sentence-transformers/all-MiniLM-L6-v2 (384 dim, ~14k tokens/sec, CPU-friendly)
+- **Balanced open-weights**: bge-m3, e5 family, gte family (typically 768-1024 dim)
+- **Quality API models**: OpenAI text-embedding-3-large, Voyage voyage-3 family, Cohere embed v3/v4 (verify current versions against provider docs)
 - **Specialized models**: Domain-specific fine-tuned models
+- **Matryoshka embeddings**: models trained with Matryoshka representation learning (e.g. text-embedding-3 family) let you truncate vectors to lower dimensions with modest quality loss — cut storage/latency without re-embedding
 
 #### Model Categories
-- **General purpose**: all-MiniLM, all-mpnet, Universal Sentence Encoder
-- **Code embeddings**: CodeBERT, GraphCodeBERT, CodeT5
-- **Scientific text**: SciBERT, BioBERT, ClinicalBERT
-- **Multilingual**: LaBSE, multilingual-e5, paraphrase-multilingual
+- **General purpose**: bge/e5/gte families (open-weights), text-embedding-3, voyage-3, cohere embed v3/v4 (API)
+- **Code embeddings**: code-specialized variants (e.g. voyage-code, jina-embeddings code models); legacy CodeBERT-family for offline baselines
+- **Scientific text**: SciBERT, BioBERT, ClinicalBERT (or a general SOTA model — benchmark both)
+- **Multilingual**: bge-m3, multilingual-e5, LaBSE
+
+See `references/embedding_model_benchmark.md` for the selection framework and tier tables.
 
 ### 3. Vector Database Selection
 
@@ -129,6 +195,18 @@ The RAG (Retrieval-Augmented Generation) Architect skill provides comprehensive 
 - **Best for**: When you already use PostgreSQL, need ACID compliance
 - **Cons**: Requires PostgreSQL expertise, less specialized than purpose-built DBs
 
+#### Index Tuning (applies across databases)
+
+Product choice matters less than index parameters. The three families:
+
+| Index family | Key parameters | Effect of raising | Tradeoff |
+|---|---|---|---|
+| **HNSW** (graph) | `M` (links per node, typical 8-64), `ef_construction` (build-time beam, typical 64-512), `ef_search` (query-time beam, typical 40-400) | Higher recall, higher latency and memory | Best recall/latency curve; slowest builds; memory-heavy (`M` drives RAM) |
+| **IVF** (clustering) | `nlist` (number of clusters, rule of thumb ~`sqrt(N)` to `4*sqrt(N)`), `nprobe` (clusters searched per query, typical 1-10% of `nlist`) | Higher recall, linearly higher latency with `nprobe` | Fast builds, lower memory than HNSW; recall degrades if data drifts from training distribution; needs retraining after large ingests |
+| **Quantization** (PQ/SQ, composable with HNSW/IVF) | PQ: subvector count and bits per code; SQ: int8/fp16 | Smaller index (4-64x compression), slight recall loss | PQ suits >10M vectors on constrained RAM; SQ (int8) is the low-risk default (~4x compression, ~1-2% recall loss); always re-rank quantized candidates against full-precision vectors when quality matters |
+
+Tuning procedure: fix a recall target (e.g. recall@10 >= 0.95 vs. exact search on a sample), then binary-search the cheapest `ef_search`/`nprobe` that meets it. Measure — do not copy defaults.
+
 ### 4. Retrieval Strategies
 
 #### Dense Retrieval
@@ -148,12 +226,17 @@ The RAG (Retrieval-Augmented Generation) Architect skill provides comprehensive 
 - **Fusion strategies**: Reciprocal Rank Fusion (RRF), weighted combination
 - **Benefits**: Combines semantic understanding with exact matching
 - **Complexity**: Requires tuning fusion weights, more complex infrastructure
+- **Boundary note**: see also `hybrid-rag-memory` for hybrid retrieval combined with agent memory backends; this skill owns retrieval pipeline design, that skill owns memory architecture.
 
 #### Reranking
-- **Two-stage approach**: Initial retrieval followed by reranking
-- **Reranking models**: Cross-encoders, specialized reranking transformers
-- **Benefits**: Higher precision, can use more sophisticated models for final ranking
-- **Tradeoff**: Additional latency, computational cost
+- **Two-stage approach**: Initial retrieval (top 50-150 candidates) followed by reranking to a final top 3-10
+- **Concrete reranker options** (verify current versions against provider docs):
+  - *Hosted cross-encoders*: Cohere Rerank (current v3.x family), Voyage rerank, Jina Reranker — one API call per query over the candidate set
+  - *Self-hosted cross-encoders*: `BAAI/bge-reranker-v2-m3` (multilingual, strong open-weights default), `mixedbread-ai/mxbai-rerank` family, classic `cross-encoder/ms-marco-MiniLM` for CPU-only budgets
+  - *LLM-as-reranker*: listwise prompting with a utility-tier model — highest quality ceiling, highest latency/cost, use only when cross-encoders plateau
+- **Cost/latency reality**: reranking 100 candidates adds roughly 50-300 ms (self-hosted GPU) to 200-600 ms (hosted API) per query, and hosted rerankers bill per query-document pair or per search unit
+- **When reranking pays** (decision rule): first-stage recall@50 is high but precision@5 is low — i.e., the right answer is *retrieved but buried*. If recall@50 is low, fix chunking/embeddings/hybrid first; a reranker cannot recover documents that were never retrieved
+- **Tradeoff**: Additional latency and cost per query; mitigate by reranking only when the first-stage score margin is ambiguous
 
 ### 5. Query Transformation Techniques
 
@@ -237,6 +320,8 @@ The RAG (Retrieval-Augmented Generation) Architect skill provides comprehensive 
 
 ### 9. Cost Optimization
 
+> Boundary: this section covers cost levers *inside the retrieval pipeline* (embedding, indexing, retrieval-time query handling). For LLM-call cost engineering — prompt caching mechanics, model routing, batch APIs, token budgets — see also `llm-cost-optimizer`.
+
 #### Embedding Cost Management
 - **Batch processing**: Batch documents for embedding to reduce API costs
 - **Caching strategies**: Cache embeddings to avoid recomputation
@@ -256,6 +341,8 @@ The RAG (Retrieval-Augmented Generation) Architect skill provides comprehensive 
 - **Smart filtering**: Use metadata filters to reduce search space
 
 ### 10. Guardrails & Safety
+
+> Boundary: this section lists what a RAG pipeline must account for. For implementation depth — injection defense taxonomies, PII engines, moderation of retrieved content — see also `agentic-guardrails-security`. Retrieved documents are an *indirect injection* vector: treat corpus content as untrusted input, not as instructions.
 
 #### Content Filtering
 - **Toxicity detection**: Filter harmful or inappropriate content
@@ -287,6 +374,9 @@ The RAG (Retrieval-Augmented Generation) Architect skill provides comprehensive 
 7. **Production deployment**: Scale-ready implementation with monitoring
 
 ### Monitoring & Observability
+
+> Boundary: metrics to track for RAG specifically. For the telemetry stack itself (tracing, OTel GenAI conventions, dashboards, alerting) see also `agentic-observability-telemetry`.
+
 - **Query analytics**: Track query patterns and performance
 - **Retrieval metrics**: Monitor precision, recall, and latency
 - **Generation quality**: Track faithfulness and relevance scores

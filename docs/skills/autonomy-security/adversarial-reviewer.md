@@ -1,6 +1,6 @@
 ---
 title: "Adversarial Code Reviewer — Autonomous Guardrails & Threat Modeling"
-description: "Adversarial code review that breaks the self-review monoculture. Use when you want a genuinely critical review of recent changes, before merging a. Agent skill for Claude Code, Codex CLI, Gemini CLI, OpenClaw."
+description: "Use when you want a genuinely critical review of recent changes, before merging a PR, or when you suspect the reviewer is being too agreeable about. Agent skill for Claude Code, Codex CLI, Gemini CLI, OpenClaw."
 ---
 
 # Adversarial Code Reviewer
@@ -56,11 +56,18 @@ This skill forces a genuine perspective shift by requiring you to adopt adversar
 
 1. [Quick Start](#quick-start)
 2. [Review Workflow](#review-workflow)
-3. [The Three Personas](#the-three-personas)
-4. [Severity Classification](#severity-classification)
-5. [Output Format](#output-format)
-6. [Anti-Patterns](#anti-patterns)
-7. [When to Use This](#when-to-use-this)
+3. [Personas Complement Deterministic Tooling](#personas-complement-deterministic-tooling)
+4. [Large-Diff Triage and Prioritization](#large-diff-triage-and-prioritization)
+5. [The Three Personas](#the-three-personas)
+6. [Persona 4: The Agent Adversary (Agentic Code)](#persona-4-the-agent-adversary-agentic-code)
+7. [Worked Examples: Concurrency and Races](#worked-examples-concurrency-and-races)
+8. [Severity Classification](#severity-classification)
+9. [Forced-Finding Calibration](#forced-finding-calibration)
+10. [Output Format](#output-format)
+11. [Escalation and Handoff](#escalation-and-handoff)
+12. [Anti-Patterns](#anti-patterns)
+13. [When to Use This](#when-to-use-this)
+14. [Cross-References](#cross-references)
 
 ## Quick Start
 
@@ -101,6 +108,47 @@ After all three personas have reported:
 1. Merge duplicate findings (same issue caught by multiple personas).
 2. Promote findings caught by 2+ personas to the next severity level.
 3. Produce the final structured output.
+
+## Personas Complement Deterministic Tooling
+
+This hub follows an "algorithm over AI" principle: prefer a deterministic check when one exists. Adversarial personas do **not** replace linters, type-checkers, SAST, or dependency scanners — they run **on top of** them. Run (or consult the output of) the deterministic tooling **first**, treat its results as ground truth in the review, and then spend persona attention only where scanners are structurally blind.
+
+The division of labor:
+
+| Deterministic tooling finds (run first) | Adversarial personas find (semantic, judgment) |
+|------------------------------------------|-----------------------------------------------|
+| Syntax errors, type mismatches (`tsc`, `mypy`, `pyright`) | Wrong-but-well-typed logic; business-rule violations |
+| Lint / style / formatting (`eslint`, `ruff`, `clippy`) | Misleading names; a function whose name lies about what it does |
+| Known-CVE dependencies (`npm audit`, `pip-audit`, `osv-scanner`) | A missing authorization check that no rule encodes |
+| Taint/injection signatures, hardcoded-secret regexes (`semgrep`, `bandit`, `gitleaks`) | IDOR / broken object-level authz; a trust boundary crossed without validation |
+| Dead code, cyclomatic-complexity thresholds | Race conditions spanning two functions; an error path that swallows a failure |
+| Format-level schema validation | An assumption that holds in tests but breaks under real traffic; prompt-injection surfaces |
+
+Rules of engagement:
+
+- **If a linter or SAST rule can catch it, do not spend persona budget on it.** Cite the tool output and move on. Persona attention is expensive; reserve it for what deterministic checks cannot see.
+- **A persona finding that a scanner *should* have caught** (e.g. "no input validation on this handler") is a signal your scanner configuration has a gap. File it as a NOTE to harden the pipeline, in addition to the finding itself.
+- **Scanners find what personas miss** (exhaustive coverage of their rule set, zero fatigue) and **personas find what scanners miss** (intent, context, cross-file semantics). Neither is sufficient alone.
+
+This mirrors the hub's layered-defense philosophy (see also `agentic-guardrails-security`): deterministic checks are the first layer; adversarial review is the layer that reasons about intent. For the security-scanning tools specifically, see the Cross-References section (`skill-security-auditor`, `ai-security`).
+
+## Large-Diff Triage and Prioritization
+
+Do not review a large diff (roughly > 400 changed lines or > 10 files) linearly — you will exhaust attention on boilerplate and arrive fatigued at the dangerous 5%. Triage by risk first, then spend persona effort top-down.
+
+**Priority tiers (highest risk first):**
+
+1. **Trust boundaries** — auth/authz, input parsing, deserialization, path/file handling, anything touching user-controlled or network data.
+2. **State mutation and persistence** — DB writes, migrations, cache invalidation, money/quota/counter changes, anything with a rollback cost.
+3. **Concurrency and ordering** — shared state, async/await, locks, queues, idempotency of retried operations.
+4. **Agent/LLM surfaces** — prompt construction, tool wiring, output parsing, agent loops (see Persona 4).
+5. **Control-flow changes to existing hot paths.**
+6. **New dependencies** — cross-check against the dependency-scanner output.
+7. **Everything else** — pure functions, renames, formatting, generated code, lockfiles, fixtures, docs.
+
+**Skim depth (do not deep-review):** generated files, lockfiles, vendored code, large data fixtures, and pure formatting churn. Record them explicitly as "reviewed at skim depth" so the verdict is honest about coverage.
+
+**Budget discipline:** the review is itself a bounded loop. Declare an effort budget up front (e.g. "deep review of tiers 1-4, skim of tiers 5-7") and state it in the report. If the diff is too large to review to depth within budget, that is itself a `budget` exit condition — recommend splitting the PR and emit an escalation (see Escalation and Handoff) rather than a false-confidence CLEAN. For the exit-condition taxonomy behind this, see `agentic-system-architect/references/loop_engineering_patterns.md`.
 
 ## The Three Personas
 
@@ -175,6 +223,66 @@ After all three personas have reported:
 
 **You MUST find at least one issue. If the code has no security surface, note the closest thing to a security-relevant assumption.**
 
+## Persona 4: The Agent Adversary (Agentic Code)
+
+The three personas above run on **every** review. This fourth, **specialist** persona is **conditional** — activate it only when the diff touches agent / LLM / tool-calling code: prompt templates, system prompts, tool or function definitions, MCP servers, agent loops, output parsers, RAG retrieval, or anywhere model output feeds back into control flow. This is an agent hub, and agentic code has failure modes ordinary review misses.
+
+**Mindset:** "This code hands control to a non-deterministic model and to text I do not control. Where does untrusted text become an instruction, and where does model output become an action?"
+
+**Checklist — Prompt-injection surfaces:**
+- Does any untrusted input (user message, retrieved document, tool result, web page, file content, prior-session data) get concatenated into a prompt without being clearly delimited and marked as **data, not instructions**?
+- Is there an explicit **instruction-source boundary** — does the system treat tool/RAG/document content as data rather than as commands it will obey?
+- Could retrieved or tool-returned content redirect the agent (indirect prompt injection)?
+- (For runtime defenses — spotlighting, sandwiching, dual-LLM — see `agentic-guardrails-security`. This persona *reviews* for the surface; that skill *enforces* the defense.)
+
+**Checklist — Tool-call safety:**
+- Are irreversible tool calls (delete, deploy, send, transfer, migrate, publish) gated behind human approval or an upstream gate step, per HITL rule R1? A newly exposed irreversible tool with no gate is a **CRITICAL** finding. (See `agentic-system-architect/references/hitl_defensive_architectures.md` for the R1-R6 rules.)
+- Are tool arguments validated before execution, or does raw model output flow straight into a shell / SQL / filesystem / HTTP call? **Model output is untrusted input** — treat it like user input for injection purposes.
+- Is tool scope least-privilege? Does a new tool widen the blast radius (filesystem write, network egress, credential access)?
+- On tool failure, is there an `on_failure` policy — bounded retry, escalate, or abort (rule R4) — or does the agent silently continue past a failed action?
+
+**Checklist — Non-determinism and loop safety:**
+- Does the change add or modify an iteration loop (retry, reflect, evaluate-optimize)? If so, does it declare at least one **bounding** exit condition (`max_iterations` or `budget`) and not rely on `success_predicate` alone? (Canonical taxonomy: `max_iterations`, `no_progress`, `oscillation`, `budget`, `success_predicate`, `escalation_trigger` — see `loop_engineering_patterns.md`.)
+- Could the loop oscillate (A-B-A-B) or repeat an identical action or thought — the runaway signatures D1/D2/D7 that `react_trace_analyzer.py` flags?
+- Does the code assume the model returns well-formed output (valid JSON, a known enum, a bounded length)? What happens on a malformed, empty, truncated, or refusal response? Non-determinism means "passed in testing" is not "correct."
+- Is the prompt or model behavior versioned enough that this change is reproducible? An un-versioned prompt edit that silently shifts production behavior is a finding (see also `prompt-governance`).
+- Model references: are model families pinned by tier or current alias rather than a deprecated hardcoded ID that will 404? (Verify against current provider docs.)
+
+**You MUST find at least one issue when agentic code is present. If the agent code is genuinely well-guarded, name the single most dangerous thing the design trusts the model to get right.**
+
+## Worked Examples: Concurrency and Races
+
+Concurrency bugs are the Saboteur's highest-value hunting ground: they pass every single-threaded test and every type-checker, so no deterministic tool in the pipeline will catch them. Look for these patterns, each with the question that surfaces it.
+
+**Example 1 — Check-then-act (TOCTOU):**
+```python
+# Two requests run this concurrently
+if not db.exists(user_id):        # T1 and T2 both read "does not exist"
+    db.create(User(user_id))      # T1 creates; T2 creates again -> duplicate / unique-violation
+```
+Question: *"What if this runs twice concurrently between the check and the act?"* Fix direction: atomic upsert, a unique constraint, or a lock. Severity: WARNING, or CRITICAL if it corrupts money/state.
+
+**Example 2 — Read-modify-write on shared state (lost update):**
+```python
+balance = account.get_balance()    # both readers see 100
+account.set_balance(balance - 10)  # both write 90 -> one -10 is lost; correct answer was 80
+```
+Question: *"Is this update atomic, or can two writers interleave?"* Fix direction: atomic DB update (`UPDATE ... SET balance = balance - 10 WHERE ...`), an optimistic-lock version column, or a transaction at the right isolation level.
+
+**Example 3 — async shared state / unawaited failure:**
+```python
+await asyncio.gather(*(handle(i) for i in items))
+# Watch for: a module-level cache mutated by concurrent tasks without a lock;
+# a fire-and-forget task whose exception is never awaited and silently vanishes;
+# a resource (lock/connection) held across an await point, serializing or deadlocking.
+```
+Questions: *"Is any shared structure mutated by concurrent tasks? Is any created task awaited so its exception surfaces? Is any resource held across an await?"*
+
+**Example 4 — Non-idempotent tool retried (agentic tie-in):**
+An error-mitigation loop retries a failed tool call. If `send_payment` succeeded but the response timed out, the retry double-sends. Question: *"Is every retried action idempotent, or keyed by an idempotency token?"* This links tool-call safety (Persona 4) to concurrency: a bounded retry loop is still a bug if the action it retries is not idempotent.
+
+For the loop-safety theory behind bounded retries and idempotent iteration, see `agentic-system-architect/references/loop_engineering_patterns.md` — do not re-derive it here.
+
 ## Severity Classification
 
 | Severity | Definition | Action Required |
@@ -184,6 +292,28 @@ After all three personas have reported:
 | **NOTE** | Style issue, minor improvement opportunity, or documentation gap. Nice to fix. | Author's discretion. |
 
 **Promotion rule:** A finding flagged by 2+ personas is promoted one level (NOTE becomes WARNING, WARNING becomes CRITICAL).
+
+## Forced-Finding Calibration
+
+The "each persona MUST find at least one issue" rule exists to break rubber-stamping — **not** to manufacture noise. A forced finding must still be a real, defensible risk, not padding. Calibrate every finding against this test.
+
+**A finding is GENUINE only when you can state all three:**
+1. A concrete **trigger** — a specific input, state, or timing that reaches it.
+2. A concrete **bad outcome** — crash, wrong result, breach, data loss, or a maintainer who will misread it.
+3. It is **not already prevented** elsewhere in the code path.
+
+If you cannot fill all three, it is padding — downgrade it or drop it.
+
+**Padding tells (downgrade or drop):**
+- "Consider adding more tests" with no specific untested path named.
+- "This could be more readable" with no named ambiguity.
+- "Might want to handle errors" where errors are already handled upstream.
+- Restating a linter/SAST rule the pipeline already enforces (cite the tool instead).
+- Hypotheticals with no reachable trigger ("if someone deleted this line...").
+
+**When the code really is solid,** the honest minimum finding is the **weakest assumption**, stated as a NOTE — not a WARNING inflated to look substantive. Example: *"No defect found in the retry logic; the load-bearing assumption is that `fetch()` never returns a 2xx with an empty body — untested, low likelihood. NOTE."* That is a legitimate forced finding. Inventing a CRITICAL to appear thorough is the **opposite** failure: it erodes trust in every future BLOCK.
+
+**Rule:** severity reflects reality, never the reviewer's need to "have found something." A review that honestly lands at CLEAN with three well-argued NOTES is a **successful** review, not a failed one. This is the antidote to the self-agreement and cosmetic-churn failure modes that reflection loops fall into (see `loop_engineering_patterns.md`): anchor every finding to a rubric, not a vibe.
 
 ## Output Format
 
@@ -212,6 +342,23 @@ Structure your review as follows:
 - **BLOCK** — 1+ CRITICAL findings. Do not merge until resolved.
 - **CONCERNS** — No criticals but 2+ warnings. Merge at your own risk.
 - **CLEAN** — Only notes. Safe to merge.
+
+## Escalation and Handoff
+
+An adversarial review is the **SELF-REVIEW and HANDOFF** stage (Phase 5) of the hub's 5-Phase Protocol applied to a code change, and the verdict is a handoff signal. Map each verdict to a next action rather than treating it as a dead end.
+
+| Verdict | Meaning | Hub mapping and next action |
+|---------|---------|------------------------------|
+| **BLOCK** | 1+ CRITICAL | Fires an `escalation_trigger`. Do not self-merge. A CRITICAL touching an **irreversible action** (deploy, delete, migrate, payment, publish) must go to a **human** — that is exactly the class the HUMAN GATE (Phase 3) exists to stop. Hand off the finding, its trigger, and a rollback note (HITL rules R1/R2). |
+| **CONCERNS** | No criticals, 2+ warnings | Return to the author to fix-or-justify. If an autonomous agent produced the change, bound the fix loop: repair within a set number of attempts, then escalate rather than loop indefinitely. |
+| **CLEAN** | Only notes | Proceed to handoff. Record coverage honestly — what was deep-reviewed vs. skimmed, per Large-Diff Triage. |
+
+**Escalation rules:**
+- **Any CRITICAL in security- or money-touching code escalates to a human**, regardless of the reviewer's confidence. An adversarial reviewer never grants approval for an irreversible action — that authority belongs to the HUMAN GATE, not the reviewer.
+- **If the diff exceeds the review budget** (see Large-Diff Triage), emit an explicit `budget` escalation ("too large to review to depth; recommend splitting the PR"), not a CLEAN.
+- **If two fix-review cycles do not converge** — the same class of finding keeps reappearing — stop looping and escalate. This is the `no_progress` / `max_iterations` exit condition applied to the review loop itself.
+
+**Handoff report** should carry: scope and coverage depth, the verdict, findings grouped by severity, and — for BLOCK/CONCERNS — the specific exit condition or gate that fired. This makes the review auditable and lets an orchestrator route it correctly. For the full exit-condition taxonomy and the HITL gate theory, see `agentic-system-architect/references/loop_engineering_patterns.md` and `references/hitl_defensive_architectures.md`.
 
 ## Anti-Patterns
 
@@ -247,6 +394,11 @@ You are likely reviewing code you just wrote or just read. Your brain (weights) 
 
 ## Cross-References
 
-- Related: `skills/ai-security` — deep security analysis
-- Related: `skills/skill-security-auditor` — general code quality review
-- Complementary: `skills/self-eval` — quality management workflows
+**Scope delineation (resolves the OWASP / injection overlap):** this skill is a **review methodology** — how to reason adversarially about a diff. The overlapping security skills below are **scanning tools**. Run them first and feed their output into the Security Auditor persona and Persona 4 (see Personas Complement Deterministic Tooling); use the personas to reason about what those scanners structurally cannot encode.
+
+- `ai-security` — AI/ML security **scanner**: prompt-injection and jailbreak signatures, MITRE ATLAS mapping, model-inversion and data-poisoning risk. Its scanner overlaps the Security Auditor persona's OWASP list and Persona 4's injection checklist; it *scans*, this skill *reasons*.
+- `skill-security-auditor` — pre-install security **scanner** for agent skills (dangerous Python patterns, prompt injection in SKILL.md, supply-chain risk). It is **not** a general code reviewer — this skill is the general adversarial reviewer.
+- `agentic-guardrails-security` — **runtime** enforcement of the Persona-4 concerns (Llama Guard, Guardrails AI, Presidio, injection defenses). This skill reviews for the surface; that skill enforces the defense.
+- `prompt-governance` — versioning and eval pipelines for the prompt changes Persona 4 flags.
+- `self-eval` — honest work-quality scoring; complements the Forced-Finding Calibration discipline here.
+- `agentic-system-architect` — flagship reference for loop theory, the six-type exit-condition taxonomy, D1-D7, R1-R6, and the >= 90 HARDENED gate cited throughout this skill.
