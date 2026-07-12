@@ -37,8 +37,14 @@ A small improvement with ugly code is NOT worth it.
 Equal performance with simpler code IS worth it.
 Removing code that gets same results is the best outcome.
 
-## Stop When
-val_bpb < 0.95 OR after 100 experiments, whichever comes first.
+## Exit Conditions (all six, declared before iteration 1)
+Hub canon: ../agentic-system-architect/references/loop_engineering_patterns.md
+- success_predicate: best val_bpb < 0.95 in results.tsv.
+- max_iterations: 100 experiments.
+- no_progress: no KEEP in 20 experiments AND best-val_bpb state hash unchanged.
+- oscillation: last 4 experiments alternate between two configs (A-B-A-B), no net KEEP.
+- budget: 6h wall-clock, whichever comes first.
+- escalation_trigger: 5 consecutive crashes, an edit outside train.py, or any condition firing twice for the same config.
 ```
 
 ---
@@ -79,8 +85,14 @@ Maximize eval_score on the test suite. Higher is better (0-100).
 - quality_score = average * 10 (maps to 10-100)
 - Run log shows which test cases failed
 
-## Stop When
-eval_score >= 85 OR after 50 experiments.
+## Exit Conditions (all six, declared before iteration 1)
+Hub canon: ../agentic-system-architect/references/loop_engineering_patterns.md
+- success_predicate: best eval_score >= 85 in results.tsv.
+- max_iterations: 50 experiments.
+- no_progress: no KEEP in 15 experiments AND best-score state hash unchanged.
+- oscillation: last 4 experiments alternate between two prompt strategies (A-B-A-B), no net KEEP.
+- budget: N LLM-judge calls (cases x eval_repeats x AR_JUDGE_SAMPLES x experiments) -- set a ceiling.
+- escalation_trigger: 5 consecutive crashes, an edit to evaluate.py or tests/, or any condition firing twice for the same strategy.
 ```
 
 ---
@@ -120,8 +132,14 @@ Minimize p50_ms (median latency). Lower is better.
 4. Try NumPy vectorization for loops
 5. Try algorithm-level changes last (higher risk)
 
-## Stop When
-p50_ms < 50ms OR improvement plateaus for 10 consecutive experiments.
+## Exit Conditions (all six, declared before iteration 1)
+Hub canon: ../agentic-system-architect/references/loop_engineering_patterns.md
+- success_predicate: best p50_ms < 50 in results.tsv (must clear the calibrated noise_band).
+- max_iterations: 60 experiments.
+- no_progress: no KEEP for 10 consecutive experiments AND best-p50 state hash unchanged (plateau).
+- oscillation: last 4 experiments alternate between two optimizations (A-B-A-B), no net KEEP.
+- budget: 4h wall-clock.
+- escalation_trigger: 5 consecutive crashes, a correctness-test regression, an edit outside src/module.py, or any condition firing twice.
 ```
 
 ---
@@ -165,6 +183,12 @@ Maximize pass_rate on the task evaluation suite. Higher is better (0-1).
 A shorter SKILL.md that achieves the same score is better.
 Aim for 200-400 lines total.
 
-## Stop When
-pass_rate >= 0.90 OR after 30 experiments.
+## Exit Conditions (all six, declared before iteration 1)
+Hub canon: ../agentic-system-architect/references/loop_engineering_patterns.md
+- success_predicate: best pass_rate >= 0.90 in results.tsv.
+- max_iterations: 30 experiments.
+- no_progress: no KEEP in 12 experiments AND best-pass_rate state hash unchanged.
+- oscillation: last 4 experiments alternate between two edits (A-B-A-B), no net KEEP.
+- budget: N LLM-scored task runs -- set a ceiling; watch held-out pass_rate for overfitting.
+- escalation_trigger: 5 consecutive crashes, an edit to evaluate.py or tests/, or any condition firing twice for the same edit.
 ```

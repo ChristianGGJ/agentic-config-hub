@@ -83,6 +83,7 @@ def init_root(root):
 def create_program_md(experiment_dir, domain, name, target, metric, direction, constraints=""):
     """Generate a program.md template for the experiment."""
     direction_word = "Minimize" if direction == "lower" else "Maximize"
+    comparator = "<" if direction == "lower" else ">"
     content = f"""# autoresearch — {name}
 
 ## Goal
@@ -111,9 +112,18 @@ A small improvement that adds ugly complexity is NOT worth it.
 Equal performance with simpler code IS worth it.
 Removing code that gets same results is the best outcome.
 
-## Stop When
-You don't stop. The human will interrupt you when they're satisfied.
-If no improvement in 20+ consecutive runs, change strategy drastically.
+## Exit Conditions (declare all six before iteration 1)
+This loop is long-running by design, but "runs forever" is not an exit condition
+-- it is the absence of one. Declare all six canonical types up front. The first
+to fire STOPS the loop and reports; the human may also interrupt at any time.
+Hub canon: ../agentic-system-architect/references/loop_engineering_patterns.md
+
+- success_predicate: `{metric}` reaches its target -- fill in, e.g. `{metric} {comparator} <value>`. Machine-checkable against results.tsv.
+- max_iterations: hard cap on experiments (e.g. 100). High is fine (autonomy is preserved), but it MUST exist and must not be raised mid-run.
+- no_progress: no KEEP in N consecutive experiments (e.g. 20) OR the best-metric state hash is unchanged across the window. Then change strategy or stop.
+- oscillation: the last 4 experiments alternate between two approaches (A-B-A-B) with no net KEEP. Stop and report both approaches.
+- budget: a wall-clock / tool-call / API-cost ceiling (e.g. 6 hours, or N LLM-judge calls). Stop when spent.
+- escalation_trigger: 5 consecutive crashes, a change that would touch a non-target file, a would-be evaluator edit, or any condition above firing twice for the same approach. Stop and ask the human.
 """
     (experiment_dir / "program.md").write_text(content)
 
@@ -126,6 +136,14 @@ metric: {metric}
 metric_direction: {direction}
 metric_grep: ^{metric}:
 time_budget_minutes: {time_budget}
+# Statistical validity (see SKILL.md > Statistical Validity).
+# Run the eval multiple times and aggregate so a single noisy run cannot fake a KEEP.
+eval_repeats: 1
+warmup_runs: 0
+aggregate: median
+# Minimum improvement the aggregated metric must clear to KEEP (absorbs noise).
+# Measure it first: python scripts/calibrate_noise.py --experiment <domain>/<name>
+noise_band: 0.0
 created: {datetime.now().strftime('%Y-%m-%d %H:%M')}
 """
     (experiment_dir / "config.cfg").write_text(content)

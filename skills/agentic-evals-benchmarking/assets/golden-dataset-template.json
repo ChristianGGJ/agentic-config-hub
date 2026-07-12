@@ -1,0 +1,21 @@
+{
+  "description": "Golden dataset template for agent/LLM evaluation. Copy, fill 'cases', hold out a split you never tune against. Fields marked optional apply to specific eval types.",
+  "dataset": "my-suite-name",
+  "version": "1.0.0",
+  "task_type": "rag_qa | agent_trajectory | classification | generation",
+  "cases": [
+    {
+      "id": "case-001",
+      "input": "The user request or question.",
+      "context": ["Optional: retrieved chunks provided to the model (RAG tasks)."],
+      "expected_output": "The gold answer or reference (for reference-based metrics).",
+      "expected_trajectory": [
+        {"tool": "optional: expected tool name for agent-trajectory eval", "args": {}}
+      ],
+      "labels": {"unsafe": false, "category": "optional-stratification-key"},
+      "weight": 1.0
+    }
+  ],
+  "splits": {"dev": ["case-001"], "holdout": []},
+  "notes": "Stratify by 'category' and report per-category metrics. Rotate the holdout as behavior/attackers drift."
+}

@@ -4,6 +4,8 @@ Uses the user's existing CLI tool for evaluation.
 DO NOT MODIFY after experiment starts — this is the fixed evaluator."""
 
 import json
+import os
+import statistics
 import subprocess
 import sys
 from pathlib import Path
@@ -49,6 +51,36 @@ except FileNotFoundError:
     print(f"Test cases file not found: {TEST_CASES_FILE}", file=sys.stderr)
     sys.exit(1)
 
+# Average multiple judge calls per case to damp LLM-judge variance
+# (see SKILL.md > Reducing LLM-Judge Variance). Override with AR_JUDGE_SAMPLES.
+try:
+    n_samples = max(1, int(os.environ.get("AR_JUDGE_SAMPLES", "3")))
+except ValueError:
+    n_samples = 3
+
+
+def judge_score(prompt_text):
+    """Sample the judge n_samples times; return the median score or None."""
+    vals = []
+    for _ in range(n_samples):
+        jr = subprocess.run(
+            [CLI_TOOL, "-p", prompt_text],
+            capture_output=True, text=True, timeout=60
+        )
+        if jr.returncode != 0:
+            continue
+        for line in jr.stdout.splitlines():
+            if "quality_score:" in line:
+                try:
+                    vals.append(float(line.split(":")[-1].strip()))
+                except ValueError:
+                    pass
+                break
+    if not vals:
+        return None
+    return statistics.median(vals)
+
+
 scores = []
 
 for i, case in enumerate(test_cases):
@@ -73,26 +105,8 @@ for i, case in enumerate(test_cases):
         actual=actual[:500]
     )
 
-    judge_result = subprocess.run(
-        [CLI_TOOL, "-p", judge_prompt],
-        capture_output=True, text=True, timeout=60
-    )
-
-    if judge_result.returncode != 0:
-        scores.append(0)
-        continue
-
-    # Parse score
-    for line in judge_result.stdout.splitlines():
-        if "quality_score:" in line:
-            try:
-                score = float(line.split(":")[-1].strip())
-                scores.append(score)
-            except ValueError:
-                scores.append(0)
-            break
-    else:
-        scores.append(0)
+    case_score = judge_score(judge_prompt)
+    scores.append(case_score if case_score is not None else 0)
 
     print(f"  Case {i+1}/{len(test_cases)}: {scores[-1]:.1f}", file=sys.stderr)
 
@@ -106,3 +120,5 @@ quality = avg * 10  # 1-10 scores → 10-100 range
 print(f"quality_score: {quality:.2f}")
 print(f"cases_tested: {len(scores)}")
 print(f"avg_per_case: {avg:.2f}")
+if len(scores) > 1:
+    print(f"quality_score_stddev: {statistics.pstdev([s * 10 for s in scores]):.3f}")

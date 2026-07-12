@@ -8,13 +8,15 @@
 - [ ] No empty `properties` objects (warn if inputs truly optional)
 
 ## Descriptive Quality
-- [ ] All tools include actionable descriptions (≥10 chars)
+- [ ] All tools include actionable descriptions (>=10 chars)
 - [ ] Descriptions start with a verb ("Create…", "Retrieve…", "Delete…")
 - [ ] Parameter descriptions explain expected values, not just types
 
 ## Security & Safety
 - [ ] Auth tokens and secrets are NOT exposed in tool schemas
 - [ ] Destructive tools require explicit confirmation input parameters
+- [ ] Annotations set honestly: `readOnlyHint`, `destructiveHint`, `idempotentHint`, `openWorldHint` (hints for client UX, never security guarantees)
+- [ ] `outputSchema` declared only when the handler actually returns `structuredContent`
 - [ ] No tool accepts arbitrary URLs or file paths without validation
 - [ ] Outbound host allowlists are explicit where applicable
 
@@ -26,5 +28,6 @@
 
 ## Runtime & Error Handling
 - [ ] Error responses use consistent structure (`code`, `message`, `details`)
+- [ ] Domain failures return `isError: true` tool results; JSON-RPC error codes reserved for protocol failures (see mcp-protocol-basics.md section 5)
 - [ ] Timeout and rate-limit behaviors are documented
 - [ ] Large response payloads are paginated or truncated

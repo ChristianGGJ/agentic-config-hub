@@ -24,6 +24,8 @@ python3 scripts/mcp_validator.py --input generated/tool_manifest.json --strict -
 
 ## References
 
+- `references/mcp-protocol-basics.md`
+- `references/mcp-transports.md`
 - `references/openapi-extraction-guide.md`
 - `references/python-server-template.md`
 - `references/typescript-server-template.md`
@@ -34,17 +36,17 @@ python3 scripts/mcp_validator.py --input generated/tool_manifest.json --strict -
 ### Claude Code
 
 ```bash
-cp -R engineering/mcp-server-builder ~/.claude/skills/mcp-server-builder
+cp -R skills/mcp-server-builder ~/.claude/skills/mcp-server-builder
 ```
 
 ### OpenAI Codex
 
 ```bash
-cp -R engineering/mcp-server-builder ~/.codex/skills/mcp-server-builder
+cp -R skills/mcp-server-builder ~/.codex/skills/mcp-server-builder
 ```
 
 ### OpenClaw
 
 ```bash
-cp -R engineering/mcp-server-builder ~/.openclaw/skills/mcp-server-builder
+cp -R skills/mcp-server-builder ~/.openclaw/skills/mcp-server-builder
 ```

@@ -39,7 +39,17 @@ Extract from the user's input:
 ### Step 2: Check for duplicates
 
 ```bash
-MEMORY_DIR="$HOME/.claude/projects/$(pwd | sed 's|/|%2F|g; s|%2F|/|; s|^/||')/memory"
+# Locate auto-memory (Claude Code dash-encodes the project path: every
+# non-alphanumeric char becomes '-', e.g. C:\x\y -> C--x-y)
+PROJECT_PATH="$(pwd -W 2>/dev/null || pwd)"
+PROJECT_KEY="$(printf '%s' "$PROJECT_PATH" | sed 's|[^A-Za-z0-9]|-|g')"
+MEMORY_DIR="$HOME/.claude/projects/$PROJECT_KEY/memory"
+if [ ! -d "$MEMORY_DIR" ]; then   # fallback: discover by encoded basename
+    BASENAME_KEY="$(basename "$PROJECT_PATH" | sed 's|[^A-Za-z0-9]|-|g')"
+    CANDIDATE="$(find "$HOME/.claude/projects" -maxdepth 1 -type d -name "*${BASENAME_KEY}" 2>/dev/null | head -1)"
+    [ -n "$CANDIDATE" ] && MEMORY_DIR="$CANDIDATE/memory"
+fi
+
 grep -ni "<keywords>" "$MEMORY_DIR/MEMORY.md" 2>/dev/null
 ```
 

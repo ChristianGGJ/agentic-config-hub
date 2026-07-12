@@ -3,17 +3,20 @@
 Prompt Optimizer - Static analysis tool for prompt engineering
 
 Features:
-- Token estimation (GPT-4/Claude approximation)
+- Token estimation (per model family approximation)
+- Relative cost estimation by capability tier (optionally in USD via --price-per-mtok)
 - Prompt structure analysis
 - Clarity scoring
-- Few-shot example extraction and management
+- Few-shot example extraction, management, and validation
 - Optimization suggestions
 
 Usage:
     python prompt_optimizer.py prompt.txt --analyze
-    python prompt_optimizer.py prompt.txt --tokens --model gpt-4
+    python prompt_optimizer.py prompt.txt --tokens --model claude --tier standard
+    python prompt_optimizer.py prompt.txt --tokens --tier frontier --price-per-mtok 15.0
     python prompt_optimizer.py prompt.txt --optimize --output optimized.txt
     python prompt_optimizer.py prompt.txt --extract-examples --output examples.json
+    python prompt_optimizer.py prompt.txt --validate-examples
 """
 
 import argparse
@@ -25,23 +28,24 @@ from typing import Dict, List, Optional, Tuple
 from dataclasses import dataclass, asdict
 
 
-# Token estimation ratios (chars per token approximation)
+# Token estimation ratios (chars per token approximation, English prose)
+# Keyed by model FAMILY, not model ID -- IDs churn too fast to hard-code.
 TOKEN_RATIOS = {
-    'gpt-4': 4.0,
-    'gpt-3.5': 4.0,
     'claude': 3.5,
+    'gpt': 4.0,
+    'gemini': 4.0,
     'default': 4.0
 }
 
-# Cost per 1K tokens (input)
-COST_PER_1K = {
-    'gpt-4': 0.03,
-    'gpt-4-turbo': 0.01,
-    'gpt-3.5-turbo': 0.0005,
-    'claude-3-opus': 0.015,
-    'claude-3-sonnet': 0.003,
-    'claude-3-haiku': 0.00025,
-    'default': 0.01
+# Relative input-cost multipliers by capability tier, normalized to fast = 1.0.
+# These are order-of-magnitude ratios that hold across major providers as of
+# 2026 (small/fast tier vs balanced workhorse tier vs frontier tier). Absolute
+# $/MTok prices change too often to hard-code here: pass --price-per-mtok with
+# your provider's current published INPUT price to get dollar estimates.
+COST_TIER_MULTIPLIERS = {
+    'fast': 1.0,       # small/fast models (e.g. Haiku-class, mini/nano/flash-class)
+    'standard': 4.0,   # balanced workhorse models (e.g. Sonnet-class)
+    'frontier': 15.0   # top capability/reasoning models (e.g. Opus-class)
 }
 
 
@@ -49,8 +53,10 @@ COST_PER_1K = {
 class PromptAnalysis:
     """Results of prompt analysis"""
     token_count: int
-    estimated_cost: float
-    model: str
+    model_family: str
+    cost_tier: str
+    relative_cost_units: float
+    estimated_cost_usd: Optional[float]
     clarity_score: int
     structure_score: int
     issues: List[Dict[str, str]]
@@ -77,10 +83,21 @@ def estimate_tokens(text: str, model: str = 'default') -> int:
     return int(len(text) / ratio)
 
 
-def estimate_cost(token_count: int, model: str = 'default') -> float:
-    """Estimate cost based on token count"""
-    cost_per_1k = COST_PER_1K.get(model, COST_PER_1K['default'])
-    return round((token_count / 1000) * cost_per_1k, 6)
+def estimate_relative_cost(token_count: int, tier: str = 'standard') -> float:
+    """Relative cost in 'fast-tier token-kilounits': tokens/1000 * tier multiplier.
+
+    Useful for comparing prompts and tiers against each other without
+    depending on volatile absolute prices.
+    """
+    multiplier = COST_TIER_MULTIPLIERS.get(tier, COST_TIER_MULTIPLIERS['standard'])
+    return round((token_count / 1000) * multiplier, 4)
+
+
+def estimate_cost_usd(token_count: int, price_per_mtok: Optional[float]) -> Optional[float]:
+    """Estimate input cost in USD when the caller supplies a current $/MTok price."""
+    if price_per_mtok is None:
+        return None
+    return round((token_count / 1_000_000) * price_per_mtok, 6)
 
 
 def find_ambiguous_instructions(text: str) -> List[Dict[str, str]]:
@@ -299,12 +316,14 @@ def generate_suggestions(analysis: PromptAnalysis) -> List[str]:
     return suggestions
 
 
-def analyze_prompt(text: str, model: str = 'gpt-4') -> PromptAnalysis:
+def analyze_prompt(text: str, model: str = 'default', tier: str = 'standard',
+                   price_per_mtok: Optional[float] = None) -> PromptAnalysis:
     """Perform comprehensive prompt analysis"""
 
     # Basic metrics
     token_count = estimate_tokens(text, model)
-    cost = estimate_cost(token_count, model)
+    relative_cost = estimate_relative_cost(token_count, tier)
+    cost_usd = estimate_cost_usd(token_count, price_per_mtok)
     word_count = len(text.split())
     line_count = len(text.split('\n'))
 
@@ -324,8 +343,10 @@ def analyze_prompt(text: str, model: str = 'gpt-4') -> PromptAnalysis:
 
     analysis = PromptAnalysis(
         token_count=token_count,
-        estimated_cost=cost,
-        model=model,
+        model_family=model,
+        cost_tier=tier,
+        relative_cost_units=relative_cost,
+        estimated_cost_usd=cost_usd,
         clarity_score=clarity_score,
         structure_score=structure_score,
         issues=all_issues,
@@ -358,30 +379,109 @@ def optimize_prompt(text: str) -> str:
     return optimized.strip()
 
 
+def validate_few_shot_examples(text: str) -> Dict[str, any]:
+    """Validate few-shot examples for count, completeness, consistency, duplicates.
+
+    Returns a dict with per-check results. Statuses: PASS, WARN, FAIL.
+    """
+    examples = extract_few_shot_examples(text)
+    checks = []
+
+    # Check 1: example count (3-5 recommended)
+    n = len(examples)
+    if n == 0:
+        checks.append({'check': 'example_count', 'status': 'FAIL',
+                       'detail': 'No Input/Output example pairs detected'})
+    elif n < 3:
+        checks.append({'check': 'example_count', 'status': 'WARN',
+                       'detail': f'{n} example(s) found; 3-5 recommended for consistency'})
+    elif n > 5:
+        checks.append({'check': 'example_count', 'status': 'WARN',
+                       'detail': f'{n} examples found; consider trimming to 3-5 to save tokens'})
+    else:
+        checks.append({'check': 'example_count', 'status': 'PASS',
+                       'detail': f'{n} examples found'})
+
+    # Check 2: completeness (every example has non-empty input and output)
+    incomplete = [ex.index for ex in examples if not ex.input_text or not ex.output_text]
+    if incomplete:
+        checks.append({'check': 'completeness', 'status': 'FAIL',
+                       'detail': f'Examples missing input or output: {incomplete}'})
+    elif examples:
+        checks.append({'check': 'completeness', 'status': 'PASS',
+                       'detail': 'All examples have input and output'})
+
+    # Check 3: output format consistency (all JSON-parseable or none)
+    if examples:
+        json_flags = []
+        for ex in examples:
+            try:
+                json.loads(ex.output_text)
+                json_flags.append(True)
+            except (json.JSONDecodeError, ValueError):
+                json_flags.append(False)
+        if any(json_flags) and not all(json_flags):
+            mixed = [ex.index for ex, is_json in zip(examples, json_flags) if not is_json]
+            checks.append({'check': 'format_consistency', 'status': 'WARN',
+                           'detail': f'Mixed output formats: examples {mixed} are not valid JSON '
+                                     'while others are'})
+        else:
+            fmt = 'JSON' if json_flags and all(json_flags) else 'plain text'
+            checks.append({'check': 'format_consistency', 'status': 'PASS',
+                           'detail': f'All outputs share one format ({fmt})'})
+
+    # Check 4: duplicate inputs (identical inputs teach nothing new)
+    if examples:
+        seen = {}
+        dupes = []
+        for ex in examples:
+            key = ex.input_text.strip().lower()
+            if key in seen:
+                dupes.append((seen[key], ex.index))
+            else:
+                seen[key] = ex.index
+        if dupes:
+            checks.append({'check': 'diversity', 'status': 'WARN',
+                           'detail': f'Duplicate inputs between example pairs: {dupes}'})
+        else:
+            checks.append({'check': 'diversity', 'status': 'PASS',
+                           'detail': 'All example inputs are distinct'})
+
+    passed = not any(c['status'] == 'FAIL' for c in checks)
+    return {
+        'example_count': n,
+        'passed': passed,
+        'checks': checks
+    }
+
+
 def format_report(analysis: PromptAnalysis) -> str:
-    """Format analysis as human-readable report"""
+    """Format analysis as human-readable report (ASCII-safe)"""
     report = []
     report.append("=" * 50)
     report.append("PROMPT ANALYSIS REPORT")
     report.append("=" * 50)
     report.append("")
 
-    report.append("📊 METRICS")
-    report.append(f"  Token count:     {analysis.token_count:,}")
-    report.append(f"  Estimated cost:  ${analysis.estimated_cost:.4f} ({analysis.model})")
+    report.append("METRICS")
+    report.append(f"  Token count:     {analysis.token_count:,} (family: {analysis.model_family})")
+    report.append(f"  Relative cost:   {analysis.relative_cost_units:,.2f} units "
+                  f"(tier: {analysis.cost_tier}; fast tier = 1.0x per 1K tokens)")
+    if analysis.estimated_cost_usd is not None:
+        report.append(f"  Estimated cost:  ${analysis.estimated_cost_usd:.6f} (from --price-per-mtok)")
     report.append(f"  Word count:      {analysis.word_count:,}")
     report.append(f"  Line count:      {analysis.line_count}")
     report.append("")
 
-    report.append("📈 SCORES")
-    report.append(f"  Clarity:    {analysis.clarity_score}/100 {'✅' if analysis.clarity_score >= 70 else '⚠️'}")
-    report.append(f"  Structure:  {analysis.structure_score}/100 {'✅' if analysis.structure_score >= 70 else '⚠️'}")
+    report.append("SCORES")
+    report.append(f"  Clarity:    {analysis.clarity_score}/100 {'[OK]' if analysis.clarity_score >= 70 else '[WARN]'}")
+    report.append(f"  Structure:  {analysis.structure_score}/100 {'[OK]' if analysis.structure_score >= 70 else '[WARN]'}")
     report.append("")
 
-    report.append("📋 STRUCTURE")
+    report.append("STRUCTURE")
     report.append(f"  Sections:      {len(analysis.sections)}")
-    report.append(f"  Examples:      {analysis.example_count} {'✅' if analysis.has_examples else '❌'}")
-    report.append(f"  Output format: {'✅ Specified' if analysis.has_output_format else '❌ Missing'}")
+    report.append(f"  Examples:      {analysis.example_count} {'[OK]' if analysis.has_examples else '[MISSING]'}")
+    report.append(f"  Output format: {'[OK] Specified' if analysis.has_output_format else '[MISSING]'}")
     report.append("")
 
     if analysis.sections:
@@ -391,7 +491,7 @@ def format_report(analysis: PromptAnalysis) -> str:
         report.append("")
 
     if analysis.issues:
-        report.append(f"⚠️ ISSUES FOUND ({len(analysis.issues)})")
+        report.append(f"ISSUES FOUND ({len(analysis.issues)})")
         for issue in analysis.issues[:10]:  # Limit to first 10
             report.append(f"  Line {issue['line']}: {issue['message']}")
             report.append(f"    Found: \"{issue['text']}\"")
@@ -400,7 +500,7 @@ def format_report(analysis: PromptAnalysis) -> str:
         report.append("")
 
     if analysis.suggestions:
-        report.append("💡 SUGGESTIONS")
+        report.append("SUGGESTIONS")
         for i, suggestion in enumerate(analysis.suggestions, 1):
             report.append(f"  {i}. {suggestion}")
         report.append("")
@@ -417,9 +517,17 @@ def main():
         epilog="""
 Examples:
   %(prog)s prompt.txt --analyze
-  %(prog)s prompt.txt --tokens --model claude-3-sonnet
+  %(prog)s prompt.txt --tokens --model claude --tier standard
+  %(prog)s prompt.txt --tokens --tier frontier --price-per-mtok 15.0
   %(prog)s prompt.txt --optimize --output optimized.txt
   %(prog)s prompt.txt --extract-examples --output examples.json
+  %(prog)s prompt.txt --validate-examples
+
+Cost model:
+  Costs are reported as RELATIVE units (tokens/1000 x tier multiplier,
+  fast tier = 1.0x) because absolute prices change frequently. For dollar
+  estimates, pass --price-per-mtok with your provider's current published
+  input price ($ per million tokens).
         """
     )
 
@@ -428,9 +536,16 @@ Examples:
     parser.add_argument('--tokens', '-t', action='store_true', help='Count tokens only')
     parser.add_argument('--optimize', '-O', action='store_true', help='Generate optimized version')
     parser.add_argument('--extract-examples', '-e', action='store_true', help='Extract few-shot examples')
-    parser.add_argument('--model', '-m', default='gpt-4',
-                       choices=['gpt-4', 'gpt-4-turbo', 'gpt-3.5-turbo', 'claude-3-opus', 'claude-3-sonnet', 'claude-3-haiku'],
-                       help='Model for token/cost estimation')
+    parser.add_argument('--validate-examples', action='store_true',
+                       help='Validate few-shot examples (count, completeness, format consistency, diversity); exit 1 on FAIL')
+    parser.add_argument('--model', '-m', default='default',
+                       choices=sorted(TOKEN_RATIOS.keys()),
+                       help='Model family for token estimation (default: default)')
+    parser.add_argument('--tier', default='standard',
+                       choices=sorted(COST_TIER_MULTIPLIERS.keys()),
+                       help='Capability tier for relative cost estimation (default: standard)')
+    parser.add_argument('--price-per-mtok', type=float, default=None,
+                       help='Current input price in $ per million tokens; enables USD estimates')
     parser.add_argument('--output', '-o', help='Output file path')
     parser.add_argument('--json', '-j', action='store_true', help='Output as JSON')
     parser.add_argument('--compare', '-c', help='Compare with baseline analysis JSON')
@@ -448,17 +563,38 @@ Examples:
     # Tokens only
     if args.tokens:
         token_count = estimate_tokens(text, args.model)
-        cost = estimate_cost(token_count, args.model)
+        relative_cost = estimate_relative_cost(token_count, args.tier)
+        cost_usd = estimate_cost_usd(token_count, args.price_per_mtok)
         if args.json:
             print(json.dumps({
                 'tokens': token_count,
-                'cost': cost,
-                'model': args.model
+                'model_family': args.model,
+                'cost_tier': args.tier,
+                'relative_cost_units': relative_cost,
+                'estimated_cost_usd': cost_usd
             }, indent=2))
         else:
-            print(f"Tokens: {token_count:,}")
-            print(f"Estimated cost: ${cost:.4f} ({args.model})")
+            print(f"Tokens: {token_count:,} (family: {args.model})")
+            print(f"Relative cost: {relative_cost:,.2f} units (tier: {args.tier}; fast = 1.0x)")
+            if cost_usd is not None:
+                print(f"Estimated cost: ${cost_usd:.6f} (at ${args.price_per_mtok}/MTok input)")
         sys.exit(0)
+
+    # Validate few-shot examples
+    if args.validate_examples:
+        result = validate_few_shot_examples(text)
+        if args.json:
+            print(json.dumps(result, indent=2))
+        else:
+            print("FEW-SHOT EXAMPLE VALIDATION")
+            print(f"  Examples found: {result['example_count']}")
+            for check in result['checks']:
+                print(f"  [{check['status']}] {check['check']}: {check['detail']}")
+            print(f"  Overall: {'PASS' if result['passed'] else 'FAIL'}")
+        if args.output:
+            Path(args.output).write_text(json.dumps(result, indent=2))
+            print(f"\nValidation results saved to {args.output}")
+        sys.exit(0 if result['passed'] else 1)
 
     # Extract examples
     if args.extract_examples:
@@ -490,14 +626,14 @@ Examples:
         sys.exit(0)
 
     # Default: full analysis
-    analysis = analyze_prompt(text, args.model)
+    analysis = analyze_prompt(text, args.model, args.tier, args.price_per_mtok)
 
     # Compare with baseline
     if args.compare:
         baseline_path = Path(args.compare)
         if baseline_path.exists():
             baseline = json.loads(baseline_path.read_text())
-            print("\n📊 COMPARISON WITH BASELINE")
+            print("\nCOMPARISON WITH BASELINE")
             print(f"  Tokens: {baseline.get('token_count', 0):,} -> {analysis.token_count:,}")
             print(f"  Clarity: {baseline.get('clarity_score', 0)} -> {analysis.clarity_score}")
             print(f"  Issues: {len(baseline.get('issues', []))} -> {len(analysis.issues)}")

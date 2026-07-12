@@ -22,12 +22,22 @@ Performs a comprehensive audit of Claude Code's auto-memory and produces actiona
 ### Step 1: Locate memory directory
 
 ```bash
-# Find the project's auto-memory directory
-MEMORY_DIR="$HOME/.claude/projects/$(pwd | sed 's|/|%2F|g; s|%2F|/|; s|^/||')/memory"
+# Claude Code names each project dir by taking the absolute project path and
+# replacing every non-alphanumeric character with '-' (slashes, drive colon,
+# dots, underscores — all become '-'):
+#   /home/user/my_app  ->  -home-user-my-app
+#   C:\Users\x\proj    ->  C--Users-x-proj
+PROJECT_PATH="$(pwd -W 2>/dev/null || pwd)"   # pwd -W: Windows-style path in Git Bash
+PROJECT_KEY="$(printf '%s' "$PROJECT_PATH" | sed 's|[^A-Za-z0-9]|-|g')"
+MEMORY_DIR="$HOME/.claude/projects/$PROJECT_KEY/memory"
 
-# Fallback: check common path patterns
-# ~/.claude/projects/<user>/<project>/memory/
-# ~/.claude/projects/<absolute-path>/memory/
+# Discovery fallback — if the computed name misses (encoding drift across
+# platforms/versions), match the project dir by its encoded basename
+if [ ! -d "$MEMORY_DIR" ]; then
+    BASENAME_KEY="$(basename "$PROJECT_PATH" | sed 's|[^A-Za-z0-9]|-|g')"
+    CANDIDATE="$(find "$HOME/.claude/projects" -maxdepth 1 -type d -name "*${BASENAME_KEY}" 2>/dev/null | head -1)"
+    [ -n "$CANDIDATE" ] && MEMORY_DIR="$CANDIDATE/memory"
+fi
 
 # List all memory files
 ls -la "$MEMORY_DIR"/

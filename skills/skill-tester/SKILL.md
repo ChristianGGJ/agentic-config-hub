@@ -1,6 +1,6 @@
 ---
 name: "skill-tester"
-description: "Skill Tester"
+description: "Use when validating, testing, or quality-scoring a skill package before publishing: check SKILL.md structure and frontmatter canon, run a skill's scripts for --help/exit-code/argparse correctness, and score quality across documentation, code, completeness, and usability (with an optional security dimension)."
 ---
 
 # Skill Tester
@@ -157,10 +157,10 @@ Scoring dimensions include:
 skill_validator.py path/to/skill --tier POWERFUL --json
 
 # Comprehensive skill testing
-script_tester.py path/to/skill --timeout 30 --sample-data
+script_tester.py path/to/skill --timeout 30 --json
 
 # Quality assessment and scoring
-quality_scorer.py path/to/skill --detailed --recommendations
+quality_scorer.py path/to/skill --detailed --include-security
 ```
 
 ### CI/CD Pipeline Integration
@@ -168,18 +168,20 @@ quality_scorer.py path/to/skill --detailed --recommendations
 # GitHub Actions workflow example
 - name: "validate-skill-quality"
   run: |
-    python skill_validator.py engineering/${{ matrix.skill }} --json | tee validation.json
-    python script_tester.py engineering/${{ matrix.skill }} | tee testing.json
-    python quality_scorer.py engineering/${{ matrix.skill }} --json | tee scoring.json
+    python skill_validator.py skills/${{ matrix.skill }} --json | tee validation.json
+    python script_tester.py skills/${{ matrix.skill }} --json | tee testing.json
+    python quality_scorer.py skills/${{ matrix.skill }} --json | tee scoring.json
 ```
 
 ### Batch Repository Analysis
 ```bash
-# Validate all skills in repository
-find engineering/ -type d -maxdepth 1 | xargs -I {} skill_validator.py {}
+# Validate every skill in the repository
+find skills/ -mindepth 1 -maxdepth 1 -type d | xargs -I {} python skill_validator.py {} --json
 
-# Generate repository quality report
-quality_scorer.py engineering/ --batch --output-format json > repo_quality.json
+# Generate a per-skill quality report (one JSON per skill)
+for d in skills/*/; do
+  python quality_scorer.py "$d" --json > "reports/$(basename "$d").json"
+done
 ```
 
 ## Output Formats & Reporting
@@ -304,15 +306,15 @@ jobs:
 ### Continuous Quality Monitoring
 ```bash
 #!/bin/bash
-# Daily quality report generation
-echo "Generating daily skill quality report..."
+# Daily quality report generation: score every skill and collect the JSON.
 timestamp=$(date +"%Y-%m-%d")
-python engineering/skill-tester/scripts/quality_scorer.py engineering/ \
-  --batch --json > "reports/quality_report_${timestamp}.json"
-
-echo "Quality trends analysis..."
-python engineering/skill-tester/scripts/trend_analyzer.py reports/ \
-  --days 30 > "reports/quality_trends_${timestamp}.md"
+mkdir -p reports
+for skill in skills/*/; do
+  name=$(basename "$skill")
+  python skills/skill-tester/scripts/quality_scorer.py "$skill" --json \
+    > "reports/${name}_${timestamp}.json"
+done
+# Trend tracking: commit the dated reports/ JSON and diff scores across dates in git.
 ```
 
 ## Performance & Scalability

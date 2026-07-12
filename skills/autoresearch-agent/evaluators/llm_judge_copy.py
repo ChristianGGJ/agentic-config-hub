@@ -3,6 +3,8 @@
 Uses the user's existing CLI tool for evaluation.
 DO NOT MODIFY after experiment starts — this is the fixed evaluator."""
 
+import os
+import statistics
 import subprocess
 import sys
 from pathlib import Path
@@ -75,39 +77,67 @@ except FileNotFoundError:
 
 full_prompt = f"{JUDGE_PROMPT}\n\n---\n\nCopy to evaluate:\n\n{content}"
 
-result = subprocess.run(
-    [CLI_TOOL, "-p", full_prompt],
-    capture_output=True, text=True, timeout=120
-)
 
-if result.returncode != 0:
-    print(f"LLM judge failed: {result.stderr[:200]}", file=sys.stderr)
-    sys.exit(1)
-
-output = result.stdout
-found_scores = False
-for line in output.splitlines():
-    line = line.strip()
-    if line.startswith("engagement_score:") or line.startswith("criterion_"):
-        print(line)
-        found_scores = True
-
-# Fallback: if no criterion_ lines found, try parsing any "word: digit" lines
-if not found_scores:
-    import re
-    fallback_scores = []
-    for line in output.splitlines():
+def _run_judge_once(prompt):
+    """One judge call. Returns (engagement_score, component_lines) or (None, [])."""
+    proc = subprocess.run(
+        [CLI_TOOL, "-p", prompt],
+        capture_output=True, text=True, timeout=120
+    )
+    if proc.returncode != 0:
+        print(f"LLM judge call failed: {proc.stderr[:200]}", file=sys.stderr)
+        return None, []
+    out = proc.stdout
+    eng = None
+    components = []
+    for line in out.splitlines():
         line = line.strip()
-        match = re.match(r'^(\w[\w\s]*?):\s*(\d+(?:\.\d+)?)\s*$', line)
-        if match and match.group(1).lower() not in ("engagement_score",):
-            fallback_scores.append(float(match.group(2)))
-            print(f"criterion_{len(fallback_scores)}: {match.group(2)}")
-    if fallback_scores:
-        avg = sum(fallback_scores) / len(fallback_scores)
-        print(f"engagement_score: {avg:.1f}")
-        found_scores = True
+        if line.startswith("engagement_score:"):
+            try:
+                eng = float(line.split(":", 1)[1].strip())
+            except ValueError:
+                pass
+        elif line.startswith("criterion_"):
+            components.append(line)
+    # Fallback: parse "word: digit" lines if no structured labels were found
+    if eng is None and not components:
+        import re
+        fallback = []
+        for line in out.splitlines():
+            line = line.strip()
+            match = re.match(r'^(\w[\w\s]*?):\s*(\d+(?:\.\d+)?)\s*$', line)
+            if match and match.group(1).lower() != "engagement_score":
+                fallback.append(float(match.group(2)))
+                components.append(f"criterion_{len(fallback)}: {match.group(2)}")
+        if fallback:
+            eng = sum(fallback) / len(fallback)
+    return eng, components
 
-if "engagement_score:" not in output and not found_scores:
-    print("Could not parse engagement_score from LLM output", file=sys.stderr)
-    print(f"Raw: {output[:500]}", file=sys.stderr)
+
+# Average multiple judge calls to damp LLM-judge variance
+# (see SKILL.md > Reducing LLM-Judge Variance). Override with AR_JUDGE_SAMPLES.
+try:
+    n_samples = max(1, int(os.environ.get("AR_JUDGE_SAMPLES", "3")))
+except ValueError:
+    n_samples = 3
+
+scores = []
+first_components = []
+for _ in range(n_samples):
+    eng, components = _run_judge_once(full_prompt)
+    if eng is not None:
+        scores.append(eng)
+        if not first_components:
+            first_components = components
+
+if not scores:
+    print("Could not parse engagement_score from any LLM judge call", file=sys.stderr)
     sys.exit(1)
+
+for line in first_components:
+    print(line)
+
+print(f"engagement_score: {statistics.median(scores):.2f}")
+print(f"engagement_score_samples: {len(scores)}")
+if len(scores) > 1:
+    print(f"engagement_score_stddev: {statistics.stdev(scores):.3f}")

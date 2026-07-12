@@ -40,7 +40,11 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--input", help="Path to manifest JSON file. If omitted, reads from stdin.")
     parser.add_argument("--strict", action="store_true", help="Exit non-zero when errors are found.")
     parser.add_argument("--format", choices=["text", "json"], default="text", help="Output format.")
-    return parser.parse_args()
+    parser.add_argument("--json", action="store_true", help="Shortcut for --format json.")
+    args = parser.parse_args()
+    if args.json:
+        args.format = "json"
+    return args
 
 
 def load_manifest(input_path: Optional[str]) -> Dict[str, Any]:

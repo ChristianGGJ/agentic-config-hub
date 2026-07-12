@@ -1,0 +1,15 @@
+{
+  "description": "Example results doc consumed by scripts/eval_gate.py. Aggregate mean of case scores is gated against --threshold; per-metric floors against --metric name=value.",
+  "suite": "rag-answer-quality@1.0.0",
+  "cases": [
+    {"id": "c1", "question": "What is the refund window?", "score": 0.93},
+    {"id": "c2", "question": "List the supported currencies", "score": 0.88},
+    {"id": "c3", "question": "Explain the escalation policy", "score": 0.90},
+    {"id": "c4", "question": "When does the trial end?", "score": 0.86}
+  ],
+  "metrics": {
+    "faithfulness": 0.91,
+    "answer_relevancy": 0.89,
+    "context_precision": 0.87
+  }
+}

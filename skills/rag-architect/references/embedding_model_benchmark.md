@@ -1,13 +1,40 @@
-# Embedding Model Benchmark 2024
+# Embedding Model Selection Guide
 
 ## Executive Summary
 
-This comprehensive benchmark evaluates 15 popular embedding models across multiple dimensions including retrieval quality, processing speed, memory usage, and cost. Results are based on evaluation across 5 diverse datasets totaling 2M+ documents and 50K queries.
+This reference covers how to choose an embedding model for RAG: the current model landscape, the selection framework, and a historical benchmark snapshot for relative intuition.
+
+> **Currency caveat (important):** the embedding landscape turns over every 6-12 months. Model names and relative rankings below reflect the landscape as of late 2025 / early 2026 for the current section and a 2024 snapshot for the numeric benchmark tables. Before committing to a model, verify against the current MTEB retrieval leaderboard (Hugging Face) and the provider's own docs — and above all, benchmark on *your* corpus with `scripts/retrieval_evaluator.py`.
+
+## Current Model Landscape (verify against current docs)
+
+### API models (hosted)
+- **OpenAI text-embedding-3-small / 3-large** — 1536 / 3072 dim; support Matryoshka-style dimension truncation via the `dimensions` API parameter (e.g. run 3-large at 256-1024 dim for cheaper storage with modest quality loss). `text-embedding-ada-002` is a legacy model — do not select it for new systems.
+- **Voyage voyage-3 family** (voyage-3, voyage-3-lite, and code/finance/law specialized variants) — strong retrieval quality per dollar; frequent releases, check current version.
+- **Cohere embed v3 / v4** — strong multilingual coverage; v3 introduced `input_type` (separate query vs. document embedding modes), v4 adds multimodal and flexible dimensions.
+- **Google Gemini embedding models** — competitive quality, tight integration if you are already on Vertex/Gemini.
+
+### Open-weights models (self-hosted)
+- **BAAI/bge-m3** — the multilingual workhorse: dense + sparse + multi-vector (ColBERT-style) outputs from one model, 8k context. Strong default for hybrid retrieval.
+- **BAAI/bge-large-en-v1.5** — mature English-only choice; still a solid CPU/GPU-friendly baseline.
+- **intfloat/e5 family (e5-large-v2, multilingual-e5)** and **gte family (incl. gte-Qwen LLM-based variants)** — consistently near the top of MTEB among open weights.
+- **jina-embeddings-v3** — 8k context, task-specific LoRA adapters, Matryoshka dimensions.
+- **nomic-embed-text** — fully open (weights + data), long context, Matryoshka dimensions.
+- **all-MiniLM-L6-v2 / all-mpnet-base-v2** — legacy sentence-transformers; still fine for prototypes and tight CPU budgets, outclassed on quality by everything above.
+
+### Matryoshka dimensions
+Models trained with Matryoshka Representation Learning (text-embedding-3, jina-v3, nomic, several gte/bge variants) concentrate information in the leading dimensions, so you can truncate stored vectors (e.g. 3072 -> 512) and renormalize, trading a few points of recall for 4-6x lower storage and faster search. Decide the dimension at design time and evaluate at that dimension — do not benchmark at full size and deploy truncated.
+
+---
+
+## Historical Benchmark Snapshot (2024)
+
+Everything below this line is a point-in-time snapshot of a 2024-era evaluation. The absolute numbers are illustrative and hardware-dependent; treat the *relative ordering within a tier* as directional intuition only, and re-verify anything decision-critical.
 
 ## Models Evaluated
 
 ### OpenAI Models
-- **text-embedding-ada-002** (1536 dim) - Latest general-purpose model
+- **text-embedding-ada-002** (1536 dim) - Legacy general-purpose model (superseded)
 - **text-embedding-3-small** (1536 dim) - Optimized for speed/cost
 - **text-embedding-3-large** (3072 dim) - Maximum quality
 
@@ -125,7 +152,7 @@ This comprehensive benchmark evaluates 15 popular embedding models across multip
 |-------|------|--------------------|---------------------------|
 | text-embedding-3-small | API | $0.02 | $0.20 |
 | text-embedding-ada-002 | API | $0.10 | $1.00 |
-| text-embedding-3-large | API | $1.30 | $13.00 |
+| text-embedding-3-large | API | $0.13 | $1.30 |
 | all-MiniLM-L6-v2 | Self-hosted | $0.05 | $0.50 |
 | all-MiniLM-L12-v2 | Self-hosted | $0.08 | $0.80 |
 | all-mpnet-base-v2 | Self-hosted | $0.15 | $1.50 |
@@ -183,14 +210,16 @@ Tested on translated versions of Natural Questions (Spanish, French, German):
 
 ## Recommendations by Use Case
 
+> These recommendations mix the 2024 snapshot with the current landscape section above. Where a current-generation model family exists (voyage-3, cohere embed v3/v4, bge-m3), prefer it over the snapshot-era pick after verifying on your corpus.
+
 ### High-Volume Production Systems
-**Primary**: BAAI/bge-large-en-v1.5
-- Excellent quality (2nd best overall)
-- No API costs or rate limits
+**Primary**: BAAI/bge-m3 (multilingual, hybrid-ready) or bge-large-en-v1.5 (English-only)
+- Excellent quality without API costs or rate limits
+- bge-m3 additionally emits sparse signals for hybrid retrieval
 - Reasonable resource requirements
 
-**Secondary**: intfloat/e5-large-v2
-- Very close quality to bge-large
+**Secondary**: intfloat/e5-large-v2 or gte family
+- Very close quality to bge family
 - Active development community
 - Good documentation
 
@@ -206,9 +235,8 @@ Tested on translated versions of Natural Questions (Spanish, French, German):
 - No infrastructure overhead
 
 ### Maximum Quality Requirements
-**Primary**: text-embedding-3-large
-- Best overall quality
-- Latest OpenAI technology
+**Primary**: text-embedding-3-large, or current voyage-3 / cohere embed v4 tier (verify current leaderboards)
+- Best overall quality among hosted options
 - Worth the cost for critical applications
 
 **Secondary**: BAAI/bge-large-en-v1.5
@@ -235,9 +263,9 @@ Tested on translated versions of Natural Questions (Spanish, French, German):
 3. intfloat/e5-large-v2 as open-source alternative
 
 **Code/Technical**: 
-1. microsoft/codebert-base for code search
-2. text-embedding-ada-002 for mixed code/text
-3. all-mpnet-base-v2 for technical documentation
+1. Current code-specialized API models (e.g. voyage-code family) for code search
+2. text-embedding-3 family for mixed code/text
+3. microsoft/codebert-base only as an offline/legacy baseline
 
 **Multilingual**:
 1. paraphrase-multilingual-mpnet-base-v2 for balanced multilingual
@@ -335,4 +363,4 @@ The embedding model landscape offers excellent options across all use cases:
 - **Cost Optimized**: Open source models (bge, e5, mpnet series)
 - **Specialized**: Domain-specific models when available
 
-The key is matching your specific requirements to the right model characteristics. Consider starting with BAAI/bge-large-en-v1.5 as a strong general-purpose choice, then optimize based on your specific needs and constraints.
+The key is matching your specific requirements to the right model characteristics. Consider starting with BAAI/bge-m3 (self-hosted) or the text-embedding-3 / voyage-3 tier (API) as a strong general-purpose choice, then optimize based on your specific needs and constraints — and re-check the current MTEB leaderboard before committing, since this landscape shifts every few months.

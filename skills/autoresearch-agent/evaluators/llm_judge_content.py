@@ -3,6 +3,8 @@
 Uses the user's existing CLI tool (claude, codex, gemini) for evaluation.
 DO NOT MODIFY after experiment starts — this is the fixed evaluator."""
 
+import os
+import statistics
 import subprocess
 import sys
 from pathlib import Path
@@ -51,27 +53,54 @@ except FileNotFoundError:
 
 full_prompt = f"{JUDGE_PROMPT}\n\n---\n\nContent to evaluate:\n\n{content}"
 
-# Call the user's CLI tool
-result = subprocess.run(
-    [CLI_TOOL, "-p", full_prompt],
-    capture_output=True, text=True, timeout=120
-)
 
-if result.returncode != 0:
-    print(f"LLM judge failed: {result.stderr[:200]}", file=sys.stderr)
+def _run_judge_once(prompt):
+    """One judge call. Returns (ctr_score, component_lines) or (None, [])."""
+    proc = subprocess.run(
+        [CLI_TOOL, "-p", prompt],
+        capture_output=True, text=True, timeout=120
+    )
+    if proc.returncode != 0:
+        print(f"LLM judge call failed: {proc.stderr[:200]}", file=sys.stderr)
+        return None, []
+    ctr = None
+    components = []
+    for line in proc.stdout.splitlines():
+        line = line.strip()
+        if line.startswith("ctr_score:"):
+            try:
+                ctr = float(line.split(":", 1)[1].strip())
+            except ValueError:
+                pass
+        elif line.startswith(("curiosity:", "specificity:", "emotional:", "scroll_stop:", "seo:")):
+            components.append(line)
+    return ctr, components
+
+
+# Average multiple judge calls to damp LLM-judge variance
+# (see SKILL.md > Reducing LLM-Judge Variance). Override with AR_JUDGE_SAMPLES.
+try:
+    n_samples = max(1, int(os.environ.get("AR_JUDGE_SAMPLES", "3")))
+except ValueError:
+    n_samples = 3
+
+scores = []
+first_components = []
+for _ in range(n_samples):
+    ctr, components = _run_judge_once(full_prompt)
+    if ctr is not None:
+        scores.append(ctr)
+        if not first_components:
+            first_components = components
+
+if not scores:
+    print("Could not parse ctr_score from any LLM judge call", file=sys.stderr)
     sys.exit(1)
 
-# Parse output — look for ctr_score line
-output = result.stdout
-for line in output.splitlines():
-    line = line.strip()
-    if line.startswith("ctr_score:"):
-        print(line)
-    elif line.startswith(("curiosity:", "specificity:", "emotional:", "scroll_stop:", "seo:")):
-        print(line)
+for line in first_components:
+    print(line)
 
-# Verify ctr_score was found
-if "ctr_score:" not in output:
-    print("Could not parse ctr_score from LLM output", file=sys.stderr)
-    print(f"Raw output: {output[:500]}", file=sys.stderr)
-    sys.exit(1)
+print(f"ctr_score: {statistics.median(scores):.2f}")
+print(f"ctr_score_samples: {len(scores)}")
+if len(scores) > 1:
+    print(f"ctr_score_stddev: {statistics.stdev(scores):.3f}")

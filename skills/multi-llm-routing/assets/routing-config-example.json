@@ -1,0 +1,18 @@
+{
+  "description": "Example three-tier cascade routing config. Passes routing_config_validator.py with zero errors.",
+  "tiers": [
+    {"name": "utility", "model_family": "small/fast utility tier", "relative_cost": 1, "capabilities": ["chat", "extract", "classify"]},
+    {"name": "mid", "model_family": "mid-tier general model", "relative_cost": 6, "capabilities": ["chat", "extract", "classify", "summarize", "code"]},
+    {"name": "reasoning", "model_family": "frontier reasoning tier", "relative_cost": 20, "capabilities": ["chat", "extract", "classify", "summarize", "code", "multi_step_reasoning", "planning"]}
+  ],
+  "cascade": {
+    "order": ["utility", "mid", "reasoning"],
+    "verify": ["schema_validity", "constraint_check", "groundedness"]
+  },
+  "exit_conditions": ["max_iterations", "budget", "oscillation", "no_progress", "success_predicate", "escalation_trigger"],
+  "failover": {
+    "utility": "mid",
+    "mid": "reasoning"
+  },
+  "notes": "Escalate only on a failed verify predicate. Pin a task signature's tier floor after an A-B-A-B oscillation (see references/cascade_routing.md section 4)."
+}

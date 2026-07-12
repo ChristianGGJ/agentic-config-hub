@@ -356,11 +356,13 @@ import openai
 with open('my_tools_openai.json') as f:
     schemas = json.load(f)
 
-# Use with OpenAI function calling
-response = openai.ChatCompletion.create(
-    model="gpt-4",
+# Use with OpenAI function calling (v1 SDK; tools API)
+from openai import OpenAI
+client = OpenAI()
+response = client.chat.completions.create(
+    model="gpt-4o",
     messages=[{"role": "user", "content": "Search for AI news"}],
-    functions=schemas['functions']
+    tools=[{"type": "function", "function": s} for s in schemas['functions']]
 )
 ```
 
