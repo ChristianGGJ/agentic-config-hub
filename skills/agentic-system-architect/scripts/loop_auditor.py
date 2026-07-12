@@ -36,10 +36,25 @@ Usage examples:
     python loop_auditor.py my-agent.md --json
     python loop_auditor.py my-agent.md --json > audit.json
     python loop_auditor.py my-agent.md --min-score 90   # CI deployment gate
+    python loop_auditor.py my-agent.md --history .audit/ledger.json
+
+Optional cross-run reflection memory (--history):
+    Without --history the tool is stateless and behaves exactly as before.
+    With --history <ledger.json> it APPENDS this run's verdict (file, score,
+    grade, failed_check_ids, timestamp) to a JSON ledger, then reads prior
+    records for the SAME file and computes score_delta, a no_progress flag
+    (>= 2 consecutive runs with no score increase and the same failed checks),
+    an oscillation flag (a failed check that disappeared then reappeared), and
+    a recurring-findings digest. This is the deterministic, git-versionable
+    critique ledger that turns the single-trial evaluator-optimizer loop into a
+    Reflexion-style episodic-memory loop (see
+    references/self_reflection_critique_loops.md). It is still stdlib-only and
+    makes no LLM or network call; --timestamp overrides the recorded time.
 
 Exit codes:
     0  audit completed (a low score is a finding, not a tool error)
-    1  I/O or usage error (missing file, unreadable file, bad arguments),
+    1  I/O or usage error (missing file, unreadable file, bad arguments,
+       unreadable/malformed --history ledger, or unwritable ledger path),
        or the score is below the --min-score gate when one is set
 
 Console output is ASCII-safe: no emoji, no box-drawing characters, so it
@@ -47,6 +62,7 @@ renders correctly on Windows cp1252 consoles.
 """
 
 import argparse
+import datetime
 import json
 import re
 import sys
@@ -305,6 +321,178 @@ def format_human(result):
     return "\n".join(lines)
 
 
+# ---------------------------------------------------------------------------
+# Optional cross-run reflection memory (--history). Everything below is inert
+# unless --history is passed, so the default code path is unchanged. No LLM or
+# network calls; stdlib only; ASCII-safe output.
+# ---------------------------------------------------------------------------
+
+def failed_ids_from_result(result):
+    """Return the sorted list of failed check ids from an audit result."""
+    return sorted(
+        check["id"]
+        for category in result["categories"]
+        for check in category["checks"]
+        if not check["passed"]
+    )
+
+
+def current_timestamp():
+    """ISO-8601 UTC timestamp (seconds precision), used when --timestamp is absent."""
+    return (
+        datetime.datetime.now(datetime.timezone.utc)
+        .replace(microsecond=0)
+        .isoformat()
+    )
+
+
+def load_ledger(path):
+    """Load an audit-history ledger (a JSON array of records).
+
+    A missing or empty file yields an empty ledger. A file that exists but does
+    not contain a JSON array raises ValueError (surfaced as a usage error).
+    """
+    if not path.exists():
+        return []
+    text = path.read_text(encoding="utf-8", errors="replace").strip()
+    if not text:
+        return []
+    data = json.loads(text)  # ValueError on malformed JSON -> handled by caller
+    if not isinstance(data, list):
+        raise ValueError("ledger root is not a JSON array")
+    return data
+
+
+def _oscillated(presence):
+    """True if a check was present, then absent, then present again.
+
+    presence is a chronological list of 1/0 flags (1 = the check FAILED that
+    run). Collapse consecutive duplicates; if the value 1 appears >= 2 times in
+    the collapsed sequence, the failure disappeared and later reappeared.
+    """
+    collapsed = []
+    for flag in presence:
+        if not collapsed or collapsed[-1] != flag:
+            collapsed.append(flag)
+    return collapsed.count(1) >= 2
+
+
+def analyze_history(prior_records, current_record):
+    """Compare the current verdict against prior runs for the SAME file.
+
+    prior_records: chronological prior ledger records for this file.
+    current_record: the record about to be appended.
+    Returns a JSON-serializable analysis dict (the 'history' block).
+    """
+    sequence = prior_records + [current_record]
+    runs = len(sequence)
+    current_score = current_record["score"]
+
+    previous_score = prior_records[-1]["score"] if prior_records else None
+    score_delta = (
+        current_score - previous_score if previous_score is not None else None
+    )
+
+    # no_progress: trailing streak of runs with an identical failed-check set
+    # and non-increasing score. A streak of >= 2 records means at least this
+    # run plus one prior run sat at the same wall (a score plateau).
+    streak = 1
+    for i in range(len(sequence) - 1, 0, -1):
+        cur = set(sequence[i]["failed_check_ids"])
+        prev = set(sequence[i - 1]["failed_check_ids"])
+        no_increase = sequence[i]["score"] <= sequence[i - 1]["score"]
+        if cur == prev and no_increase:
+            streak += 1
+        else:
+            break
+    no_progress = streak >= 2
+
+    # oscillation + recurrence: walk each check id across the full sequence.
+    all_ids = set()
+    for rec in sequence:
+        all_ids.update(rec["failed_check_ids"])
+    oscillating = []
+    counts = {}
+    for cid in sorted(all_ids):
+        presence = [1 if cid in set(rec["failed_check_ids"]) else 0 for rec in sequence]
+        counts[cid] = sum(presence)
+        if _oscillated(presence):
+            oscillating.append(cid)
+
+    recurring = [
+        {"id": cid, "runs_failed": counts[cid], "total_runs": runs}
+        for cid in sorted(counts)
+        if counts[cid] >= 2
+    ]
+
+    return {
+        "runs_for_file": runs,
+        "current_score": current_score,
+        "previous_score": previous_score,
+        "score_delta": score_delta,
+        "no_progress": no_progress,
+        "no_progress_streak": streak if no_progress else 0,
+        "oscillating_checks": oscillating,
+        "recurring_failures": recurring,
+    }
+
+
+def format_history(analysis, ledger_label):
+    """Render the recurring-findings digest as an ASCII-safe text block."""
+    rule = "-" * 68
+    lines = ["", "RECURRING FINDINGS DIGEST", rule]
+    lines.append("Ledger             : %s" % ledger_label)
+    lines.append("Runs for this file : %d" % analysis["runs_for_file"])
+
+    if analysis["previous_score"] is None:
+        lines.append(
+            "History            : first recorded run for this file; "
+            "nothing to compare yet."
+        )
+        lines.append(rule)
+        return "\n".join(lines)
+
+    delta = analysis["score_delta"]
+    sign = "+" if delta >= 0 else ""
+    lines.append(
+        "Score              : %d -> %d  (delta %s%d)"
+        % (analysis["previous_score"], analysis["current_score"], sign, delta)
+    )
+    if analysis["no_progress"]:
+        lines.append(
+            "No-progress        : YES - score plateau across %d runs with an "
+            "identical failed-check set" % analysis["no_progress_streak"]
+        )
+    else:
+        lines.append("No-progress        : no")
+    if analysis["oscillating_checks"]:
+        lines.append(
+            "Oscillation        : YES - %s (failed -> fixed -> failed again)"
+            % ", ".join(analysis["oscillating_checks"])
+        )
+    else:
+        lines.append("Oscillation        : no")
+    if analysis["recurring_failures"]:
+        lines.append("Recurring failed checks (failed in >= 2 runs):")
+        for rec in analysis["recurring_failures"]:
+            lines.append(
+                "  %-4s failed in %d/%d runs"
+                % (rec["id"], rec["runs_failed"], rec["total_runs"])
+            )
+    else:
+        lines.append("Recurring failed checks: none")
+    lines.append(rule)
+    lines.append(
+        "A recurring or oscillating finding is a candidate to graduate into an"
+    )
+    lines.append(
+        "enforced authoring rule. Route it through the self-improving-agent"
+    )
+    lines.append("promotion pipeline; a human approves the graduation (Phase 3).")
+    lines.append(rule)
+    return "\n".join(lines)
+
+
 class UsageErrorParser(argparse.ArgumentParser):
     """ArgumentParser that exits with code 1 on usage errors (spec contract)."""
 
@@ -346,6 +534,22 @@ def build_parser():
         help="exit 1 if the final score is below N (deployment/CI gate, "
              "e.g. --min-score 90 to require HARDENED)",
     )
+    parser.add_argument(
+        "--history",
+        default=None,
+        metavar="LEDGER.JSON",
+        help="append this run's verdict to a JSON audit-history ledger and "
+             "print a recurring-findings digest (score delta, no_progress, "
+             "oscillation) computed from prior runs for the same file. Without "
+             "this flag the tool is stateless and behaves exactly as before.",
+    )
+    parser.add_argument(
+        "--timestamp",
+        default=None,
+        metavar="ISO8601",
+        help="timestamp recorded in the --history ledger for this run "
+             "(default: current UTC time). Ignored without --history.",
+    )
     return parser
 
 
@@ -374,10 +578,58 @@ def main(argv=None):
 
     result = audit_content(content, str(path))
 
+    history_text = None
+    if args.history is not None:
+        ledger_path = Path(args.history)
+        try:
+            ledger = load_ledger(ledger_path)
+        except ValueError as exc:
+            sys.stderr.write(
+                "%s: error: cannot parse --history ledger %s: %s\n"
+                % (TOOL_NAME, ledger_path, exc)
+            )
+            return 1
+        except OSError as exc:
+            sys.stderr.write(
+                "%s: error: cannot read --history ledger %s: %s\n"
+                % (TOOL_NAME, ledger_path, exc)
+            )
+            return 1
+
+        record = {
+            "file": result["file"],
+            "score": result["score"],
+            "grade": result["grade"],
+            "failed_check_ids": failed_ids_from_result(result),
+            "timestamp": args.timestamp or current_timestamp(),
+        }
+        prior_for_file = [r for r in ledger if r.get("file") == record["file"]]
+        analysis = analyze_history(prior_for_file, record)
+        analysis["ledger"] = str(ledger_path)
+
+        ledger.append(record)
+        try:
+            if ledger_path.parent and not ledger_path.parent.exists():
+                ledger_path.parent.mkdir(parents=True, exist_ok=True)
+            ledger_path.write_text(
+                json.dumps(ledger, indent=2) + "\n", encoding="utf-8"
+            )
+        except OSError as exc:
+            sys.stderr.write(
+                "%s: error: cannot write --history ledger %s: %s\n"
+                % (TOOL_NAME, ledger_path, exc)
+            )
+            return 1
+
+        result["history"] = analysis
+        history_text = format_history(analysis, str(ledger_path))
+
     if args.json:
         print(json.dumps(result, indent=2))
     else:
         print(format_human(result))
+        if history_text is not None:
+            print(history_text)
 
     if args.min_score is not None and result["score"] < args.min_score:
         sys.stderr.write(

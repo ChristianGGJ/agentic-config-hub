@@ -59,6 +59,9 @@ every message with no curation policy, you are building a transcript, not a memo
    rule for when hybrid beats pure-dense (see `references/rag_memory_patterns.md`).
 5. **Write/eviction policy design** — what to store, when to summarize, how to
    deduplicate, TTL and deletion procedures (including user-data erasure).
+6. **Memory lifecycle & learning** — the eviction/consolidation policy that fights
+   context noise, and procedural memory (self-authored skill/tool registries)
+   (see the *Memory Lifecycle & Learning* section below).
 
 ## Decision Frameworks
 
@@ -104,6 +107,26 @@ instead of storing transcripts, and record provenance (`source_thread_id`, times
 | Episodic memories | Keep last N=100 per namespace + summaries of the rest | Count cap, then summarize-and-delete |
 | Semantic memories | Indefinite while referenced | Superseded-fact overwrite; staleness review when hit rate ~ 0 |
 | User-requested erasure | Immediate | Delete by user namespace across ALL layers (checkpoints included) — see `references/memory_apis.md` |
+
+## Memory Lifecycle & Learning
+
+Storage is only half of memory design; the other half is the LIFECYCLE — how memory is
+aged, consolidated, evicted, and grown into new capability. The load-bearing thesis is
+that **more memory is not better**: past a point, extra context becomes *noise* that
+degrades retrieval precision (context rot / lost-in-the-middle), so a memory system is
+defined as much by what it drops as by what it keeps. Two references (and one tool) cover
+this layer without repeating the storage/taxonomy content above: `references/memory_eviction_and_consolidation.md`
+gives the two-track eviction picture (real framework levers — LangGraph/LangMem store TTL
+and `refresh_on_read`, Mem0 fused/temporal scoring, MemGPT/Letta paging + sleep-time
+compute, LlamaIndex `token_flush_size`/block `priority`, rerank-before-inject — and their
+git-native static analogs) plus a concrete 8-rule eviction policy and a composite
+keep/evict score; `references/procedural_memory_skill_registries.md` frames the hub's own
+`skills/` directory as a governed, Voyager-style procedural-memory registry where adding a
+skill = registering a capability, but human-gated, audited, and versioned. The deterministic
+tool `scripts/memory_evictor.py` plans eviction over a JSONL store on the age/recency/
+frequency/pinned axes (semantic relevance is a runtime concern, delegated to `rag-architect`).
+Safety rule: an eviction/consolidation pass never autonomously drops a pinned safety rule or
+a crystallized boundary — those are removed only through the Phase-3 HUMAN GATE.
 
 ## Framework Surfaces (summary)
 
@@ -194,3 +217,11 @@ structured handoff (memories written, deduped, evicted, evidence of success_pred
 | `references/memory_apis.md` | Real framework memory APIs: LangGraph checkpointer vs Store (semantic search config, namespacing), CrewAI memory configuration, MAF AgentThread + context providers; write policies, multi-tenancy, retention/erasure |
 | `references/vector_schema_examples.md` | Concrete schemas: pgvector DDL with HNSW/IVFFlat tuning, Azure AI Search index JSON, Qdrant collection config with sparse+dense vectors; BM25 parameter guidance |
 | `references/rag_memory_patterns.md` | Hybrid retrieval over memories: RRF implementations (Python + C#), when hybrid beats pure-dense, memory-vs-document chunking, durable checkpointer setup, memory quality evaluation |
+| `references/memory_eviction_and_consolidation.md` | The context-noise thesis and eviction/consolidation LIFECYCLE: real framework levers (store TTL/`refresh_on_read`, Mem0 fused/temporal scoring, MemGPT/Letta paging + sleep-time compute, LlamaIndex `token_flush_size`/block priority, rerank-before-inject) and their git-native static analogs; a concrete 8-rule eviction policy and composite keep/evict score |
+| `references/procedural_memory_skill_registries.md` | Procedural memory (self-authored skill/tool libraries): the Voyager propose->verify->register->retrieve loop and its static analog — the hub's `skills/` directory as a governed, human-gated, audited, versioned capability registry; description-as-retrieval-index and skill-retrieval hygiene |
+
+**Tools**
+
+| Script | Summary |
+|------|---------|
+| `scripts/memory_evictor.py` | Deterministic eviction planner over a JSONL memory store (stdlib only, `--json`): composite TTL + recency + frequency policy with pinned-item protection; emits the kept set and an evicted report with reasons. Covers the age/recency/frequency/pinned axes only — semantic relevance is delegated to `rag-architect`. Run `python scripts/memory_evictor.py --help`. |
