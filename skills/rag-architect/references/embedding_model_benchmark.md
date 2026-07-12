@@ -152,7 +152,7 @@ Everything below this line is a point-in-time snapshot of a 2024-era evaluation.
 |-------|------|--------------------|---------------------------|
 | text-embedding-3-small | API | $0.02 | $0.20 |
 | text-embedding-ada-002 | API | $0.10 | $1.00 |
-| text-embedding-3-large | API | $1.30 | $13.00 |
+| text-embedding-3-large | API | $0.13 | $1.30 |
 | all-MiniLM-L6-v2 | Self-hosted | $0.05 | $0.50 |
 | all-MiniLM-L12-v2 | Self-hosted | $0.08 | $0.80 |
 | all-mpnet-base-v2 | Self-hosted | $0.15 | $1.50 |

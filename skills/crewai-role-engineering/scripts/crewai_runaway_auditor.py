@@ -1,59 +1,110 @@
 #!/usr/bin/env python3
 """Runaway-prevention auditor for CrewAI code (crewai-role-engineering skill).
 
-Statically scans CrewAI Python source for Agent/Crew/Task constructions that omit
-the runaway-prevention controls the hub canon requires: Agent needs max_iter (and
-ideally max_rpm / max_execution_time); a hierarchical Crew needs a manager; long
-tasks should set human_input where a HITL gate belongs. Regex/heuristic only -- no
-imports of crewai, no code execution, no network.
+Statically audits CrewAI Python source via the `ast` module -- the file is parsed,
+never imported or executed -- for missing runaway-prevention controls that map to the
+hub's exit-condition canon:
 
-Maps to hub exit conditions: max_iter -> max_iterations, max_execution_time/max_rpm
--> budget, human_input -> escalation_trigger / HUMAN GATE.
+  - Agent(...) without max_iter                         -> unbounded loop (max_iterations)
+  - Agent(...) with neither max_execution_time nor max_rpm -> no budget ceiling (budget)
+  - Task(...) missing expected_output                   -> unverifiable output (success_predicate)
+  - Task(...) with an irreversible-verb description and no human_input=True -> missing HITL gate (escalation_trigger)
+  - Crew(..., process=Process.hierarchical) without manager_llm/manager_agent -> undefined coordination
+
+Stdlib only (ast, argparse, json). No imports of crewai, no execution, no network.
 
 Usage:
   python crewai_runaway_auditor.py path/to/crew.py
-  python crewai_runaway_auditor.py src/ --json      # scans *.py recursively
+  python crewai_runaway_auditor.py src/ --json        # scans *.py recursively
+  python crewai_runaway_auditor.py crew.py --strict    # warnings also fail the run
 
-Exit codes: 0 no findings; 1 findings present, or I/O / usage error.
-(A non-zero exit flags unguarded constructs; wire it into CI as a gate.)
+Exit codes:
+  0  no blocking findings (HIGH; and MEDIUM too under --strict)
+  1  blocking findings present, or I/O / parse / usage error
 """
 
 import argparse
+import ast
 import json
-import re
 import sys
 from pathlib import Path
 
 TOOL = "crewai_runaway_auditor"
-
-# Match a constructor call and capture its argument text up to the balanced-ish close.
-AGENT_RE = re.compile(r"\bAgent\s*\((.*?)\)\s*(?:$|\n|#)", re.S)
-CREW_RE = re.compile(r"\bCrew\s*\((.*?)\)\s*(?:$|\n|#)", re.S)
+IRREVERSIBLE_VERBS = ("delete", "deploy", "publish", "send", "drop", "migrate",
+                      "purchase", "transfer", "email", "post", "remove", "overwrite")
 
 
-def scan_text(text, path):
-    findings = []
+class UsageError(argparse.ArgumentParser):
+    def error(self, message):
+        self.print_usage(sys.stderr)
+        sys.stderr.write("%s: error: %s\n" % (self.prog, message))
+        sys.exit(1)
 
-    def has(args, kw):
-        return re.search(r"\b" + kw + r"\s*=", args) is not None
 
-    # crude call extraction: find "Agent(" / "Crew(" and take the next ~400 chars
-    for m in re.finditer(r"\bAgent\s*\(", text):
-        seg = text[m.end():m.end() + 600]
-        line = text[:m.start()].count("\n") + 1
-        if not has(seg, "max_iter"):
-            findings.append((str(path), line, "HIGH",
-                             "Agent(...) without max_iter -> unbounded reasoning loop (map to max_iterations)"))
-        if not has(seg, "max_rpm") and not has(seg, "max_execution_time"):
-            findings.append((str(path), line, "MEDIUM",
-                             "Agent(...) without max_rpm or max_execution_time -> no budget ceiling"))
-    for m in re.finditer(r"\bCrew\s*\(", text):
-        seg = text[m.end():m.end() + 800]
-        line = text[:m.start()].count("\n") + 1
-        hierarchical = re.search(r"Process\.hierarchical", seg) is not None
-        if hierarchical and not (has(seg, "manager_llm") or has(seg, "manager_agent")):
-            findings.append((str(path), line, "HIGH",
-                             "hierarchical Crew without manager_llm/manager_agent -> undefined coordination"))
+def _callee(node):
+    """Return the simple name of a call target, e.g. 'Agent', 'Crew', 'Task'."""
+    f = node.func
+    if isinstance(f, ast.Name):
+        return f.id
+    if isinstance(f, ast.Attribute):
+        return f.attr
+    return None
+
+
+def _kwargs(node):
+    return {kw.arg: kw.value for kw in node.keywords if kw.arg}
+
+
+def _literal(value):
+    try:
+        return ast.literal_eval(value)
+    except (ValueError, SyntaxError):
+        return None
+
+
+def audit_tree(tree, path):
+    findings = []  # (path, line, severity, message)
+
+    for node in ast.walk(tree):
+        if not isinstance(node, ast.Call):
+            continue
+        name = _callee(node)
+        if name not in ("Agent", "Task", "Crew"):
+            continue
+        kw = _kwargs(node)
+        line = getattr(node, "lineno", 0)
+
+        if name == "Agent":
+            if "max_iter" not in kw:
+                findings.append((path, line, "HIGH",
+                    "Agent(...) without max_iter -> unbounded reasoning loop (map to max_iterations)"))
+            if "max_execution_time" not in kw and "max_rpm" not in kw:
+                findings.append((path, line, "MEDIUM",
+                    "Agent(...) without max_execution_time or max_rpm -> no budget ceiling (map to budget)"))
+
+        elif name == "Task":
+            if "expected_output" not in kw:
+                findings.append((path, line, "MEDIUM",
+                    "Task(...) missing expected_output -> output cannot be machine-verified (success_predicate)"))
+            desc = _literal(kw["description"]) if "description" in kw else None
+            if isinstance(desc, str) and any(v in desc.lower() for v in IRREVERSIBLE_VERBS):
+                hi = kw.get("human_input")
+                approved = isinstance(hi, ast.Constant) and hi.value is True
+                if not approved:
+                    findings.append((path, line, "HIGH",
+                        "Task with an irreversible-verb description and no human_input=True -> missing HITL gate (escalation_trigger)"))
+
+        elif name == "Crew":
+            proc = kw.get("process")
+            is_hier = False
+            if isinstance(proc, ast.Attribute) and proc.attr == "hierarchical":
+                is_hier = True
+            elif isinstance(proc, ast.Constant) and proc.value == "hierarchical":
+                is_hier = True
+            if is_hier and "manager_llm" not in kw and "manager_agent" not in kw:
+                findings.append((path, line, "HIGH",
+                    "hierarchical Crew without manager_llm/manager_agent -> undefined coordination"))
+
     return findings
 
 
@@ -64,17 +115,11 @@ def iter_py(target):
 
 
 def main(argv=None):
-    p = argparse.ArgumentParser(
-        prog="crewai_runaway_auditor.py",
-        description="Audit CrewAI source for missing runaway-prevention controls.")
+    p = UsageError(prog="crewai_runaway_auditor.py",
+                   description="AST audit of CrewAI source for missing runaway-prevention controls.")
     p.add_argument("path", help="a .py file or a directory to scan recursively")
     p.add_argument("--json", action="store_true", help="machine-readable output")
-
-    class _P(argparse.ArgumentParser):
-        def error(self, m):
-            self.print_usage(sys.stderr)
-            sys.stderr.write("%s: error: %s\n" % (self.prog, m)); sys.exit(1)
-    p.__class__ = _P
+    p.add_argument("--strict", action="store_true", help="MEDIUM findings also fail the run")
     args = p.parse_args(argv)
 
     target = Path(args.path)
@@ -86,25 +131,34 @@ def main(argv=None):
         sys.stderr.write("%s: error: no .py files at %s\n" % (TOOL, target))
         return 1
 
-    all_findings = []
+    findings = []
     for f in files:
         try:
-            all_findings.extend(scan_text(f.read_text(encoding="utf-8", errors="replace"), f))
-        except OSError as exc:
-            sys.stderr.write("%s: warning: cannot read %s: %s\n" % (TOOL, f, exc))
+            tree = ast.parse(f.read_text(encoding="utf-8", errors="replace"), filename=str(f))
+        except SyntaxError as exc:
+            sys.stderr.write("%s: warning: skipping unparseable %s: %s\n" % (TOOL, f, exc))
+            continue
+        findings.extend(audit_tree(tree, str(f)))
+
+    highs = [x for x in findings if x[2] == "HIGH"]
+    mediums = [x for x in findings if x[2] == "MEDIUM"]
+    blocking = highs + (mediums if args.strict else [])
 
     if args.json:
-        print(json.dumps({"scanned": len(files),
-                          "findings": [{"file": a, "line": b, "severity": c, "issue": d}
-                                       for a, b, c, d in all_findings]}, indent=2))
+        print(json.dumps({
+            "scanned": len(files), "strict": args.strict,
+            "findings": [{"file": a, "line": b, "severity": c, "issue": d}
+                         for a, b, c, d in findings],
+            "blocking": len(blocking),
+        }, indent=2))
     else:
-        print("CrewAI runaway audit: %d file(s), %d finding(s)"
-              % (len(files), len(all_findings)))
-        for a, b, c, d in all_findings:
+        print("CrewAI runaway audit: %d file(s), %d finding(s)%s"
+              % (len(files), len(findings), " [--strict]" if args.strict else ""))
+        for a, b, c, d in findings:
             print("  [%s] %s:%d %s" % (c, a, b, d))
-        if not all_findings:
-            print("  no unguarded Agent/Crew constructs found")
-    return 1 if all_findings else 0
+        if not findings:
+            print("  clean -- all Agent/Task/Crew constructs carry their controls")
+    return 1 if blocking else 0
 
 
 if __name__ == "__main__":
