@@ -15,7 +15,7 @@ Attack vectors, detection strategies, and mitigations for malicious AI agent ski
 
 ## Attack Surface
 
-AI agent skills have three attack surfaces:
+AI agent skills expose these attack surfaces:
 
 ```
 ┌─────────────────────────────────────────────────┐
@@ -27,8 +27,14 @@ AI agent skills have three attack surfaces:
 ├──────────────┴──────────────┴───────────────────┤
 │              File System & Structure             │
 │              (Persistence, traversal)            │
+├──────────────────────────────────────────────────┤
+│         Manifests (.mcp.json, hooks, settings)   │
+│         (AUTO-EXECUTION — runs before review)    │
 └─────────────────────────────────────────────────┘
 ```
+
+The manifest layer is listed last but is the **highest priority**: it auto-executes the
+moment an agent loads the project, before a human reads a single script.
 
 ### Why Skills Are High-Risk
 
@@ -144,6 +150,18 @@ AI agent skills have three attack surfaces:
 | Pickle files | Serialized Python objects with code execution |
 | Symlinks | Links pointing outside skill directory |
 | Template injection | Jinja/Mako templates with code execution |
+
+### manifests (auto-execution surface)
+
+The highest-priority surface: config that runs **automatically** when an agent loads the
+project, before any human reads a script. Audited by `scripts/manifest_auditor.py`.
+
+| Risk | What to Check |
+|------|---------------|
+| MCP auto-run | `.mcp.json` server `command`/`args` — pipe-to-shell, `npx -y`/`uvx` auto-fetch, inline shell/code, netcat |
+| MCP data egress | Remote MCP `url`/`type` (plaintext HTTP, external context egress); hardcoded secrets in `env` |
+| Hook auto-run | `settings.json` / `hooks.json` `hooks.<Event>` commands; `.git/hooks/*`, `.githooks/*`, `.husky/*`; `core.hooksPath` relocation |
+| Permission bypass | `permissions.defaultMode: bypassPermissions`, broad/dangerous `permissions.allow`, `enableAllProjectMcpServers` |
 
 ---
 

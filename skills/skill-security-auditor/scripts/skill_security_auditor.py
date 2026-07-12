@@ -14,6 +14,7 @@ Exit codes:
 """
 
 import argparse
+import hashlib
 import json
 import os
 import re
@@ -71,6 +72,7 @@ class AuditReport:
     files_scanned: int = 0
     scripts_scanned: int = 0
     md_files_scanned: int = 0
+    suppressed_count: int = 0
 
     @property
     def critical_count(self):
@@ -107,6 +109,7 @@ class AuditReport:
                 "files_scanned": self.files_scanned,
                 "scripts_scanned": self.scripts_scanned,
                 "md_files_scanned": self.md_files_scanned,
+                "suppressed": self.suppressed_count,
             },
             "findings": [f.to_dict() for f in self.findings],
         }
@@ -598,6 +601,93 @@ MD_EXTENSIONS = {".md", ".mdx", ".markdown"}
 ALL_SCAN_EXTENSIONS = CODE_EXTENSIONS | MD_EXTENSIONS
 
 
+# =============================================================================
+# FALSE-POSITIVE CALIBRATION
+# Three layers reduce noise without hiding evidence:
+#   1. Inline suppression  - a reviewer annotates a specific line.
+#   2. Baseline allowlist  - accepted findings recorded from a prior run.
+#   3. Context weighting    - obfuscation findings are downgraded (not removed)
+#                             when no exec/command sink exists in the same file.
+# =============================================================================
+
+# Matches "# nosec", "# audit-ignore", "# audit-ignore: OBFUSCATION,NET-READ",
+# "# audit-ignore[CODE-EXEC]" (also with // comments). Case-insensitive.
+INLINE_SUPPRESS_RE = re.compile(
+    r"(?:#|//)\s*(?:nosec|audit-ignore)(?:\s*[:\[]\s*([A-Za-z0-9_\-, ]+?)\s*\]?)?\s*$",
+    re.IGNORECASE,
+)
+
+# Categories that represent an actual execution / command sink. Obfuscation is
+# only high-signal when it feeds one of these in the same file.
+SINK_CATEGORIES = {"CODE-EXEC", "CMD-INJECT"}
+OBFUSCATION_CATEGORY = "OBFUSCATION"
+
+
+def _suppressed(line: str, category: str) -> bool:
+    """True if an inline suppression marker on this line covers `category`."""
+    m = INLINE_SUPPRESS_RE.search(line)
+    if not m:
+        return False
+    cats = m.group(1)
+    if not cats:
+        return True  # bare marker suppresses everything on the line
+    wanted = {c.strip().upper() for c in cats.split(",") if c.strip()}
+    return category.upper() in wanted
+
+
+def finding_fingerprint(finding: "Finding", skill_path: Path) -> str:
+    """Stable id for a finding: category + skill-relative path + matched text.
+
+    Line numbers are deliberately excluded so edits above a finding do not
+    invalidate its baseline entry.
+    """
+    f = finding.file
+    try:
+        rel = os.path.relpath(f, str(skill_path)) if os.path.isabs(f) else f
+    except ValueError:
+        rel = f
+    rel = rel.replace("\\", "/")
+    basis = "{}|{}|{}".format(rel, finding.category, finding.pattern)
+    return hashlib.sha1(basis.encode("utf-8", "replace")).hexdigest()[:16]
+
+
+def apply_context_weighting(report: AuditReport):
+    """Downgrade obfuscation findings that have no exec/command sink in the same file.
+
+    A base64/hex/chr finding is only CRITICAL when it can feed an execution sink
+    (the classic base64->exec payload). On its own it is usually legitimate data
+    handling, so it is downgraded to INFO with an explanatory note rather than
+    removed - the evidence stays in the report.
+    """
+    sink_files = {
+        f.file for f in report.findings if f.category in SINK_CATEGORIES
+    }
+    for f in report.findings:
+        if f.category != OBFUSCATION_CATEGORY:
+            continue
+        if f.file in sink_files:
+            if "exec/eval sink present" not in f.risk:
+                f.risk = f.risk + " [exec/eval sink present in same file - high signal]"
+            continue
+        if f.severity > Severity.INFO:
+            f.severity = Severity.INFO
+            f.risk = f.risk + " [no exec/eval/command sink in same file - likely legitimate; verify manually]"
+
+
+def load_baseline(path: str) -> set:
+    """Load accepted-finding fingerprints from a baseline JSON file."""
+    try:
+        data = json.loads(Path(path).read_text(encoding="utf-8"))
+    except Exception as exc:
+        print("Error reading baseline {}: {}".format(path, exc), file=sys.stderr)
+        sys.exit(1)
+    if isinstance(data, dict):
+        return set(data.get("fingerprints", []))
+    if isinstance(data, list):
+        return set(data)
+    return set()
+
+
 def scan_file_code(filepath: Path, report: AuditReport):
     """Scan a code file for dangerous patterns."""
     try:
@@ -625,6 +715,9 @@ def scan_file_code(filepath: Path, report: AuditReport):
 
         for pat in patterns:
             if re.search(pat["regex"], line):
+                if _suppressed(line, pat["category"]):
+                    report.suppressed_count += 1
+                    continue
                 report.findings.append(
                     Finding(
                         severity=pat["severity"],
@@ -650,6 +743,9 @@ def scan_file_prompt_injection(filepath: Path, report: AuditReport):
     for i, line in enumerate(lines, 1):
         for pat in PROMPT_INJECTION_PATTERNS:
             if re.search(pat["regex"], line):
+                if _suppressed(line, pat["category"]):
+                    report.suppressed_count += 1
+                    continue
                 report.findings.append(
                     Finding(
                         severity=pat["severity"],
@@ -856,7 +952,7 @@ def scan_filesystem(skill_path: Path, report: AuditReport):
                 pass
 
 
-def scan_skill(skill_path: Path) -> AuditReport:
+def scan_skill(skill_path: Path, context_weighting: bool = True) -> AuditReport:
     """Run full security audit on a skill directory."""
     report = AuditReport(
         skill_name=skill_path.name,
@@ -900,18 +996,32 @@ def scan_skill(skill_path: Path) -> AuditReport:
     # 4. Dependency scanning
     scan_dependencies(skill_path, report)
 
+    # 5. Context weighting — downgrade obfuscation findings with no exec sink
+    if context_weighting:
+        apply_context_weighting(report)
+
     return report
 
 
 def clone_repo(url: str, skill_name: Optional[str] = None, cleanup: bool = False):
     """Clone a git repo to a temp directory and return the skill path."""
     tmp_dir = tempfile.mkdtemp(prefix="skill-audit-")
+    # Host-safety hardening for cloning UNTRUSTED repos (see SKILL.md "Host
+    # Safety"). git clone does not execute a remote repo's hooks, but we still:
+    #   - refuse submodules (--no-recurse-submodules): a malicious .gitmodules
+    #     can point fetches at attacker-controlled URLs.
+    #   - never prompt for credentials (GIT_TERMINAL_PROMPT=0): avoids hanging
+    #     or leaking creds to a hostile server.
+    # This is defense-in-depth only; run the whole audit inside a container/VM
+    # with no outbound network for genuinely untrusted sources.
+    clone_env = dict(os.environ, GIT_TERMINAL_PROMPT="0")
     try:
         subprocess.run(
-            ["git", "clone", "--depth", "1", url, tmp_dir],
+            ["git", "clone", "--depth", "1", "--no-recurse-submodules", url, tmp_dir],
             check=True,
             capture_output=True,
             text=True,
+            env=clone_env,
         )
     except subprocess.CalledProcessError as e:
         print(f"Error cloning {url}: {e.stderr}", file=sys.stderr)
@@ -959,6 +1069,11 @@ def print_report(report: AuditReport):
     )
     print("╚" + "═" * 54 + "╝")
 
+    if report.suppressed_count:
+        print(
+            f"  Suppressed (inline/baseline): {report.suppressed_count}"
+        )
+
     if not report.findings:
         print("\n  No security issues found. Skill is safe to install.\n")
         return
@@ -979,6 +1094,13 @@ def print_report(report: AuditReport):
 
 
 def main():
+    # The text report uses box-drawing/emoji glyphs; force UTF-8 so it does not
+    # crash on legacy Windows consoles (cp1252). Best-effort, safe to ignore.
+    try:
+        sys.stdout.reconfigure(encoding="utf-8")
+    except Exception:
+        pass
+
     parser = argparse.ArgumentParser(
         description="Skill Security Auditor — Scan skills for security risks before installation"
     )
@@ -1006,6 +1128,21 @@ def main():
         action="store_true",
         help="Remove cloned repo after audit (only for git URLs)",
     )
+    parser.add_argument(
+        "--baseline",
+        metavar="FILE",
+        help="Suppress findings whose fingerprint is listed in this baseline JSON file",
+    )
+    parser.add_argument(
+        "--write-baseline",
+        metavar="FILE",
+        help="Write current findings' fingerprints to FILE (to accept them) and exit 0",
+    )
+    parser.add_argument(
+        "--no-context-weighting",
+        action="store_true",
+        help="Disable downgrading obfuscation findings that lack an exec/command sink",
+    )
 
     args = parser.parse_args()
 
@@ -1024,7 +1161,31 @@ def main():
             sys.exit(1)
 
     try:
-        report = scan_skill(skill_path)
+        report = scan_skill(skill_path, context_weighting=not args.no_context_weighting)
+
+        # Write-baseline mode: record fingerprints, then exit clean.
+        if args.write_baseline:
+            fps = sorted({finding_fingerprint(f, skill_path) for f in report.findings})
+            payload = {"version": 1, "skill": report.skill_name, "fingerprints": fps}
+            Path(args.write_baseline).write_text(
+                json.dumps(payload, indent=2), encoding="utf-8"
+            )
+            print(
+                "Wrote {} fingerprint(s) to {}".format(len(fps), args.write_baseline),
+                file=sys.stderr,
+            )
+            sys.exit(0)
+
+        # Baseline suppression: drop accepted findings.
+        if args.baseline:
+            accepted = load_baseline(args.baseline)
+            kept = []
+            for f in report.findings:
+                if finding_fingerprint(f, skill_path) in accepted:
+                    report.suppressed_count += 1
+                else:
+                    kept.append(f)
+            report.findings = kept
 
         if args.json_output:
             print(json.dumps(report.to_dict(), indent=2))
