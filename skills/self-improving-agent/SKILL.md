@@ -119,6 +119,65 @@ paths:
 
 This loads only when Claude works with API test files — zero overhead otherwise.
 
+## Bridge: Audit Findings -> Enforced Rules (Reflexion memory)
+
+A single audit catches a mistake once. The high-leverage move is wiring a *recurring* audit finding into a durable authoring rule so the **same class of error is prevented at authoring time, not just caught after**. This is the static-track realization of Reflexion's episodic reflection memory (Shinn et al. 2023): a scalar/verbal critique from one trial is persisted and prepended to the next trial's context so the actor stops repeating the mistake — here with no runtime, no model calls, and a mandatory human gate. For the framework-track theory (Reflexion, Self-Refine, CRITIC, Evaluator-Optimizer) and the real APIs behind it, see `skills/agentic-system-architect/references/self_reflection_critique_loops.md`; the trial-loop and exit-condition theory lives in `skills/agentic-system-architect/references/loop_engineering_patterns.md` (cited here, not duplicated).
+
+### The pipeline
+
+```
+(a) loop_auditor.py --history   ->  recurring-findings digest
+        (agentic-system-architect / loop-engineering-mechanisms own this)
+                |
+                v  a check that fails across 2+ runs/sessions = "Proven"
+(b) /si:remember "<recurring finding + implied authoring rule>"
+                |
+                v  human confirms it is durable + actionable
+(c) /si:promote "<rule>" --target claude.md   (or --target rules/<topic>.md)
+                |
+                v  rule now loads into every future authoring session
+(d) next loop_auditor.py run no longer flags it -> loop closed
+```
+
+- **(a) Detect the recurrence.** `loop_auditor.py`'s audit-history ledger mode (`--history`) records each verdict and emits a recurring-findings digest — a check that has failed across runs or sessions rather than once. The ledger, its score-delta / `no_progress` / oscillation counters, and the digest format are **owned and defined by `agentic-system-architect` (which ships `loop_auditor.py`) and `loop-engineering-mechanisms`** — see those skills for the flag's exact interface; do not re-teach it here. *(Verify `--history` against `loop_auditor.py`'s current interface — the ledger mode is a sibling addition landing alongside this bridge.)* A repeated failed check is the static equivalent of Reflexion's persisted critique signal, and it satisfies the **"Proven — appeared in 2+ sessions"** bar in [reference/promotion-rules.md](reference/promotion-rules.md).
+- **(b) Capture the lesson.** Run `/si:remember` with the finding stated as an implied authoring rule (imperative, e.g. "Every loop block must declare a `no_progress` exit condition, not only `max_iterations`"). This lands the reflection in auto-memory (`MEMORY.md`) — the capture buffer, not yet enforcement.
+- **(c) Graduate it.** Once the recurrence and the promotion criteria hold (Proven + Actionable + Durable, score >= 6 per promotion-rules.md), `/si:promote` distills it into a one-line rule and writes it to `./CLAUDE.md` (project-wide) or `.claude/rules/<topic>.md` (scoped by `paths`). The mistake is now prevented when the next config is *written*, not merely graded after.
+- **(d) Close the loop.** Because the rule loads into every subsequent authoring session, the next `loop_auditor.py` run stops flagging that check. The reflection has changed the policy; the error class does not recur across sessions or authors.
+
+### Why this is Reflexion, statically
+
+| Reflexion component | Static-track realization in this hub |
+|---|---|
+| Actor (generates the action/text) | The config author (human or Claude) editing an agent/skill/workflow `.md` |
+| Evaluator (scalar / task feedback) | `loop_auditor.py`'s deterministic 100-point score + FAILED-CHECKS list |
+| Self-Reflection (verbal critique) | The per-check remediation hints + the cross-run recurring-findings digest |
+| Episodic memory buffer (last N reflections, prepended to the next trial) | The **promoted rule file** — `CLAUDE.md` / `.claude/rules/` loaded into every future authoring session |
+| Durable episodic log | **git history** of that rule file (every promotion is a reviewed commit) |
+| Trial loop | producer -> `loop_auditor.py` -> remediate (see `loop_engineering_patterns.md`) |
+
+The load-bearing point: the versioned rule file *is* the reflection buffer, and git *is* the durable episodic log — no vector store, no runtime state. The single-trial evaluator-optimizer loop the hub already runs becomes a true cross-session Reflexion loop only once step (a)'s persisted digest feeds this promotion path.
+
+### Eviction: keep the reflection buffer from becoming noise
+
+Reflexion deliberately bounds its buffer to the last N reflections so context does not blow up. The static buffer needs the same discipline: an ever-growing pile of promoted rules becomes context noise that degrades adherence (adherence drops as `CLAUDE.md` lengthens — see [reference/memory-architecture.md](reference/memory-architecture.md)). Consolidate and prune promoted rules on the same cadence you prune memory:
+
+- Use `/si:review` to find consolidation groups and stale/contradicted rules; merge redundant lines and drop rules whose originating finding no longer recurs.
+- Keep the *recurring-finding digest* as the retention signal (a rule earns its slot only while its error class is still live); one-off resolved findings are evicted.
+- For the storage-side eviction/consolidation policy (hot/warm/frozen tiering, when a promoted rule may be retired), delegate to `hybrid-rag-memory/references/memory_eviction_and_consolidation.md` — do not re-derive it here. Versioning and one-command rollback of a promoted rule are owned by `prompt-governance`.
+
+### Safety: the promotion is human-gated
+
+This loop **proposes**; it never auto-writes. Step (b)->(c) always passes through a human confirming the rule via `/si:promote`, mirroring the 5-Phase HUMAN GATE. Two hard limits:
+
+- **Object-level only.** The loop may graduate authoring rules for the configs being written (object-level). It must **never** promote a change that edits the critic itself — `loop_auditor.py`'s rubric, the six exit-condition definitions, or the promotion predicate (meta-level). An agent rewriting its own guardrails/reward function is the PromptBreeder anti-pattern; meta-level config changes only through a separate, explicitly human-authorized governance action.
+- **Recurrence is evidence, not authority.** A digest entry nominates a rule; it does not authorize enforcement. The human gate is what turns a proven finding into a committed rule.
+
+### See also
+
+- `agent-self-optimization` — the governed candidate-rewrite (optimizer) track; this bridge feeds it the persisted findings that motivate a rewrite.
+- `skills/agentic-system-architect/references/self_reflection_critique_loops.md` — Reflexion / CRITIC / Evaluator-Optimizer theory and framework APIs.
+- `skills/agentic-system-architect/scripts/loop_auditor.py` — the deterministic critic and its `--history` ledger mode.
+
 ## Agents
 
 ### memory-analyst
