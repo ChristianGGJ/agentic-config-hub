@@ -143,12 +143,83 @@ Every agent documents **at least 3 core workflows**. Each workflow must include:
 
 - **Goal** — one sentence, outcome-oriented.
 - **Steps** — numbered; every step that runs a tool shows the concrete command with
-  the real `../skills/<name>/scripts/...` path, not a placeholder.
+  the real `../skills/<name>/...` path, not a placeholder (most skills keep tools under
+  `scripts/`; some, like agent-designer, ship them at the package root — always use the
+  path that exists on disk).
 - **Expected Output** — what "done" looks like, measurably (scores, PASS/FAIL,
   artifacts produced).
 
 Workflows that perform irreversible actions must show where the HUMAN GATE sits in
 the step sequence.
+
+## Team Topology & Handoff Contracts
+
+When multiple `cs-*` agents build a product together, they operate as a **Supervisor
+pattern** team. This section is the contract reference; the executable process lives
+in [../workflows/team-development.md](../workflows/team-development.md).
+
+### Supervisor topology
+
+- **cs-agentic-system-architect** — Team Lead (Supervisor): owns the Change Manifest,
+  decomposes work into components, assigns them, maintains the Shared Iteration
+  Ledger, runs the final integration audit.
+- **cs-agent-designer** — Specialist (works in parallel): produces agent specs and
+  tool schemas.
+- **cs-prompt-engineer** — Specialist (works in parallel): produces system prompts,
+  few-shot blocks, and eval sets.
+- **cs-agent-security-auditor** — Adversarial Gate: audits every artifact; never
+  produces what it audits.
+- **human-reviewer** — Gatekeeper: HUMAN GATE approvals and team-level escalations.
+
+### Handoff contracts (H1-H5)
+
+All inter-agent handoffs are typed artifacts — exactly these five:
+
+| Artifact | Producer -> Consumer | Required fields | Acceptance criterion |
+|----------|----------------------|-----------------|----------------------|
+| **H1 Component Inventory** | architect -> specialists | Per component: id, type, purpose, assigned role, acceptance criteria, budget share | Lives in the ecosystem MANIFEST.md |
+| **H2 Agent Spec Package** | designer -> auditor | Draft agent .md + tool schema JSON; must declare the 6 canonical exit conditions | `loop_auditor.py` score >= 90 (HARDENED) |
+| **H3 Prompt Package** | prompt-engineer -> auditor | Prompt file(s) + eval set + baseline scores | Relevance and faithfulness >= 0.85 and no regression vs baseline |
+| **H4 Audit Verdict** | auditor -> producer, cc architect | Verdict PASS/FAIL, findings with severity, remediation hints | FAIL returns the artifact to its producer (evaluator-optimizer loop) |
+| **H5 Handoff Report** | architect -> human | Ledger summary, all scores, deviations (must be empty), open risks | Human approves at the HUMAN GATE |
+
+**Rejection rule:** an artifact missing any required field is rejected on sight
+(contract violation) without consuming an audit cycle. **2 malformed handoffs from
+the same role -> escalate to the human.**
+
+### Team-scope exit conditions
+
+The canonical 6 exit-condition types apply at team scope:
+
+| Exit condition       | Team-level definition                                                            |
+|----------------------|----------------------------------------------------------------------------------|
+| `max_iterations`     | 3 audit cycles per component, then escalation_trigger -> human decides          |
+| `no_progress`        | A full team cycle closes zero components -> stop and escalate                   |
+| `oscillation`        | The same artifact bounced between two roles twice -> human decides              |
+| `budget`             | Declared in the MANIFEST (total tool calls / wall-clock for the engagement); architect halts the team when exhausted |
+| `success_predicate`  | Every component PASS + integration audit green                                  |
+| `escalation_trigger` | Any Red Line hit or 3 failed audit cycles                                       |
+
+Per component, the evaluator-optimizer loop runs: produce -> audit -> if FAIL
+remediate -> re-audit, capped at 3 audit cycles. The auditor never audits its own
+remediation: producers fix, the auditor re-audits.
+
+### Shared Iteration Ledger
+
+A table in the ecosystem MANIFEST.md, one row per component. **The architect is the
+only writer of the ledger.**
+
+| id | owner | state (draft / in-audit / remediation / closed) | audit cycles used (n/3) | current score | last verdict |
+|----|-------|--------------------------------------------------|--------------------------|---------------|--------------|
+
+### Adding a new team member
+
+A new `cs-*` agent joining the topology must:
+
+1. Declare a **Team Role** section in its agent file stating which H-artifacts it
+   produces and which it consumes.
+2. Pass the HARDENED gate (`loop_auditor.py --min-score 90`) before joining the
+   topology.
 
 ## Quality Checklist
 

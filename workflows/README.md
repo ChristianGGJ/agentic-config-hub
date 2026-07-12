@@ -119,6 +119,8 @@ extracts from this README):
 | [harden-agent.md](harden-agent.md) | Audit an existing agent with `loop_auditor.py`, remediate findings behind a human gate, and re-audit to `>= 90 HARDENED`. |
 | [diagnose-runaway.md](diagnose-runaway.md) | Analyze a runaway agent trace with `react_trace_analyzer.py` (D1-D7), map detections to mitigations, and patch the agent config. |
 | [gate-multiagent-workflow.md](gate-multiagent-workflow.md) | Retrofit an ungated multi-agent workflow: classify irreversibility, insert gates, and validate until R1-R6 PASS. |
+| [team-development.md](team-development.md) | Supervisor-pattern team workflow: the four cs-* agents build a product ecosystem via typed handoff contracts (H1-H5), evaluator-optimizer audit loops, and team-level exit conditions. |
 
-All workflows are executed by `cs-agentic-system-architect`
-(see [../agents/](../agents/)) with a human reviewer holding every gate.
+Workflows are orchestrated by `cs-agentic-system-architect` (see [../agents/](../agents/));
+`team-development.md` is executed by the full four-agent team under the Supervisor pattern.
+A human reviewer holds every gate.

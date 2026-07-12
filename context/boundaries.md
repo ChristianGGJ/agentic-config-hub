@@ -1,6 +1,6 @@
 ---
 name: "agentic-config-hub-boundaries"
-version: "1.1.0"
+version: "1.2.0"
 description: "Allowed and forbidden actions, write scopes, escalation path, and enforcement for agents working on agentic-config-hub"
 type: "context"
 ---
@@ -43,6 +43,8 @@ approved Change Manifest:
 | `scripts/` | Repo-level install and docs-generation scripts (stdlib-only) |
 | `docs/`, `documentation/` | MkDocs content and workflow documentation |
 | `ecosystems/<project-name>/` | **Product plane:** complete generated ecosystems (their `context/`, `skills/`, `agents/`, `workflows/`, `exports/`, `MANIFEST.md`, `HANDOFF.md`) plus their row in the `ecosystems/README.md` registry |
+| `prompts/` | The versioned prompt registry: `registry.yaml` plus versioned prompt files, governed by the prompt-governance promotion gates (HUMAN GATE on every promotion) |
+| `tests/` | Test fixtures and validation datasets for skills and agents |
 
 Explicitly outside every agent's write scope: `context/` (see F6), repository
 settings, branch protection, CI configuration, and anything reachable only via
@@ -99,5 +101,6 @@ owner remains the final gate.
 
 | Version | Date | Change | Author |
 |---|---|---|---|
+| 1.2.0 | 2026-07-11 | Added `prompts/` (versioned prompt registry) and `tests/` (fixtures) to the allowed write scopes, backing the cs-prompt-engineer and cs-agent-security-auditor boundaries. | ChristianGGJ |
 | 1.1.0 | 2026-07-11 | Added product plane (`ecosystems/`): F10-F11, ecosystem write scope, and plane-separation rules B1-B6. | ChristianGGJ |
 | 1.0.0 | 2026-07-10 | Initial boundaries (F1-F9, write scopes, escalation, enforcement). | ChristianGGJ |

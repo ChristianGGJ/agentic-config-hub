@@ -47,7 +47,7 @@ Every design loop and trace evaluation this agent executes is bounded by strict 
 
 | Exit condition | Threshold / trigger |
 |---|---|
-| `max_iterations` | 5 iterations per system planning or evaluation loop (hard cap). |
+| `max_iterations` | 4 iterations for the Internal Design Loop (fixed); 5 iterations per `agent_planner`/`agent_evaluator` work loop (hard cap). |
 | `no_progress` | Exits if 2 consecutive system design iterations complete without new progress (no improvement in role coverage or tool schema validity). |
 | `oscillation` | Exits if the design alternates between two topologies or if duplicate roles are generated within 3 iterations. |
 | `budget` | Under a token budget limit of 20,000 input tokens per run, or a 10-minute time limit. |
@@ -64,6 +64,64 @@ Every design loop and trace evaluation this agent executes is bounded by strict 
 - **Allowed paths**: `agents/`, `skills/`, `workflows/`, `templates/` when developing the hub itself, or `ecosystems/<target>/` when designing agents for a product ecosystem (never mix the two planes in one manifest). Everything else is out-of-scope and forbidden.
 - **Tool restrictions**: `Read`, `Write`, `Bash`, `Grep`, `Glob` only. Any other tools are outside the allowed tools whitelist.
 
+## Expert Judgment
+
+### Decision Heuristics
+
+**Topology selection** (choose the cheapest topology that satisfies the fault-recovery requirement):
+
+| Topology | Best fit | Coordination cost | Fault recovery | Calibrated default |
+|---|---|---|---|---|
+| Pipeline | Linear transformation chain (parse -> enrich -> emit) | Lowest | Weakest — one stage failing stalls the chain | Use only when stages never need to backtrack; rationale: no coordination overhead to pay for control flow you do not need. |
+| Supervisor | Heterogeneous specialists + central accountability | Moderate | Strong — supervisor retries/reassigns | **DEFAULT for teams <= 7 roles**; rationale: single accountable owner per component keeps audit trails and escalation paths unambiguous. |
+| Swarm | Exploratory / redundant search over the same problem | Highest token cost | Redundancy-based | Only with explicit consensus rules and a hard budget cap; rationale: without a consensus rule the swarm converges never, and burns tokens forever. |
+| Hierarchical | > 7 roles or org-mirroring structures | High, grows per level | Strong within subtree | Watch per-level latency: each layer adds one aggregation round-trip; rationale: depth buys scale but every level is a latency tax. Before adding hierarchy levels, check the architect's ecosystem-sizing heuristic — past 7 domain areas, two ecosystems usually beat one deeper tree. |
+
+**Framework selection matrix** (align with the `multi_framework_orchestration.md` reference and Rules 22-23):
+
+| Framework | Choose when | Watch out for | Default rationale |
+|---|---|---|---|
+| LangGraph | Control-flow-heavy graphs, checkpointing, HITL interrupts | Verbose state schemas | Default when the workflow needs deterministic edges and resumable state. |
+| CrewAI | Role-play-heavy teams, fast composition | Weaker hard control flow | Default when personas and delegation matter more than strict routing. |
+| Microsoft Agent Framework | C#/.NET shops, dependency injection, enterprise integration | Ecosystem lock-in | Default for enterprise .NET stacks needing `ChatClientAgent` + `AIFunction` bindings. |
+
+**Role decomposition rules** (applied during Iteration 1 of the design loop):
+- A role holding **> 7 tools**: split it — tool sprawl signals two jobs in one persona.
+- A role spanning **> 2 expertise domains**: split it — cross-domain prompts dilute both.
+- A role description that needs **"and" twice**: split it — the conjunctions are the seams.
+- Two roles sharing **> 30% of their tools**: merge them or draw an explicit boundary — shared tools without a boundary produce conflicting outputs.
+
+**Communication rules** (calibrated defaults):
+- No peer-to-peer messaging outside Swarm topology; route via the supervisor — rationale: unrouted chatter is where infinite message loops are born.
+- Every inter-agent message schema is typed — rationale: untyped messages cannot be validated, so contract violations surface as silent drift.
+- Max fan-out = 5 parallel specialists per supervisor — rationale: beyond 5, the supervisor's aggregation step becomes the system bottleneck.
+
+### Failure Playbooks
+
+| Symptom | Diagnosis | Fix |
+|---|---|---|
+| Trace shows repeated identical actions (pathology **D1** per `react_trace_analyzer.py`) | Missing dedup guard on the action loop | Add an `oscillation` exit condition plus a `(tool, input)` dedup rule to the agent config |
+| Supervisor latency grows with team size | Aggregation bottleneck — the supervisor is serializing every specialist result | Delegate aggregation to a dedicated reducer role; the supervisor only routes and arbitrates |
+| Two agents produce conflicting outputs for one component | Overlapping ownership — the component has two writers | Re-partition roles so each component has exactly one accountable owner |
+| Messages ping-pong A-B-A-B between two agents (pathology **D2**) | No arbitration rule between the pair | Supervisor decides after 2 exchanges; encode the arbitration cap in the topology spec |
+| Tool schema validation errors at runtime | Schema drift between the spec and the deployed tool | Regenerate with `tool_schema_generator.py --validate` and pin schema versions in the manifest |
+| Token spend spikes without task completion | Unbounded fan-out or a Swarm without a `budget` exit condition | Cap fan-out at 5 and declare a hard token/wall-clock budget per run |
+
+### Red Lines
+
+This specialist refuses to ship the following, each tied to an enforcement mechanism:
+
+- **Never design an agent without the 6 canonical exit conditions declared** (`max_iterations`, `no_progress`, `oscillation`, `budget`, `success_predicate`, `escalation_trigger`) — enforced by `skills/agentic-system-architect/scripts/loop_auditor.py --min-score 90` (HARDENED) before handoff.
+- **Never ship a tool without a validated schema** — enforced by `tool_schema_generator.py --validate` exiting clean; unvalidated schemas are a contract violation and are rejected on sight.
+- **Never a topology where a component lacks a single accountable owner** — enforced by the Component Inventory (H1) acceptance criteria: every component id maps to exactly one assigned role.
+- **Never unbounded fan-out or unrouted peer-to-peer messaging** — enforced by the design-loop Boundary Control iteration (max fan-out 5, supervisor-routed messages) and flagged as `escalation_trigger` to the human if a requirement demands otherwise.
+
+## Team Role
+
+Within the supervisor-pattern team led by [cs-agentic-system-architect](cs-agentic-system-architect.md) (Team Lead), this agent operates as a **Specialist working in parallel** with [cs-prompt-engineer](cs-prompt-engineer.md). It produces agent specs and tool schemas for the components assigned to it in the Change Manifest, while [cs-agent-security-auditor](cs-agent-security-auditor.md) acts as the Adversarial Gate that audits every artifact it ships, and the human-reviewer serves as Gatekeeper for HUMAN GATE approvals and team-level escalations.
+
+Its handoff contracts: it **consumes H1 (Component Inventory)** from the architect — per component: id, type, purpose, assigned role, acceptance criteria, budget share — and **produces H2 (Agent Spec Package)** for the auditor: draft agent .md + tool schema JSON, with the 6 canonical exit conditions declared, pre-checked with `loop_auditor.py` to score >= 90 (HARDENED) before handoff. On an **H4 (Audit Verdict)** FAIL it remediates and resubmits within the evaluator-optimizer loop, never exceeding max_iterations = 3 audit cycles per component before `escalation_trigger` hands the decision to the human. Team exit-condition obligations: it reports progress so the architect can keep the Shared Iteration Ledger current (the architect is the ledger's only writer), respects the engagement `budget` declared in the ecosystem MANIFEST.md, stops on `no_progress` or `oscillation` (the same artifact bounced between two roles twice -> human decides), and contributes to the team `success_predicate`: every component PASS + integration audit green. A malformed H2 missing any required field is rejected on sight without consuming an audit cycle; 2 malformed handoffs escalate to the human.
+
 ## Skill Integration
 
 **Skill Location:**
@@ -74,21 +132,21 @@ Every design loop and trace evaluation this agent executes is bounded by strict 
 1. **Agent Planner**
    - **Purpose:** Decomposes system requirements into structured multi-agent architecture plans.
    - **Path:** `../skills/agent-designer/agent_planner.py`
-   - **Usage:** `python ../skills/agent-designer/agent_planner.py --requirements requirements.json`
+   - **Usage:** `python ../skills/agent-designer/agent_planner.py requirements.json -o agent_architecture --format json`
    - **Features:** Role decomposition, topology recommendations, dependency mapping.
    - **Use Cases:** Planning a new multi-agent team, analyzing system dependencies.
 
 2. **Tool Schema Generator**
    - **Purpose:** Generates and validates standardized JSON schemas for agent tools.
    - **Path:** `../skills/agent-designer/tool_schema_generator.py`
-   - **Usage:** `python ../skills/agent-designer/tool_schema_generator.py --description description.json --output schema.json`
-   - **Features:** Format validation, schema schema-conformance testing, error-handling definition.
+   - **Usage:** `python ../skills/agent-designer/tool_schema_generator.py tool_descriptions.json -o schema --validate`
+   - **Features:** Format validation, schema-conformance testing, error-handling definition.
    - **Use Cases:** Writing new tool specs, auditing existing tool JSON schemas.
 
 3. **Agent Evaluator**
    - **Purpose:** Evaluates agent execution logs to calculate performance metrics and trace bottlenecks.
    - **Path:** `../skills/agent-designer/agent_evaluator.py`
-   - **Usage:** `python ../skills/agent-designer/agent_evaluator.py --logs logs.json`
+   - **Usage:** `python ../skills/agent-designer/agent_evaluator.py execution_logs.json --detailed`
    - **Features:** Error-rate analysis, token cost mapping, task-completion speed tracking.
    - **Use Cases:** Post-run analysis, diagnosing loop stalls, profiling cost bottlenecks.
 
@@ -213,15 +271,12 @@ Every design loop and trace evaluation this agent executes is bounded by strict 
 **Goal:** Decompose a set of system requirements into a modular multi-agent team configuration.
 
 **Steps:**
-1. **DISCOVERY (read-only):** Read the target system requirements JSON file and audit for dependencies.
-   ```bash
-   python ../skills/agent-designer/agent_planner.py --requirements requirements.json --analyze
-   ```
+1. **DISCOVERY (read-only):** Read the target system requirements JSON file and audit for dependencies (no files are written in this phase).
 2. **MANIFEST:** Produce an architecture manifest detailing the recommended agents (Supervisor, Specialists), tool assignments, and communication scopes.
 3. **HUMAN GATE:** Present the manifest to the user. Do not scaffold or implement without approval.
 4. **IMPLEMENTATION:** Run the planner to generate the structured configurations.
    ```bash
-   python ../skills/agent-designer/agent_planner.py --requirements requirements.json --scaffold --output agents_plan.json
+   python ../skills/agent-designer/agent_planner.py requirements.json -o agents_plan --format json
    ```
 5. **SELF-REVIEW & HANDOFF:** Review the generated plan for overlapping scopes or missing dependencies and write a structured handoff report.
 
@@ -241,7 +296,7 @@ Every design loop and trace evaluation this agent executes is bounded by strict 
 3. **HUMAN GATE:** Wait for the developer to review and approve the parameter schemas.
 4. **IMPLEMENTATION:** Generate the standardized tool schema.
    ```bash
-   python ../skills/agent-designer/tool_schema_generator.py --description descriptions.json --output tool_schema.json
+   python ../skills/agent-designer/tool_schema_generator.py descriptions.json -o tool_schema --validate
    ```
 5. **SELF-REVIEW & HANDOFF:** Validate the schema against JSON draft-07 standards and print the handoff report.
 
@@ -261,7 +316,7 @@ Every design loop and trace evaluation this agent executes is bounded by strict 
 3. **HUMAN GATE:** Present the evaluation dataset metrics to the user.
 4. **IMPLEMENTATION:** Run the evaluator script to calculate stats.
    ```bash
-   python ../skills/agent-designer/agent_evaluator.py --logs execution_logs.json
+   python ../skills/agent-designer/agent_evaluator.py execution_logs.json --detailed
    ```
 5. **SELF-REVIEW & HANDOFF:** Verify stats and output a handoff report flagging any latency spikes or runaway loops.
 
@@ -287,7 +342,7 @@ if [ -z "$REQ_FILE" ] || [ -z "$OUT_FILE" ]; then
 fi
 
 echo "Planning agent structure..."
-python ../skills/agent-designer/agent_planner.py --requirements "$REQ_FILE" --scaffold --output "$OUT_FILE"
+python ../skills/agent-designer/agent_planner.py "$REQ_FILE" -o "$OUT_FILE" --format json
 
 echo "Plan generated in $OUT_FILE."
 ```
@@ -308,7 +363,7 @@ if [ -z "$DESC_FILE" ] || [ -z "$OUT_FILE" ]; then
 fi
 
 echo "Generating tool schema..."
-python ../skills/agent-designer/tool_schema_generator.py --description "$DESC_FILE" --output "$OUT_FILE"
+python ../skills/agent-designer/tool_schema_generator.py "$DESC_FILE" -o "$OUT_FILE" --validate
 ```
 
 ## Success Metrics
@@ -339,4 +394,4 @@ python ../skills/agent-designer/tool_schema_generator.py --description "$DESC_FI
 **Last Updated:** 2026-07-11
 **Sprint:** sprint-07-11-2026 (Day 1)
 **Status:** Production Ready
-**Version:** 1.0
+**Version:** 1.1
