@@ -244,7 +244,7 @@ class SkillValidator:
             min_lines = self._get_tier_requirement("min_skill_md_lines", 100)
             if line_count >= min_lines:
                 self.report.add_check("skill_md_length", True, 
-                                     f"SKILL.md has {line_count} lines (≥{min_lines})", 1.0)
+                                     f"SKILL.md has {line_count} lines (>={min_lines})", 1.0)
             else:
                 self.report.add_check("skill_md_length", False,
                                      f"SKILL.md has {line_count} lines (<{min_lines})", 0.0)
@@ -253,8 +253,8 @@ class SkillValidator:
             # Validate frontmatter
             self._validate_frontmatter(content)
             
-            # Check required sections
-            self._validate_required_sections(content)
+            # Check recommended sections (non-fatal)
+            self._validate_recommended_sections(content)
             
         except Exception as e:
             self.report.add_check("skill_md_readable", False, f"Error reading SKILL.md: {str(e)}", 0.0)
@@ -305,23 +305,31 @@ class SkillValidator:
                                  "No frontmatter found", 0.0)
             self.report.add_error("SKILL.md must start with YAML frontmatter")
             
-    def _validate_required_sections(self, content: str):
-        """Validate required sections in SKILL.md"""
-        self.log_verbose("Checking required sections...")
-        
+    def _validate_recommended_sections(self, content: str):
+        """Check for RECOMMENDED SKILL.md sections. These are non-fatal: the hub
+        canon requires only name+description frontmatter, so a missing section is
+        a warning/partial score, never an error that fails the skill."""
+        self.log_verbose("Checking recommended sections...")
+
         missing_sections = []
-        for section in self.REQUIRED_SKILL_MD_SECTIONS:
-            pattern = rf'^#+\s*{re.escape(section)}\s*$'
-            if not re.search(pattern, content, re.MULTILINE | re.IGNORECASE):
-                missing_sections.append(section)
-                
+        for label, pattern in self.RECOMMENDED_SKILL_MD_SECTIONS.items():
+            # pattern is a regex alternation (e.g. "(?:Usage|Quick\\s+Start)")
+            heading = rf'^#+\s*{pattern}\b'
+            if not re.search(heading, content, re.MULTILINE | re.IGNORECASE):
+                missing_sections.append(label)
+
+        total = len(self.RECOMMENDED_SKILL_MD_SECTIONS)
+        present = total - len(missing_sections)
+        score = present / total if total else 1.0
         if not missing_sections:
-            self.report.add_check("required_sections", True,
-                                 "All required sections present", 1.0)
+            self.report.add_check("recommended_sections", True,
+                                  "All recommended sections present", 1.0)
         else:
-            self.report.add_check("required_sections", False,
-                                 f"Missing sections: {', '.join(missing_sections)}", 0.0)
-            self.report.add_error(f"Missing required sections: {', '.join(missing_sections)}")
+            # partial score, warning only -- does NOT flip the pass/fail gate
+            self.report.add_check("recommended_sections", True,
+                                  f"{present}/{total} recommended sections present", score)
+            self.report.add_warning(
+                f"Recommended sections not detected: {', '.join(missing_sections)}")
             
     def _validate_readme(self):
         """Validate README.md content"""
@@ -351,8 +359,11 @@ class SkillValidator:
         """Validate directory structure against tier requirements"""
         self.log_verbose("Validating directory structure...")
         
-        required_dirs = self._get_tier_requirement("required_dirs", ["scripts"])
-        optional_dirs = self._get_tier_requirement("optional_dirs", [])
+        # Hub canon: a skill needs only SKILL.md. scripts/references/assets are all
+        # OPTIONAL (scripts only where determinism beats prose). No directory is
+        # universally required unless a declared tier explicitly demands it.
+        required_dirs = self._get_tier_requirement("required_dirs", [])
+        optional_dirs = self._get_tier_requirement("optional_dirs", ["scripts", "references", "assets"])
         
         # Check required directories
         missing_required = []
@@ -393,7 +404,7 @@ class SkillValidator:
         # Check minimum number of scripts
         if len(python_files) >= min_scripts:
             self.report.add_check("min_scripts_count", True,
-                                 f"Found {len(python_files)} Python scripts (≥{min_scripts})", 1.0)
+                                 f"Found {len(python_files)} Python scripts (>={min_scripts})", 1.0)
         else:
             self.report.add_check("min_scripts_count", False,
                                  f"Found {len(python_files)} Python scripts (<{min_scripts})", 0.0)
@@ -450,24 +461,30 @@ class SkillValidator:
             self.report.add_error(f"Cannot read {script_name}: {str(e)}")
             
     def _validate_script_features(self, tree: ast.AST, script_name: str, content: str):
-        """Validate required script features"""
+        """Validate required script features.
+
+        A script with a `__main__` guard is treated as a CLI entrypoint and must
+        carry argparse. A script WITHOUT a main guard is a helper/library module
+        (imported by a sibling CLI) and is exempt from the CLI requirements -- it
+        gets a suggestion, never an error."""
         required_features = self._get_tier_requirement("features_required", ["argparse", "main_guard"])
-        
-        # Check for argparse usage
+        has_main_guard = 'if __name__ == "__main__"' in content
+        is_cli = has_main_guard  # only entrypoints must satisfy the CLI contract
+
+        # Check for argparse usage (CLI entrypoints only)
         if "argparse" in required_features:
             has_argparse = self._check_argparse_usage(tree)
-            self.report.add_check(f"script_argparse_{script_name}", has_argparse,
-                                 f"{'Uses' if has_argparse else 'Missing'} argparse in {script_name}", 1.0 if has_argparse else 0.0)
-            if not has_argparse:
+            self.report.add_check(f"script_argparse_{script_name}", has_argparse or not is_cli,
+                                 f"{'Uses' if has_argparse else 'No'} argparse in {script_name}", 1.0 if (has_argparse or not is_cli) else 0.0)
+            if is_cli and not has_argparse:
                 self.report.add_error(f"{script_name} must use argparse for command-line arguments")
-                
+
         # Check for main guard
         if "main_guard" in required_features:
-            has_main_guard = 'if __name__ == "__main__"' in content
-            self.report.add_check(f"script_main_guard_{script_name}", has_main_guard,
-                                 f"{'Has' if has_main_guard else 'Missing'} main guard in {script_name}", 1.0 if has_main_guard else 0.0)
+            self.report.add_check(f"script_main_guard_{script_name}", True,
+                                 f"{'Has main guard (CLI)' if has_main_guard else 'Library module (no CLI required)'} in {script_name}", 1.0)
             if not has_main_guard:
-                self.report.add_error(f"{script_name} must have 'if __name__ == \"__main__\"' guard")
+                self.report.add_suggestion(f"{script_name} has no main guard; treated as a helper/library module (exempt from the CLI contract)")
                 
         # Check for external imports (should only use stdlib)
         external_imports = self._check_external_imports(tree)
@@ -506,21 +523,45 @@ class SkillValidator:
             'copy', 'pprint', 'reprlib', 'enum', 'decimal', 'fractions', 'statistics',
             'cmath', 'platform', 'errno', 'io', 'codecs', 'unicodedata', 'stringprep',
             'textwrap', 'string', 'struct', 'difflib', 'heapq', 'bisect', 'array',
-            'weakref', 'types', 'copyreg', 'uuid', 'mmap', 'ctypes'
+            'weakref', 'types', 'copyreg', 'uuid', 'mmap', 'ctypes', 'stat',
+            'shlex', 'signal', 'select', 'socket', 'ssl', 'asyncio', 'concurrent',
+            'configparser', 'zipfile', 'tarfile', 'gzip', 'bz2', 'lzma', 'binascii'
         }
-        
+        # Prefer the authoritative stdlib set when available (Python 3.10+).
+        stdlib_modules |= getattr(sys, "stdlib_module_names", frozenset())
+
+        # Sibling modules in the same scripts/ dir are local, not external deps.
+        sibling_modules = set()
+        scripts_dir = self.skill_path / "scripts"
+        if scripts_dir.is_dir():
+            sibling_modules = {p.stem for p in scripts_dir.glob("*.py")}
+
+        # Imports guarded inside a try/except (optional deps with a stdlib fallback)
+        # are acceptable -- collect them so they are not flagged.
+        optional_modules = set()
+        for node in ast.walk(tree):
+            if isinstance(node, ast.Try):
+                for sub in ast.walk(node):
+                    if isinstance(sub, ast.Import):
+                        for alias in sub.names:
+                            optional_modules.add(alias.name.split('.')[0])
+                    elif isinstance(sub, ast.ImportFrom) and sub.module:
+                        optional_modules.add(sub.module.split('.')[0])
+
+        def is_allowed(mod_top):
+            return (mod_top in stdlib_modules or mod_top in sibling_modules
+                    or mod_top in optional_modules)
+
         external_imports = []
         for node in ast.walk(tree):
             if isinstance(node, ast.Import):
                 for alias in node.names:
-                    module_name = alias.name.split('.')[0]
-                    if module_name not in stdlib_modules:
+                    if not is_allowed(alias.name.split('.')[0]):
                         external_imports.append(alias.name)
-            elif isinstance(node, ast.ImportFrom) and node.module:
-                module_name = node.module.split('.')[0]
-                if module_name not in stdlib_modules:
+            elif isinstance(node, ast.ImportFrom) and node.module and node.level == 0:
+                if not is_allowed(node.module.split('.')[0]):
                     external_imports.append(node.module)
-                    
+
         return list(set(external_imports))
         
     def _validate_tier_compliance(self):
@@ -587,40 +628,40 @@ class ReportFormatter:
         if structure_checks:
             lines.append("STRUCTURE VALIDATION:")
             for check_name, result in structure_checks.items():
-                status = "✓ PASS" if result["passed"] else "✗ FAIL"
+                status = "PASS" if result["passed"] else "FAIL"
                 lines.append(f"  {status}: {result['message']}")
             lines.append("")
             
         if script_checks:
             lines.append("SCRIPT VALIDATION:")
             for check_name, result in script_checks.items():
-                status = "✓ PASS" if result["passed"] else "✗ FAIL"
+                status = "PASS" if result["passed"] else "FAIL"
                 lines.append(f"  {status}: {result['message']}")
             lines.append("")
             
         if other_checks:
             lines.append("OTHER CHECKS:")
             for check_name, result in other_checks.items():
-                status = "✓ PASS" if result["passed"] else "✗ FAIL"
+                status = "PASS" if result["passed"] else "FAIL"
                 lines.append(f"  {status}: {result['message']}")
             lines.append("")
             
         if report.errors:
             lines.append("ERRORS:")
             for error in report.errors:
-                lines.append(f"  • {error}")
+                lines.append(f"  - {error}")
             lines.append("")
-            
+
         if report.warnings:
             lines.append("WARNINGS:")
             for warning in report.warnings:
-                lines.append(f"  • {warning}")
+                lines.append(f"  - {warning}")
             lines.append("")
-            
+
         if report.suggestions:
             lines.append("SUGGESTIONS:")
             for suggestion in report.suggestions:
-                lines.append(f"  • {suggestion}")
+                lines.append(f"  - {suggestion}")
             lines.append("")
             
         return "\n".join(lines)

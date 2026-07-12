@@ -138,7 +138,10 @@ Takes a proven pattern and generates a complete skill:
 ## Hooks
 
 ### error-capture (PostToolUse → Bash)
-Monitors command output for errors. When detected, appends a structured entry to auto-memory with:
+Monitors command output for errors. When one is detected, the hook surfaces a
+`hookSpecificOutput.additionalContext` note back to the session — it does NOT write
+to memory itself; it prompts you to run `/si:remember` to persist the failure. The
+suggested note includes:
 - The command that failed
 - Error output (truncated)
 - Timestamp and context
