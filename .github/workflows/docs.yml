@@ -1,0 +1,66 @@
+name: Deploy Docs
+
+# Regenerate the MkDocs site from source and publish it to GitHub Pages.
+# Triggers when docs, the generator, or any documented source changes on main.
+on:
+  push:
+    branches: [main]
+    paths:
+      - "docs/**"
+      - "mkdocs.yml"
+      - "docs-requirements.txt"
+      - "skills/**"
+      - "agents/**"
+      - "commands/**"
+      - "scripts/generate-docs.py"
+      - "README.md"
+      - ".github/workflows/docs.yml"
+  workflow_dispatch: {}
+
+# Permissions required by the GitHub Pages deploy action.
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# One deploy at a time; do not cancel an in-progress publish.
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install docs dependencies
+        run: pip install -r docs-requirements.txt
+
+      - name: Regenerate docs pages from source
+        run: python scripts/generate-docs.py
+
+      - name: Build site (strict = fail on broken links / nav)
+        run: mkdocs build --strict
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: site
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

@@ -286,16 +286,23 @@ def rewrite_repo_links(content, source_rel_path):
     source_dir = os.path.dirname(source_rel_path)
     exts = (".md", ".py", ".json", ".yaml", ".yml", ".sh", ".txt")
 
+    repo_dirs = ("skills/", "agents/", "commands/", "workflows/", "context/",
+                 "ecosystems/", "standards/", "scripts/", "evals/", "templates/",
+                 "documentation/", "references/", "reference/", "assets/")
+
     def resolve(match):
         text = match.group(1)
         target = match.group(2)
         if target.startswith(("http://", "https://", "#", "mailto:")):
             return match.group(0)
         path_part = target.split("#", 1)[0]
-        if not path_part.endswith(exts):
+        is_file = path_part.endswith(exts)
+        is_repo_dir = path_part.endswith("/") and (
+            path_part.startswith(repo_dirs) or path_part.startswith(("./", "../")))
+        if not (is_file or is_repo_dir):
             return match.group(0)
         # Intra-docs sibling link (bare filename, no separator, not ./ or ../): keep.
-        if "/" not in path_part and not path_part.startswith("."):
+        if is_file and "/" not in path_part and not path_part.startswith("."):
             return match.group(0)
         resolved = os.path.normpath(os.path.join(source_dir, path_part)).replace(os.sep, "/")
         return f"[{text}]({GITHUB_BASE}/{resolved})"

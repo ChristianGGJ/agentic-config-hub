@@ -23,35 +23,35 @@ context/  ->  skills/  ->  agents/  ->  workflows/
 
 | Skill | What it does |
 |-------|--------------|
-| [adversarial-reviewer](skills/adversarial-reviewer/) | Hostile-persona code review that breaks the self-review monoculture and catches shared blind spots |
-| [agent-designer](skills/agent-designer/) | Design multi-agent systems, agent architectures, and communication patterns |
-| [agent-workflow-designer](skills/agent-workflow-designer/) | Design gated multi-step agent workflows and orchestration patterns |
-| [agenthub](skills/agenthub/) | Spawn N parallel subagents competing on one task via git worktree isolation; the best branch wins |
-| [agentic-evals-benchmarking](skills/agentic-evals-benchmarking/) | Automated regression suites, synthetic-data eval pipelines, and quality scoring with DeepEval/Ragas |
-| [agentic-guardrails-security](skills/agentic-guardrails-security/) | Semantic I/O firewalls, prompt-injection mitigations, and PII leakage filters (Llama Guard / Guardrails AI) |
-| [agentic-observability-telemetry](skills/agentic-observability-telemetry/) | Tracing, logging, and performance metrics across LangSmith, AgentOps, and OpenTelemetry |
-| [agentic-system-architect](skills/agentic-system-architect/) | **Flagship** - design four-pillar ecosystems and harden agents with loop controls, ReAct patterns, and HITL gates |
-| [ai-security](skills/ai-security/) | Assess AI/ML systems for prompt injection, jailbreaks, model inversion, data poisoning, and agent tool abuse |
-| [autoresearch-agent](skills/autoresearch-agent/) | Autonomous experiment loop that optimizes any file against a measurable metric; commits wins, resets failures |
-| [browser-automation](skills/browser-automation/) | Automate browser tasks: scraping, form filling, screenshots, structured data extraction |
-| [crewai-role-engineering](skills/crewai-role-engineering/) | Sequential and hierarchical CrewAI teams: backstories, goals, task scopes, and manager coordination |
-| [focused-fix](skills/focused-fix/) | Systematic 5-phase deep-dive repair of a specific feature or module, end-to-end |
-| [hybrid-rag-memory](skills/hybrid-rag-memory/) | Persistent long-term memory and hybrid retrieval (BM25 + embeddings) for stateful multi-agent systems |
-| [langgraph-state-design](skills/langgraph-state-design/) | Stateful LangGraph graphs: state schemas, conditional edges, checkpointers, and HITL gates |
-| [llm-cost-optimizer](skills/llm-cost-optimizer/) | Cut LLM API spend with token control, model routing, prompt caching, and cost observability |
-| [loop-engineering-mechanisms](skills/loop-engineering-mechanisms/) | Self-correcting retry cycles, output validation schemas, and max-iteration escape routes |
-| [mcp-server-builder](skills/mcp-server-builder/) | Build Model Context Protocol servers: tools, resources, prompts, and transports |
-| [microsoft-agent-framework](skills/microsoft-agent-framework/) | Map hub skills and agents onto Microsoft Agent Framework 1.0 (AutoGen + Semantic Kernel, C#/.NET) |
-| [ms-agent-framework-enterprise](skills/ms-agent-framework-enterprise/) | C# backend integrations and native tool plugins with dependency injection and robust data mapping |
-| [multi-llm-routing](skills/multi-llm-routing/) | Route tasks across LLM tiers (reasoning vs. utility models) to optimize cost, latency, and capability |
-| [prompt-governance](skills/prompt-governance/) | Manage prompts in production: versioning, registries, A/B tests, and regression eval pipelines |
-| [rag-architect](skills/rag-architect/) | Design RAG pipelines: retrieval strategies, embedding models, and vector search |
-| [self-eval](skills/self-eval/) | Honest two-axis scoring of AI work quality with score-inflation detection and session persistence |
-| [self-improving-agent](skills/self-improving-agent/) | Curate agent auto-memory into durable project knowledge, rules, and reusable skills |
-| [senior-prompt-engineer](skills/senior-prompt-engineer/) | Prompt engineering patterns, LLM evaluation frameworks, and structured output design |
-| [skill-security-auditor](skills/skill-security-auditor/) | Pre-install security audit of agent skills; scans for dangerous code and exfiltration patterns |
-| [skill-tester](skills/skill-tester/) | Test skill packages for structure, triggering accuracy, and tool correctness |
-| [spec-driven-workflow](skills/spec-driven-workflow/) | Spec-first development: acceptance criteria before code, tests generated from specifications |
+| [adversarial-reviewer](https://github.com/ChristianGGJ/agentic-config-hub/tree/main/skills/adversarial-reviewer) | Hostile-persona code review that breaks the self-review monoculture and catches shared blind spots |
+| [agent-designer](https://github.com/ChristianGGJ/agentic-config-hub/tree/main/skills/agent-designer) | Design multi-agent systems, agent architectures, and communication patterns |
+| [agent-workflow-designer](https://github.com/ChristianGGJ/agentic-config-hub/tree/main/skills/agent-workflow-designer) | Design gated multi-step agent workflows and orchestration patterns |
+| [agenthub](https://github.com/ChristianGGJ/agentic-config-hub/tree/main/skills/agenthub) | Spawn N parallel subagents competing on one task via git worktree isolation; the best branch wins |
+| [agentic-evals-benchmarking](https://github.com/ChristianGGJ/agentic-config-hub/tree/main/skills/agentic-evals-benchmarking) | Automated regression suites, synthetic-data eval pipelines, and quality scoring with DeepEval/Ragas |
+| [agentic-guardrails-security](https://github.com/ChristianGGJ/agentic-config-hub/tree/main/skills/agentic-guardrails-security) | Semantic I/O firewalls, prompt-injection mitigations, and PII leakage filters (Llama Guard / Guardrails AI) |
+| [agentic-observability-telemetry](https://github.com/ChristianGGJ/agentic-config-hub/tree/main/skills/agentic-observability-telemetry) | Tracing, logging, and performance metrics across LangSmith, AgentOps, and OpenTelemetry |
+| [agentic-system-architect](https://github.com/ChristianGGJ/agentic-config-hub/tree/main/skills/agentic-system-architect) | **Flagship** - design four-pillar ecosystems and harden agents with loop controls, ReAct patterns, and HITL gates |
+| [ai-security](https://github.com/ChristianGGJ/agentic-config-hub/tree/main/skills/ai-security) | Assess AI/ML systems for prompt injection, jailbreaks, model inversion, data poisoning, and agent tool abuse |
+| [autoresearch-agent](https://github.com/ChristianGGJ/agentic-config-hub/tree/main/skills/autoresearch-agent) | Autonomous experiment loop that optimizes any file against a measurable metric; commits wins, resets failures |
+| [browser-automation](https://github.com/ChristianGGJ/agentic-config-hub/tree/main/skills/browser-automation) | Automate browser tasks: scraping, form filling, screenshots, structured data extraction |
+| [crewai-role-engineering](https://github.com/ChristianGGJ/agentic-config-hub/tree/main/skills/crewai-role-engineering) | Sequential and hierarchical CrewAI teams: backstories, goals, task scopes, and manager coordination |
+| [focused-fix](https://github.com/ChristianGGJ/agentic-config-hub/tree/main/skills/focused-fix) | Systematic 5-phase deep-dive repair of a specific feature or module, end-to-end |
+| [hybrid-rag-memory](https://github.com/ChristianGGJ/agentic-config-hub/tree/main/skills/hybrid-rag-memory) | Persistent long-term memory and hybrid retrieval (BM25 + embeddings) for stateful multi-agent systems |
+| [langgraph-state-design](https://github.com/ChristianGGJ/agentic-config-hub/tree/main/skills/langgraph-state-design) | Stateful LangGraph graphs: state schemas, conditional edges, checkpointers, and HITL gates |
+| [llm-cost-optimizer](https://github.com/ChristianGGJ/agentic-config-hub/tree/main/skills/llm-cost-optimizer) | Cut LLM API spend with token control, model routing, prompt caching, and cost observability |
+| [loop-engineering-mechanisms](https://github.com/ChristianGGJ/agentic-config-hub/tree/main/skills/loop-engineering-mechanisms) | Self-correcting retry cycles, output validation schemas, and max-iteration escape routes |
+| [mcp-server-builder](https://github.com/ChristianGGJ/agentic-config-hub/tree/main/skills/mcp-server-builder) | Build Model Context Protocol servers: tools, resources, prompts, and transports |
+| [microsoft-agent-framework](https://github.com/ChristianGGJ/agentic-config-hub/tree/main/skills/microsoft-agent-framework) | Map hub skills and agents onto Microsoft Agent Framework 1.0 (AutoGen + Semantic Kernel, C#/.NET) |
+| [ms-agent-framework-enterprise](https://github.com/ChristianGGJ/agentic-config-hub/tree/main/skills/ms-agent-framework-enterprise) | C# backend integrations and native tool plugins with dependency injection and robust data mapping |
+| [multi-llm-routing](https://github.com/ChristianGGJ/agentic-config-hub/tree/main/skills/multi-llm-routing) | Route tasks across LLM tiers (reasoning vs. utility models) to optimize cost, latency, and capability |
+| [prompt-governance](https://github.com/ChristianGGJ/agentic-config-hub/tree/main/skills/prompt-governance) | Manage prompts in production: versioning, registries, A/B tests, and regression eval pipelines |
+| [rag-architect](https://github.com/ChristianGGJ/agentic-config-hub/tree/main/skills/rag-architect) | Design RAG pipelines: retrieval strategies, embedding models, and vector search |
+| [self-eval](https://github.com/ChristianGGJ/agentic-config-hub/tree/main/skills/self-eval) | Honest two-axis scoring of AI work quality with score-inflation detection and session persistence |
+| [self-improving-agent](https://github.com/ChristianGGJ/agentic-config-hub/tree/main/skills/self-improving-agent) | Curate agent auto-memory into durable project knowledge, rules, and reusable skills |
+| [senior-prompt-engineer](https://github.com/ChristianGGJ/agentic-config-hub/tree/main/skills/senior-prompt-engineer) | Prompt engineering patterns, LLM evaluation frameworks, and structured output design |
+| [skill-security-auditor](https://github.com/ChristianGGJ/agentic-config-hub/tree/main/skills/skill-security-auditor) | Pre-install security audit of agent skills; scans for dangerous code and exfiltration patterns |
+| [skill-tester](https://github.com/ChristianGGJ/agentic-config-hub/tree/main/skills/skill-tester) | Test skill packages for structure, triggering accuracy, and tool correctness |
+| [spec-driven-workflow](https://github.com/ChristianGGJ/agentic-config-hub/tree/main/skills/spec-driven-workflow) | Spec-first development: acceptance criteria before code, tests generated from specifications |
 
 ## Flagship: agentic-system-architect
 
@@ -114,7 +114,7 @@ Nothing merges without passing deterministic gates:
 
 The root pillars configure the hub itself (development plane). Everything the
 hub **produces** — complete agentic configurations for target projects — lives
-in [ecosystems/](ecosystems/), one self-contained four-pillar ecosystem per
+in [ecosystems/](https://github.com/ChristianGGJ/agentic-config-hub/tree/main/ecosystems), one self-contained four-pillar ecosystem per
 folder, born through the 5-Phase Protocol (`MANIFEST.md` approved at a human
 gate, `HANDOFF.md` on delivery) and held to the same CI gates as the hub.
 Private client work goes in `ecosystems/_local/` (git-ignored). See

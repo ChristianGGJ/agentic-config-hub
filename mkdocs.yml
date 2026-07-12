@@ -1,6 +1,8 @@
 site_name: Agentic Config Hub
 site_description: Curated library of production-ready AI configurations for agents and agentic systems
 site_url: https://ChristianGGJ.github.io/agentic-config-hub/
+repo_url: https://github.com/ChristianGGJ/agentic-config-hub
+repo_name: ChristianGGJ/agentic-config-hub
 
 theme:
   name: material
@@ -38,7 +40,7 @@ markdown_extensions:
   - attr_list
   - md_in_html
 
-docs_dir: .
+docs_dir: docs
 
 nav:
   - Home: index.md

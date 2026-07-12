@@ -1,0 +1,4 @@
+# Documentation build dependencies (MkDocs site).
+# Install locally with:  pip install -r docs-requirements.txt
+# Then:                   python scripts/generate-docs.py && mkdocs build --strict
+mkdocs-material>=9.7,<10
