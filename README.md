@@ -106,6 +106,16 @@ Nothing merges without passing deterministic gates:
 ./scripts/openclaw-install.sh
 ```
 
+## Product Plane: ecosystems/
+
+The root pillars configure the hub itself (development plane). Everything the
+hub **produces** — complete agentic configurations for target projects — lives
+in [ecosystems/](ecosystems/), one self-contained four-pillar ecosystem per
+folder, born through the 5-Phase Protocol (`MANIFEST.md` approved at a human
+gate, `HANDOFF.md` on delivery) and held to the same CI gates as the hub.
+Private client work goes in `ecosystems/_local/` (git-ignored). See
+[ecosystems/README.md](ecosystems/README.md).
+
 ## Repository Structure
 
 ```
@@ -114,6 +124,7 @@ agentic-config-hub/
 |-- skills/           # 29 atomic skill packages
 |-- agents/           # cs-* role agents + personas/
 |-- workflows/        # Gated multi-agent orchestrations
+|-- ecosystems/       # PRODUCT PLANE: generated configs per target project (_local/ git-ignored)
 |-- commands/         # Slash commands
 |-- templates/        # Agent and skill templates
 |-- standards/        # Git, quality, security, communication, documentation

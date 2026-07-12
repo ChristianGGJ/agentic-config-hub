@@ -2,7 +2,8 @@
 """Unified repository quality gate validator.
 
 Part of the meta-infrastructure for agentic-config-hub.
-Checks:
+Checks (both planes: hub root + every versioned ecosystem under ecosystems/,
+skipping the git-ignored ecosystems/_local/):
 1. Python script syntax compilation (py_compile).
 2. Agent loop safety audits (loop_auditor.py >= 90).
 3. Workflow HITL gate validation (hitl_gate_validator.py == PASS).
@@ -30,6 +31,15 @@ def run_command(cmd, capture_output=True):
     except Exception as exc:
         return -1, "", str(exc)
 
+def iter_ecosystem_dirs(repo_root):
+    """Yield versioned product ecosystems under ecosystems/ (skips _local)."""
+    eco_root = repo_root / "ecosystems"
+    if not eco_root.is_dir():
+        return
+    for eco in sorted(eco_root.iterdir()):
+        if eco.is_dir() and eco.name != "_local":
+            yield eco
+
 def check_python_syntax(repo_root):
     """Find all .py files in scripts/ and skills/*/scripts/ and compile them."""
     python_files = []
@@ -47,6 +57,12 @@ def check_python_syntax(repo_root):
                 skill_scripts = skill_dir / "scripts"
                 if skill_scripts.is_dir():
                     python_files.extend(skill_scripts.glob("*.py"))
+
+    # 3. Product plane: scripts in ecosystems/*/skills/*/scripts/
+    for eco in iter_ecosystem_dirs(repo_root):
+        for eco_scripts in (eco / "skills").glob("*/scripts"):
+            if eco_scripts.is_dir():
+                python_files.extend(eco_scripts.glob("*.py"))
 
     results = []
     all_passed = True
@@ -68,10 +84,19 @@ def check_python_syntax(repo_root):
 def check_agents(repo_root):
     """Run loop_auditor.py on all agents/cs-*.md files."""
     agents_dir = repo_root / "agents"
-    if not agents_dir.is_dir():
+    agent_files = sorted(agents_dir.glob("cs-*.md")) if agents_dir.is_dir() else []
+
+    # Product plane: audit every agent in every versioned ecosystem too.
+    for eco in iter_ecosystem_dirs(repo_root):
+        eco_agents = eco / "agents"
+        if eco_agents.is_dir():
+            agent_files.extend(sorted(
+                f for f in eco_agents.glob("*.md") if f.name.lower() != "readme.md"
+            ))
+
+    if not agent_files:
         return True, []
-        
-    agent_files = sorted(list(agents_dir.glob("cs-*.md")))
+
     auditor_path = repo_root / "skills" / "agentic-system-architect" / "scripts" / "loop_auditor.py"
     
     if not auditor_path.is_file():
@@ -119,12 +144,20 @@ def check_agents(repo_root):
 def check_workflows(repo_root):
     """Run hitl_gate_validator.py on all workflows/*.md files (excluding README.md)."""
     workflows_dir = repo_root / "workflows"
-    if not workflows_dir.is_dir():
-        return True, []
-        
-    workflow_files = sorted(list(workflows_dir.glob("*.md")))
+    workflow_files = sorted(workflows_dir.glob("*.md")) if workflows_dir.is_dir() else []
     workflow_files = [w for w in workflow_files if w.name.lower() != "readme.md"]
-    
+
+    # Product plane: validate every workflow in every versioned ecosystem too.
+    for eco in iter_ecosystem_dirs(repo_root):
+        eco_workflows = eco / "workflows"
+        if eco_workflows.is_dir():
+            workflow_files.extend(sorted(
+                f for f in eco_workflows.glob("*.md") if f.name.lower() != "readme.md"
+            ))
+
+    if not workflow_files:
+        return True, []
+
     validator_path = repo_root / "skills" / "agentic-system-architect" / "scripts" / "hitl_gate_validator.py"
     if not validator_path.is_file():
         return False, [{"file": "skills/agentic-system-architect/scripts/hitl_gate_validator.py", "passed": False, "error": "Validator script not found"}]

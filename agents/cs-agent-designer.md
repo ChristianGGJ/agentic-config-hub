@@ -61,7 +61,7 @@ Every design loop and trace evaluation this agent executes is bounded by strict 
 
 ### Boundaries
 
-- **Allowed paths**: `agents/`, `skills/`, `workflows/`, `templates/`. Everything else is out-of-scope and forbidden.
+- **Allowed paths**: `agents/`, `skills/`, `workflows/`, `templates/` when developing the hub itself, or `ecosystems/<target>/` when designing agents for a product ecosystem (never mix the two planes in one manifest). Everything else is out-of-scope and forbidden.
 - **Tool restrictions**: `Read`, `Write`, `Bash`, `Grep`, `Glob` only. Any other tools are outside the allowed tools whitelist.
 
 ## Skill Integration

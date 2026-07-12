@@ -1,6 +1,6 @@
 ---
 name: "agentic-config-hub-boundaries"
-version: "1.0.0"
+version: "1.1.0"
 description: "Allowed and forbidden actions, write scopes, escalation path, and enforcement for agents working on agentic-config-hub"
 type: "context"
 ---
@@ -23,7 +23,9 @@ type: "context"
 | F6 | Editing any file under `context/` outside the 5-Phase Protocol with an approved Change Manifest naming the file | Context is read-only ground truth |
 | F7 | Non-ASCII characters in script output, or third-party imports in scripts | Violates architecture rules 15-17 |
 | F8 | Deleting or renaming numbered rules in `context/architecture.md` (deprecate in place instead) | Rule numbers are stable citation targets |
-| F9 | Reintroducing stale legacy patterns: the old repo name, old owner, or old domain-folder paths (`marketing-skill/`, `product-team/`, `engineering-team/`, `../../engineering`, etc.) | This repo's layout is `skills/<name>`, `agents/`, `workflows/`, `context/` only |
+| F9 | Reintroducing stale legacy patterns: the old repo name, old owner, or old domain-folder paths (`marketing-skill/`, `product-team/`, `engineering-team/`, `../../engineering`, etc.) | This repo's layout is `skills/<name>`, `agents/`, `workflows/`, `context/`, `ecosystems/` only |
+| F10 | Generating product configurations (a client's or target project's agents, skills, workflows, or context) anywhere outside `ecosystems/<project-name>/` — including into the hub's root pillars | The root pillars are the development plane; products live only in the product plane (`ecosystems/`) |
+| F11 | Committing client-sensitive or private configurations into the versioned tree | Sensitive product work belongs in `ecosystems/_local/` (git-ignored) or a private repository |
 
 ## Allowed Write Scopes for Generation
 
@@ -40,10 +42,22 @@ approved Change Manifest:
 | `evals/` | Evaluation fixtures and results |
 | `scripts/` | Repo-level install and docs-generation scripts (stdlib-only) |
 | `docs/`, `documentation/` | MkDocs content and workflow documentation |
+| `ecosystems/<project-name>/` | **Product plane:** complete generated ecosystems (their `context/`, `skills/`, `agents/`, `workflows/`, `exports/`, `MANIFEST.md`, `HANDOFF.md`) plus their row in the `ecosystems/README.md` registry |
 
 Explicitly outside every agent's write scope: `context/` (see F6), repository
 settings, branch protection, CI configuration, and anything reachable only via
 the network.
+
+## Two Planes: Development vs Product
+
+| # | Rule |
+|---|---|
+| B1 | Hub agents write products **only inside `ecosystems/<project-name>/`** — never into the root pillars |
+| B2 | Changes to the root pillars (`context/`, `skills/`, `agents/`, `workflows/`) are **hub development**: feature branch + PR, never part of a product engagement |
+| B3 | An ecosystem is **self-contained**: zero `../../` references back into the hub; templates are copied, never linked |
+| B4 | Every ecosystem is born through the `design-ecosystem` workflow (5-Phase Protocol): no implementation without an approved `MANIFEST.md`, no delivery without a `HANDOFF.md` |
+| B5 | Client configurations with sensitive data live in `ecosystems/_local/` (git-ignored) or their own private repo — never in the public versioned tree (see F11) |
+| B6 | The same gates apply to products: agents >= 90 HARDENED, workflows PASS — the CI walks `ecosystems/**` exactly like the root |
 
 ## Human Gates
 
@@ -85,4 +99,5 @@ owner remains the final gate.
 
 | Version | Date | Change | Author |
 |---|---|---|---|
+| 1.1.0 | 2026-07-11 | Added product plane (`ecosystems/`): F10-F11, ecosystem write scope, and plane-separation rules B1-B6. | ChristianGGJ |
 | 1.0.0 | 2026-07-10 | Initial boundaries (F1-F9, write scopes, escalation, enforcement). | ChristianGGJ |

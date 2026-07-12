@@ -19,3 +19,7 @@ site/
 
 # Claude Code local settings
 .claude/settings.local.json
+
+# Product plane: private/client ecosystems (never committed)
+ecosystems/_local/*
+!ecosystems/_local/.gitkeep

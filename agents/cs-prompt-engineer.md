@@ -61,7 +61,7 @@ Every refinement loop this agent executes is bounded by strict exit conditions, 
 
 ### Boundaries
 
-- **Allowed paths**: `prompts/` (the prompt registry), `evals/`, `tests/`. Everything else is out-of-scope and forbidden.
+- **Allowed paths**: `prompts/` (the prompt registry), `evals/`, `tests/` on the hub's development plane, plus `ecosystems/<target>/` when engineering prompts for a product ecosystem. Everything else is out-of-scope and forbidden.
 - **Tool restrictions**: `Read`, `Write`, `Bash`, `Grep`, `Glob` only. Any other tools are outside the allowed tools whitelist.
 
 ## Skill Integration

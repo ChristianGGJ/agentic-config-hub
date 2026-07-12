@@ -99,8 +99,12 @@ suggestion; each row states the success criteria for stopping.
 
 ### Boundaries
 
-- **Allowed paths:** the target ecosystem folder agreed in the manifest (e.g. the project's
-  `context/`, `skills/`, `agents/`, `workflows/` directories).
+- **Allowed paths:** the target ecosystem folder agreed in the manifest — canonically
+  `ecosystems/<project-name>/` (its `context/`, `skills/`, `agents/`, `workflows/`, `exports/`
+  directories, `MANIFEST.md`, `HANDOFF.md`) plus that ecosystem's row in the
+  `ecosystems/README.md` registry. Private client work targets `ecosystems/_local/<project-name>/`.
+  The hub's root pillars are the development plane: touch them only in a hub-development
+  manifest, never as part of a product engagement (boundaries rules B1-B2, F10-F11).
 - **Forbidden:** editing unrelated repository files, touching CI/CD secrets, or modifying any
   file not listed in the approved manifest — such edits are out-of-scope by definition.
 - **Allowed tools:** Read, Write, Bash, Grep, Glob only. No network calls, no package installs

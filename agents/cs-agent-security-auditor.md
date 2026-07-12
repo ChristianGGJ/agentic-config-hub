@@ -61,7 +61,7 @@ Every audit loop, adversarial review, or model scan this agent executes is bound
 
 ### Boundaries
 
-- **Allowed paths**: `skills/`, `agents/`, `workflows/`, `evals/`, `tests/`. Anything else is out-of-scope and forbidden.
+- **Allowed paths**: `skills/`, `agents/`, `workflows/`, `evals/`, `tests/` on the hub's development plane, plus `ecosystems/<target>/` when auditing a product ecosystem (audits cover both planes with the same gates). Anything else is out-of-scope and forbidden.
 - **Tool restrictions**: `Read`, `Write`, `Bash`, `Grep`, `Glob` only. Any other tools are outside the allowed tools whitelist.
 
 ## Skill Integration

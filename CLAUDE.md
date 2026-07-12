@@ -16,6 +16,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - **4 pillars** at repo root: `context/`, `skills/`, `agents/`, `workflows/`
 - **Quality tooling**: `loop_auditor.py` (100-point rubric), `hitl_gate_validator.py` (R1-R6), `react_trace_analyzer.py` (D1-D7), `ecosystem_scaffolder.py`
 - Meta-infrastructure: `commands/`, `templates/`, `standards/`, `evals/`, `scripts/`, `docs/`, `documentation/`
+- **Product plane**: `ecosystems/` - generated configurations for target projects, one four-pillar ecosystem per folder (the root pillars are the development plane; the two never mix)
 
 ## Navigation Map
 
@@ -25,6 +26,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 | **Skills** | [skills/](skills/) + [skills/CLAUDE.md](skills/CLAUDE.md) | 29 atomic, self-contained skill packages |
 | **Agents** | [agents/](agents/) + [agents/CLAUDE.md](agents/CLAUDE.md) | cs-* role agents and reviewer personas |
 | **Workflows** | [workflows/](workflows/) | Gated multi-agent orchestrations with HITL blocks |
+| **Ecosystems** | [ecosystems/](ecosystems/) + [ecosystems/README.md](ecosystems/README.md) | **Product plane**: generated four-pillar configs per target project; `_local/` is git-ignored for private work |
 | **Commands** | [commands/](commands/) | Slash commands (focused-fix, plugin-audit) |
 | **Templates** | [templates/](templates/) | Reusable agent and skill templates |
 | **Standards** | [standards/](standards/) | Git, quality, security, communication, documentation |
