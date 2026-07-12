@@ -1,6 +1,6 @@
 # Skill Tester - Quality Assurance Meta-Skill
 
-A POWERFUL-tier skill that provides comprehensive validation, testing, and quality scoring for skills in the claude-skills ecosystem.
+A POWERFUL-tier skill that provides comprehensive validation, testing, and quality scoring for skills in the agentic-config-hub ecosystem.
 
 ## Overview
 

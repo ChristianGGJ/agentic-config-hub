@@ -382,8 +382,8 @@ write_tool_readme() {
     printf '%s\n\n' "$manual_install"
     printf '### Script\n\n'
     printf '```bash\n'
-    printf 'git clone https://github.com/alirezarezvani/claude-skills.git\n'
-    printf 'cd claude-skills\n'
+    printf 'git clone https://github.com/ChristianGGJ/agentic-config-hub.git\n'
+    printf 'cd agentic-config-hub\n'
     printf '%s\n' "$script_install"
     printf '```\n\n'
     printf '## Verify\n\n'
@@ -391,7 +391,7 @@ write_tool_readme() {
     printf '## Update\n\n'
     printf '%s\n\n' "$update_step"
     printf '## Source Repository\n\n'
-    printf -- '- https://github.com/alirezarezvani/claude-skills\n'
+    printf -- '- https://github.com/ChristianGGJ/agentic-config-hub\n'
   } > "${out_dir}/README.md"
 }
 
@@ -456,7 +456,7 @@ for t in $TOOLS; do
     AIDER_FILE="${OUT_BASE}/aider/CONVENTIONS.md"
     {
       echo "# Claude Skills — Aider Conventions"
-      echo "> Auto-generated from claude-skills. Do not edit manually."
+      echo "> Auto-generated from agentic-config-hub. Do not edit manually."
       echo "> Generated: ${TODAY}"
       echo
     } > "$AIDER_FILE"

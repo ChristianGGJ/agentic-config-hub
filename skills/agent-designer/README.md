@@ -410,7 +410,7 @@ response = client.messages.create(
 
 ## Contributing
 
-This skill is part of the claude-skills repository. To contribute:
+This skill is part of the agentic-config-hub repository. To contribute:
 
 1. Fork the repository
 2. Create a feature branch
@@ -427,4 +427,4 @@ This project is licensed under the MIT License - see the main repository for det
 For issues and questions:
 - Check the troubleshooting section above
 - Review the reference documentation in `references/`
-- Create an issue in the claude-skills repository
+- Create an issue in the agentic-config-hub repository

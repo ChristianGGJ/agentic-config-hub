@@ -2,7 +2,7 @@
 """
 Quality Scorer - Scores skills across multiple quality dimensions
 
-This script provides comprehensive quality assessment for skills in the claude-skills
+This script provides comprehensive quality assessment for skills in the agentic-config-hub
 ecosystem by evaluating documentation, code quality, completeness, security, and usability.
 Generates letter grades, tier recommendations, and improvement roadmaps.
 

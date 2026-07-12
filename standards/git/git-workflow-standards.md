@@ -225,7 +225,7 @@ Issue: #{issue-number}
 ```
 docs(standards): update {standard-name} for {context}
 
-- Adapt for claude-skills context
+- Adapt for agentic-config-hub context
 - Remove factory-specific references
 - Add agent-specific guidelines
 - Update examples

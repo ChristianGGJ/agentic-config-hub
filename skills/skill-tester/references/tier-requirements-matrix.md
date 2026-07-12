@@ -6,7 +6,7 @@
 
 ## Overview
 
-This document provides a comprehensive matrix of requirements for each skill tier within the claude-skills ecosystem. Skills are classified into three tiers based on complexity, functionality, and comprehensiveness: BASIC, STANDARD, and POWERFUL.
+This document provides a comprehensive matrix of requirements for each skill tier within the agentic-config-hub ecosystem. Skills are classified into three tiers based on complexity, functionality, and comprehensiveness: BASIC, STANDARD, and POWERFUL.
 
 **Note**: Security dimension requirements are optional and only apply when `--include-security` flag is used. By default, tier recommendations are based on 4 core dimensions (Documentation, Code Quality, Completeness, Usability) at 25% weight each.
 
@@ -415,4 +415,4 @@ except Exception as e:
 - **Demotion**: Serious violations or quality degradation
 - **Removal**: Critical violations or abandonment
 
-This tier requirements matrix serves as the definitive guide for skill classification and quality standards within the claude-skills ecosystem. Regular updates ensure alignment with evolving best practices and community needs.
+This tier requirements matrix serves as the definitive guide for skill classification and quality standards within the agentic-config-hub ecosystem. Regular updates ensure alignment with evolving best practices and community needs.

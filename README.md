@@ -1,6 +1,6 @@
 # Agentic Config Hub
 
-**agentic-config-hub** is a library of production-ready AI configurations for agents and agentic systems. It packages 19 self-contained skills, hardened role agents, and gated multi-agent workflows that you copy straight into Claude Code, OpenAI Codex, Gemini CLI, or OpenClaw. Every agent in the hub ships with loop-engineering controls (exit conditions, iteration budgets, self-reflection checkpoints) and every workflow embeds a human approval gate that is machine-validated before merge - autonomy with brakes, verified by deterministic tooling rather than vibes.
+**agentic-config-hub** is a library of production-ready AI configurations for agents and agentic systems. It packages 29 self-contained skills, hardened role agents, and gated multi-agent workflows that you copy straight into Claude Code, OpenAI Codex, Gemini CLI, or OpenClaw. Every agent in the hub ships with loop-engineering controls (exit conditions, iteration budgets, self-reflection checkpoints) and every workflow embeds a human approval gate that is machine-validated before merge - autonomy with brakes, verified by deterministic tooling rather than vibes.
 
 ## The Four Pillars
 
@@ -11,7 +11,7 @@ context/  ->  skills/  ->  agents/  ->  workflows/
 ```
 
 - **context/** - project ground truth; read-only for agents
-- **skills/** - 19 atomic skill packages; each one stands alone
+- **skills/** - 29 atomic skill packages; each one stands alone
 - **agents/** - cs-* role agents and reviewer personas that compose skills
 - **workflows/** - multi-agent orchestrations with hard human-in-the-loop gates
 
@@ -23,13 +23,23 @@ context/  ->  skills/  ->  agents/  ->  workflows/
 | [agent-designer](skills/agent-designer/) | Design multi-agent systems, agent architectures, and communication patterns |
 | [agent-workflow-designer](skills/agent-workflow-designer/) | Design gated multi-step agent workflows and orchestration patterns |
 | [agenthub](skills/agenthub/) | Spawn N parallel subagents competing on one task via git worktree isolation; the best branch wins |
+| [agentic-evals-benchmarking](skills/agentic-evals-benchmarking/) | Automated regression suites, synthetic-data eval pipelines, and quality scoring with DeepEval/Ragas |
+| [agentic-guardrails-security](skills/agentic-guardrails-security/) | Semantic I/O firewalls, prompt-injection mitigations, and PII leakage filters (Llama Guard / Guardrails AI) |
+| [agentic-observability-telemetry](skills/agentic-observability-telemetry/) | Tracing, logging, and performance metrics across LangSmith, AgentOps, and OpenTelemetry |
 | [agentic-system-architect](skills/agentic-system-architect/) | **Flagship** - design four-pillar ecosystems and harden agents with loop controls, ReAct patterns, and HITL gates |
 | [ai-security](skills/ai-security/) | Assess AI/ML systems for prompt injection, jailbreaks, model inversion, data poisoning, and agent tool abuse |
 | [autoresearch-agent](skills/autoresearch-agent/) | Autonomous experiment loop that optimizes any file against a measurable metric; commits wins, resets failures |
 | [browser-automation](skills/browser-automation/) | Automate browser tasks: scraping, form filling, screenshots, structured data extraction |
+| [crewai-role-engineering](skills/crewai-role-engineering/) | Sequential and hierarchical CrewAI teams: backstories, goals, task scopes, and manager coordination |
 | [focused-fix](skills/focused-fix/) | Systematic 5-phase deep-dive repair of a specific feature or module, end-to-end |
+| [hybrid-rag-memory](skills/hybrid-rag-memory/) | Persistent long-term memory and hybrid retrieval (BM25 + embeddings) for stateful multi-agent systems |
+| [langgraph-state-design](skills/langgraph-state-design/) | Stateful LangGraph graphs: state schemas, conditional edges, checkpointers, and HITL gates |
 | [llm-cost-optimizer](skills/llm-cost-optimizer/) | Cut LLM API spend with token control, model routing, prompt caching, and cost observability |
+| [loop-engineering-mechanisms](skills/loop-engineering-mechanisms/) | Self-correcting retry cycles, output validation schemas, and max-iteration escape routes |
 | [mcp-server-builder](skills/mcp-server-builder/) | Build Model Context Protocol servers: tools, resources, prompts, and transports |
+| [microsoft-agent-framework](skills/microsoft-agent-framework/) | Map hub skills and agents onto Microsoft Agent Framework 1.0 (AutoGen + Semantic Kernel, C#/.NET) |
+| [ms-agent-framework-enterprise](skills/ms-agent-framework-enterprise/) | C# backend integrations and native tool plugins with dependency injection and robust data mapping |
+| [multi-llm-routing](skills/multi-llm-routing/) | Route tasks across LLM tiers (reasoning vs. utility models) to optimize cost, latency, and capability |
 | [prompt-governance](skills/prompt-governance/) | Manage prompts in production: versioning, registries, A/B tests, and regression eval pipelines |
 | [rag-architect](skills/rag-architect/) | Design RAG pipelines: retrieval strategies, embedding models, and vector search |
 | [self-eval](skills/self-eval/) | Honest two-axis scoring of AI work quality with score-inflation detection and session persistence |
@@ -101,7 +111,7 @@ Nothing merges without passing deterministic gates:
 ```
 agentic-config-hub/
 |-- context/          # Project ground truth (read-only for agents)
-|-- skills/           # 19 atomic skill packages
+|-- skills/           # 29 atomic skill packages
 |-- agents/           # cs-* role agents + personas/
 |-- workflows/        # Gated multi-agent orchestrations
 |-- commands/         # Slash commands

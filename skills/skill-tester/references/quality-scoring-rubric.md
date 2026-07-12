@@ -6,7 +6,7 @@
 
 ## Overview
 
-This document defines the comprehensive quality scoring methodology used to assess skills within the claude-skills ecosystem. The scoring system evaluates four key dimensions by default (each weighted at 25%), with an optional fifth Security dimension (enabled via `--include-security` flag).
+This document defines the comprehensive quality scoring methodology used to assess skills within the agentic-config-hub ecosystem. The scoring system evaluates four key dimensions by default (each weighted at 25%), with an optional fifth Security dimension (enabled via `--include-security` flag).
 
 ### Dimension Configuration
 
@@ -409,7 +409,7 @@ python quality_scorer.py <skill_path> --include-security
 
 When Security is enabled, all dimensions are rebalanced to 20% each (5 dimensions × 20% = 100%).
 
-This dimension is critical for ensuring that skills do not introduce security risks into the claude-skills ecosystem.
+This dimension is critical for ensuring that skills do not introduce security risks into the agentic-config-hub ecosystem.
 
 ### Scoring Components
 
@@ -556,4 +556,4 @@ The scoring rubric evolves based on:
 - Tool capability enhancements
 - Quality trend analysis
 
-This quality scoring rubric ensures consistent, objective, and comprehensive assessment of all skills within the claude-skills ecosystem while providing clear guidance for quality improvement.
+This quality scoring rubric ensures consistent, objective, and comprehensive assessment of all skills within the agentic-config-hub ecosystem while providing clear guidance for quality improvement.

@@ -27,14 +27,14 @@ description: "Skill Tester. Agent skill for Claude Code, Codex CLI, Gemini CLI, 
 
 ## Description
 
-The Skill Tester is a comprehensive meta-skill designed to validate, test, and score the quality of skills within the claude-skills ecosystem. This powerful quality assurance tool ensures that all skills meet the rigorous standards required for BASIC, STANDARD, and POWERFUL tier classifications through automated validation, testing, and scoring mechanisms.
+The Skill Tester is a comprehensive meta-skill designed to validate, test, and score the quality of skills within the agentic-config-hub ecosystem. This powerful quality assurance tool ensures that all skills meet the rigorous standards required for BASIC, STANDARD, and POWERFUL tier classifications through automated validation, testing, and scoring mechanisms.
 
 As the gatekeeping system for skill quality, this meta-skill provides three core capabilities:
 1. **Structure Validation** - Ensures skills conform to required directory structures, file formats, and documentation standards
 2. **Script Testing** - Validates Python scripts for syntax, imports, functionality, and output format compliance  
 3. **Quality Scoring** - Provides comprehensive quality assessment across multiple dimensions with letter grades and improvement recommendations
 
-This skill is essential for maintaining ecosystem consistency, enabling automated CI/CD integration, and supporting both manual and automated quality assurance workflows. It serves as the foundation for pre-commit hooks, pull request validation, and continuous integration processes that maintain the high-quality standards of the claude-skills repository.
+This skill is essential for maintaining ecosystem consistency, enabling automated CI/CD integration, and supporting both manual and automated quality assurance workflows. It serves as the foundation for pre-commit hooks, pull request validation, and continuous integration processes that maintain the high-quality standards of the agentic-config-hub repository.
 
 ## Core Features
 
@@ -391,8 +391,8 @@ python engineering/skill-tester/scripts/trend_analyzer.py reports/ \
 
 ## Conclusion
 
-The Skill Tester represents a critical infrastructure component for maintaining the high-quality standards of the claude-skills ecosystem. By providing comprehensive validation, testing, and scoring capabilities, it ensures that all skills meet or exceed the rigorous requirements for their respective tiers.
+The Skill Tester represents a critical infrastructure component for maintaining the high-quality standards of the agentic-config-hub ecosystem. By providing comprehensive validation, testing, and scoring capabilities, it ensures that all skills meet or exceed the rigorous requirements for their respective tiers.
 
-This meta-skill not only serves as a quality gate but also as a development tool that guides skill authors toward best practices and helps maintain consistency across the entire repository. Through its integration capabilities and comprehensive reporting, it enables both manual and automated quality assurance workflows that scale with the growing claude-skills ecosystem.
+This meta-skill not only serves as a quality gate but also as a development tool that guides skill authors toward best practices and helps maintain consistency across the entire repository. Through its integration capabilities and comprehensive reporting, it enables both manual and automated quality assurance workflows that scale with the growing agentic-config-hub ecosystem.
 
-The combination of structural validation, runtime testing, and multi-dimensional quality scoring provides unparalleled visibility into skill quality while maintaining the flexibility needed for diverse skill types and complexity levels. As the claude-skills repository continues to grow, the Skill Tester will remain the cornerstone of quality assurance and ecosystem integrity.
+The combination of structural validation, runtime testing, and multi-dimensional quality scoring provides unparalleled visibility into skill quality while maintaining the flexibility needed for diverse skill types and complexity levels. As the agentic-config-hub repository continues to grow, the Skill Tester will remain the cornerstone of quality assurance and ecosystem integrity.

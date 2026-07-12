@@ -16,9 +16,9 @@ Full audit pipeline for any skill, plugin, agent, or command in this repository.
 ## Usage
 
 ```bash
-/plugin-audit product-team/code-to-prd
+/plugin-audit skills/agentic-system-architect
 /plugin-audit engineering/agenthub
-/plugin-audit engineering-team/playwright-pro
+/plugin-audit skills/skill-tester
 ```
 
 ## What It Does
@@ -42,7 +42,7 @@ Identify what the skill contains and classify it.
    - Has `skills/` → has sub-skills (compound skill)
    - Has `.claude-plugin/plugin.json` → is a standalone plugin
    - Has `settings.json` → has command registrations
-4. Detect domain from path: `engineering/`, `product-team/`, `marketing-skill/`, etc.
+4. Detect the skill category (core agentic design, prompts & quality, autonomy & security, infrastructure) per skills/CLAUDE.md
 5. Check for associated command: search `commands/` for a `.md` file matching the skill name
 
 Display discovery summary before proceeding:
@@ -227,11 +227,11 @@ Based on the skill's domain, invoke the appropriate agent's review perspective:
 
 | Domain | Agent | Review Focus |
 |--------|-------|-------------|
-| `engineering/` or `engineering-team/` | cs-senior-engineer | Architecture, code quality, CI/CD integration |
-| `product-team/` | cs-product-manager | PRD quality, user story coverage, RICE alignment |
-| `marketing-skill/` | cs-content-creator | Content quality, SEO optimization, brand voice |
-| `ra-qm-team/` | cs-quality-regulatory | Compliance checklist, audit trail, regulatory alignment |
-| `business-growth/` | cs-growth-strategist | Growth metrics, revenue impact, customer success |
+| core agentic design | cs-agentic-system-architect | Ecosystem architecture, loop controls, HITL gates |
+| prompts & quality | cs-prompt-engineer | Prompt quality, governance, evaluation rigor |
+| autonomy & security | cs-agent-security-auditor | Guardrails, injection resistance, secure autonomy |
+| infrastructure | cs-agent-designer | Tool schemas, architecture patterns, integration quality |
+| cross-cutting | cs-agentic-system-architect | Final ecosystem-level review |
 | `finance/` | cs-financial-analyst | Financial model accuracy, metric definitions |
 | Other | cs-senior-engineer | General code and architecture review |
 

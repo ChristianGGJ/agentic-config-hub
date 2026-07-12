@@ -78,7 +78,7 @@ mentioned in `SKILL.md` exist, and `--json` output is valid JSON (pipe it throug
 `python -m json.tool`). Record eval iterations in `evals/` (see
 [../evals/README.md](../evals/README.md)).
 
-## Catalog: The 19 Current Skills
+## Catalog: The 29 Current Skills
 
 ### Core agentic design
 
@@ -89,6 +89,7 @@ mentioned in `SKILL.md` exist, and `--json` output is valid JSON (pipe it throug
 | [agent-workflow-designer](agent-workflow-designer/SKILL.md) | Multi-agent workflow orchestration and step design |
 | [spec-driven-workflow](spec-driven-workflow/SKILL.md) | Spec-first development flow: spec -> plan -> implement -> verify |
 | [agenthub](agenthub/SKILL.md) | Agent registry and discovery patterns for multi-agent systems |
+| [loop-engineering-mechanisms](loop-engineering-mechanisms/SKILL.md) | Self-correcting retry cycles, validation schemas, max-iteration escape routes |
 
 ### Prompts & quality
 
@@ -99,6 +100,7 @@ mentioned in `SKILL.md` exist, and `--json` output is valid JSON (pipe it throug
 | [self-eval](self-eval/SKILL.md) | Honest work-quality scoring with inflation detection |
 | [skill-tester](skill-tester/SKILL.md) | Testing skill packages for correctness and triggering accuracy |
 | [focused-fix](focused-fix/SKILL.md) | Scoped 5-phase repair protocol for a single feature/module |
+| [agentic-evals-benchmarking](agentic-evals-benchmarking/SKILL.md) | Regression suites, synthetic-data eval pipelines, quality scoring (DeepEval/Ragas) |
 
 ### Autonomy & security
 
@@ -109,6 +111,7 @@ mentioned in `SKILL.md` exist, and `--json` output is valid JSON (pipe it throug
 | [adversarial-reviewer](adversarial-reviewer/SKILL.md) | Red-team style review of configs and outputs |
 | [skill-security-auditor](skill-security-auditor/SKILL.md) | Auditing skill packages for malicious or unsafe patterns |
 | [autoresearch-agent](autoresearch-agent/SKILL.md) | Governed autonomous research with verification loops |
+| [agentic-guardrails-security](agentic-guardrails-security/SKILL.md) | Semantic I/O firewalls, injection mitigations, PII leakage filters |
 
 ### Infrastructure
 
@@ -118,6 +121,18 @@ mentioned in `SKILL.md` exist, and `--json` output is valid JSON (pipe it throug
 | [rag-architect](rag-architect/SKILL.md) | Retrieval-augmented generation pipeline design |
 | [llm-cost-optimizer](llm-cost-optimizer/SKILL.md) | Token, caching, and model-routing cost analysis |
 | [browser-automation](browser-automation/SKILL.md) | Agent-driven browser automation patterns |
+| [hybrid-rag-memory](hybrid-rag-memory/SKILL.md) | Persistent long-term memory and hybrid retrieval (BM25 + embeddings) |
+| [multi-llm-routing](multi-llm-routing/SKILL.md) | Task routing across LLM tiers for cost, latency, and capability |
+| [agentic-observability-telemetry](agentic-observability-telemetry/SKILL.md) | Tracing, logging, and metrics (LangSmith, AgentOps, OpenTelemetry) |
+
+### Framework integration
+
+| Skill | Capability |
+|-------|------------|
+| [langgraph-state-design](langgraph-state-design/SKILL.md) | Stateful LangGraph graphs: state schemas, conditional edges, checkpointers, HITL gates |
+| [crewai-role-engineering](crewai-role-engineering/SKILL.md) | CrewAI team design: roles, backstories, task scopes, manager coordination |
+| [microsoft-agent-framework](microsoft-agent-framework/SKILL.md) | Mapping hub skills/agents onto Microsoft Agent Framework 1.0 (C#/.NET) |
+| [ms-agent-framework-enterprise](ms-agent-framework-enterprise/SKILL.md) | Enterprise C# integrations and native tool plugins with dependency injection |
 
 ## Adding a New Skill
 

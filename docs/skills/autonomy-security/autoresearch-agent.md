@@ -289,8 +289,8 @@ Flag these without being asked:
 
 ### One-liner (any tool)
 ```bash
-git clone https://github.com/alirezarezvani/claude-skills.git
-cp -r claude-skills/engineering/autoresearch-agent ~/.claude/skills/
+git clone https://github.com/ChristianGGJ/agentic-config-hub.git
+cp -r agentic-config-hub/skills/autoresearch-agent ~/.claude/skills/
 ```
 
 ### Multi-tool install

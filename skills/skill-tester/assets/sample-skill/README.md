@@ -1,6 +1,6 @@
 # Sample Text Processor
 
-A basic text processing skill that demonstrates BASIC tier requirements for the claude-skills ecosystem.
+A basic text processing skill that demonstrates BASIC tier requirements for the agentic-config-hub ecosystem.
 
 ## Quick Start
 

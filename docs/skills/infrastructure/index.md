@@ -45,7 +45,7 @@ description: "10 infrastructure skills — model-routing optimization, browser a
 
     ---
 
-    > Originally contributed by chad848(https://github.com/chad848) — enhanced and integrated by the claude-skills team.
+    > Originally contributed by chad848(https://github.com/chad848) — enhanced and integrated by the agentic-config-hub team.
 
 -   **[MCP Server Builder](mcp-server-builder.md)**
 

@@ -98,7 +98,7 @@ git branch
 git status
 
 # 3. Stage changes
-git add agents/engineering/cs-data-scientist.md
+git add agents/cs-data-scientist.md
 
 # 4. Commit with conventional commit format
 git commit -m "feat(agents): implement cs-data-scientist agent
@@ -298,10 +298,10 @@ git pull origin dev
 git checkout -b feature/sprint-11-12-2025
 
 # Work on multiple related files
-git add agents/engineering/cs-ml-engineer.md
+git add agents/cs-ml-engineer.md
 git commit -m "feat(agents): implement cs-ml-engineer"
 
-git add agents/engineering/cs-devops-engineer.md
+git add agents/cs-devops-engineer.md
 git commit -m "feat(agents): implement cs-devops-engineer"
 
 git add documentation/delivery/sprint-11-12-2025/PROGRESS.md

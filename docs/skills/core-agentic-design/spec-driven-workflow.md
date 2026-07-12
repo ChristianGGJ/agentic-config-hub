@@ -248,7 +248,7 @@ Phase 6: Self-Review     ──→  REFACTOR: Clean up internals
 
 **The handoff:** Spec-driven workflow produces the test stubs (Phase 4). TDD takes over from there. The spec tells you WHAT to test. TDD tells you HOW to implement.
 
-Use `engineering-team/tdd-guide` for:
+Use `tdd-guide (external, upstream library)` for:
 - Red-green-refactor cycle discipline
 - Coverage analysis and gap detection
 - Framework-specific test patterns (Jest, Pytest, JUnit)
@@ -315,7 +315,7 @@ A complete worked example (Password Reset spec with extracted test cases) is ava
 
 ## Cross-References
 
-- **`engineering-team/tdd-guide`** — Red-green-refactor cycle, test generation, coverage analysis. Use after Phase 4 of this workflow.
+- **`tdd-guide (external, upstream library)`** — Red-green-refactor cycle, test generation, coverage analysis. Use after Phase 4 of this workflow.
 - **`engineering/focused-fix`** — Deep-dive feature repair. When a spec-driven implementation has systemic issues, use focused-fix for diagnosis.
 - **`engineering/rag-architect`** — If the feature involves retrieval or knowledge systems, use rag-architect for the technical design within the spec.
 - **`references/spec_format_guide.md`** — Complete template with section-by-section explanations.

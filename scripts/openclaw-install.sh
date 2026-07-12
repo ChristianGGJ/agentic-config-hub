@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Install claude-skills into OpenClaw's workspace skills directory
+# Install agentic-config-hub into OpenClaw's workspace skills directory
 # Usage: ./scripts/openclaw-install.sh [--dry-run]
 
 set -euo pipefail

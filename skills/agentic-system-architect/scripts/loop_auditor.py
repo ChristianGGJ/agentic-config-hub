@@ -32,7 +32,7 @@ Grades:
     <  50    UNSAFE-FOR-AUTONOMY
 
 Usage examples:
-    python loop_auditor.py agents/engineering/cs-agentic-system-architect.md
+    python loop_auditor.py agents/cs-agentic-system-architect.md
     python loop_auditor.py my-agent.md --json
     python loop_auditor.py my-agent.md --json > audit.json
     python loop_auditor.py my-agent.md --min-score 90   # CI deployment gate

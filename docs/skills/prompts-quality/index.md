@@ -33,7 +33,7 @@ description: "6 prompts & quality skills — prompt engineering optimization, va
 
     ---
 
-    > Originally contributed by chad848(https://github.com/chad848) — enhanced and integrated by the claude-skills team.
+    > Originally contributed by chad848(https://github.com/chad848) — enhanced and integrated by the agentic-config-hub team.
 
 -   **[Self-Eval: Honest Work Evaluation](self-eval.md)**
 

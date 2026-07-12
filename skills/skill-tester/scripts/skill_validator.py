@@ -3,7 +3,7 @@
 Skill Validator - Validates skill directories against quality standards
 
 This script validates a skill directory structure, documentation, and Python scripts
-against the claude-skills ecosystem standards. It checks for required files, proper
+against the agentic-config-hub ecosystem standards. It checks for required files, proper
 formatting, and compliance with tier-specific requirements.
 
 Usage:
