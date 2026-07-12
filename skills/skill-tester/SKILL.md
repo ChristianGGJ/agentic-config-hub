@@ -304,15 +304,15 @@ jobs:
 ### Continuous Quality Monitoring
 ```bash
 #!/bin/bash
-# Daily quality report generation
-echo "Generating daily skill quality report..."
+# Daily quality report generation: score every skill and collect the JSON.
 timestamp=$(date +"%Y-%m-%d")
-python engineering/skill-tester/scripts/quality_scorer.py engineering/ \
-  --batch --json > "reports/quality_report_${timestamp}.json"
-
-echo "Quality trends analysis..."
-python engineering/skill-tester/scripts/trend_analyzer.py reports/ \
-  --days 30 > "reports/quality_trends_${timestamp}.md"
+mkdir -p reports
+for skill in skills/*/; do
+  name=$(basename "$skill")
+  python skills/skill-tester/scripts/quality_scorer.py "$skill" --json \
+    > "reports/${name}_${timestamp}.json"
+done
+# Trend tracking: commit the dated reports/ JSON and diff scores across dates in git.
 ```
 
 ## Performance & Scalability

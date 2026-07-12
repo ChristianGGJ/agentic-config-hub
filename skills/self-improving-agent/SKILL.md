@@ -1,6 +1,6 @@
 ---
 name: "self-improving-agent"
-description: "Curate Claude Code's auto-memory into durable project knowledge. Analyze MEMORY.md for patterns, promote proven learnings to CLAUDE.md and .claude/rules/, extract recurring solutions into reusable skills. Use when: (1) reviewing what Claude has learned about your project, (2) graduating a pattern from notes to enforced rules, (3) turning a debugging solution into a skill, (4) checking memory health and capacity."
+description: "Use when reviewing what Claude Code's auto-memory has learned about your project, graduating a proven pattern from MEMORY.md notes to enforced CLAUDE.md or .claude/rules/ rules, turning a recurring debugging solution into a reusable skill, or checking memory health and capacity. Curates auto-memory into durable project knowledge."
 ---
 
 # Self-Improving Agent

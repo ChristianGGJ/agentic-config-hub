@@ -453,23 +453,23 @@ def format_report(report: RAGEvaluationReport) -> str:
     lines.append("=" * 60)
     lines.append("")
 
-    lines.append(f"📊 SUMMARY")
+    lines.append("SUMMARY")
     lines.append(f"  Questions evaluated: {report.total_questions}")
     lines.append(f"  Coverage: {report.coverage:.1%}")
     lines.append("")
 
-    lines.append("📈 RETRIEVAL METRICS")
-    lines.append(f"  Context Relevance:    {report.avg_context_relevance:.2f} {'✅' if report.avg_context_relevance >= 0.8 else '⚠️'} (target: >0.80)")
+    lines.append("RETRIEVAL METRICS")
+    lines.append(f"  Context Relevance:    {report.avg_context_relevance:.2f} {'[OK]' if report.avg_context_relevance >= 0.8 else '[WARN]'} (target: >0.80)")
     lines.append(f"  Precision@{report.retrieval_metrics.get('k', 5)}:         {report.retrieval_metrics.get('precision_at_k', 0):.2f}")
     lines.append("")
 
-    lines.append("📝 GENERATION METRICS")
-    lines.append(f"  Answer Faithfulness:  {report.avg_faithfulness:.2f} {'✅' if report.avg_faithfulness >= 0.95 else '⚠️'} (target: >0.95)")
-    lines.append(f"  Groundedness:         {report.avg_groundedness:.2f} {'✅' if report.avg_groundedness >= 0.85 else '⚠️'} (target: >0.85)")
+    lines.append("GENERATION METRICS")
+    lines.append(f"  Answer Faithfulness:  {report.avg_faithfulness:.2f} {'[OK]' if report.avg_faithfulness >= 0.95 else '[WARN]'} (target: >0.95)")
+    lines.append(f"  Groundedness:         {report.avg_groundedness:.2f} {'[OK]' if report.avg_groundedness >= 0.85 else '[WARN]'} (target: >0.85)")
     lines.append("")
 
     if report.issues:
-        lines.append(f"⚠️ ISSUES FOUND ({len(report.issues)})")
+        lines.append(f"ISSUES FOUND ({len(report.issues)})")
         for issue in report.issues[:10]:
             if issue['type'] == 'unsupported_claim':
                 lines.append(f"  Q{issue['question_id']}: {len(issue.get('claims', []))} unsupported claim(s)")
@@ -479,7 +479,7 @@ def format_report(report: RAGEvaluationReport) -> str:
             lines.append(f"  ... and {len(report.issues) - 10} more issues")
         lines.append("")
 
-    lines.append("💡 RECOMMENDATIONS")
+    lines.append("RECOMMENDATIONS")
     for i, rec in enumerate(report.recommendations, 1):
         lines.append(f"  {i}. {rec}")
     lines.append("")
@@ -552,7 +552,7 @@ contexts.json:
         baseline_path = Path(args.compare)
         if baseline_path.exists():
             baseline = json.loads(baseline_path.read_text())
-            print("\n📊 COMPARISON WITH BASELINE")
+            print("\nCOMPARISON WITH BASELINE")
             print(f"  Relevance:    {baseline.get('avg_context_relevance', 0):.2f} -> {report.avg_context_relevance:.2f}")
             print(f"  Faithfulness: {baseline.get('avg_faithfulness', 0):.2f} -> {report.avg_faithfulness:.2f}")
             print(f"  Groundedness: {baseline.get('avg_groundedness', 0):.2f} -> {report.avg_groundedness:.2f}")

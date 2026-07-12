@@ -1,35 +1,196 @@
 ---
 name: "hybrid-rag-memory"
-version: "1.0.0"
-description: "Design persistent long-term memory architectures and hybrid vector search patterns (BM25 + embeddings) to support stateful multi-agent systems"
-type: "skill"
+description: "Use when designing agent memory: short-term thread state vs long-term stores, vector DB schemas (pgvector/Qdrant/Azure AI Search), hybrid BM25+dense retrieval over memories, and cross-session persistence in LangGraph, CrewAI, or Microsoft Agent Framework."
 ---
 
 # Skill: hybrid-rag-memory
 
-This skill teaches the agent how to implement long-term memory sync and hybrid retrieval databases for corporate multi-agent systems.
+## Overview
 
-## Capability
+This skill designs **memory and persistence** for agentic systems: what an agent
+remembers, where it is stored, how it is retrieved, and when it is forgotten. It covers
+the memory taxonomy (short-term vs long-term; semantic/episodic/procedural), the real
+framework memory APIs (LangGraph checkpointers vs Store, CrewAI memory, Microsoft Agent
+Framework threads and context providers), concrete vector database schemas, and hybrid
+lexical+dense retrieval over stored memories.
 
-**This skill does exactly one thing:** designs vector database schemas, specifies hybrid search retrieval queries (combining keyword BM25 with dense vector embeddings), and manages persistent long-term session memories.
+**Ownership boundary:** this skill owns MEMORY and PERSISTENCE. Document-RAG pipeline
+design — corpus chunking, embedding model selection, reranking, ingestion — is owned by
+the sibling skill `rag-architect`. Both skills use RRF-style hybrid fusion; the version
+here is specialized to memory workloads (small atomic entries, per-tenant namespaces),
+and each side stays self-contained.
 
-## Core Principles
+## Memory Taxonomy (read this first)
 
-### 1. Hybrid Search Architecture
-* Always combine **lexical search (BM25)** for exact keyword/ID matches with **semantic vector search (embeddings)** for conceptual matches.
-* Implement Reciprocal Rank Fusion (RRF) or cross-encoder re-ranking to merge and prioritize results.
+The single most common design error is conflating session state with long-term memory.
+They have different scopes, backends, and lifecycles:
 
-### 2. Long-Term Memory Sync
-* **CrewAI**: Map long-term SQLite/Qdrant memory backends to persist entity information and feedback loops across runs.
-* **LangGraph**: Implement external PostgreSQL/Redis state checkpoints to allow session persistence across server Restarts.
+| Layer | Scope | Typical backend | Lifecycle | Framework surface |
+|---|---|---|---|---|
+| **Short-term (thread)** | One conversation/run | Checkpointer tables (Postgres/SQLite) or in-process | Lives with the thread; replayable; discard or archive when the thread ends | LangGraph checkpointer; MAF `AgentThread`; CrewAI short-term memory |
+| **Long-term (store)** | Cross-thread, cross-session | Vector store / KV store with namespaces | Survives restarts and threads; needs write policy + eviction | LangGraph Store API; CrewAI long-term memory; MAF context providers |
+| **Entity** | Facts keyed to a person/org/thing | Structured rows or namespaced KV | Updated in place; superseded facts overwritten or versioned | CrewAI entity memory; custom namespaces elsewhere |
 
-### 3. Microsoft Agent Framework Memory Stores
-* Bind implementations of `IMemoryStore` to backends (e.g. pgvector or Azure AI Search).
-* Partition memories cleanly by user and session keys to prevent cross-tenant data leaks.
+Within long-term memory, distinguish content types — they demand different schemas:
+
+- **Semantic memory** — facts and preferences ("user prefers dark mode", "deploys go
+  through staging"). Small atomic entries, embedded for similarity search, deduplicated.
+- **Episodic memory** — records of what happened ("on run 41 the migration failed with
+  X"). Append-only, timestamped, queried by recency + similarity, aggressively evicted.
+- **Procedural memory** — learned rules of behavior ("always run lint before commit").
+  Few, high-value, usually promoted into system prompts or instructions rather than
+  retrieved per-query.
+
+**Lifecycle rule of thumb:** thread state is *checkpointed* (automatic, every step);
+long-term memory is *curated* (explicit writes, dedup, eviction). If a write happens on
+every message with no curation policy, you are building a transcript, not a memory.
+
+## Core Capabilities
+
+1. **Memory architecture design** — choose layers, backends, and namespaces for a given
+   multi-agent system and tenancy model.
+2. **Vector schema authoring** — pgvector DDL, Azure AI Search index JSON, Qdrant
+   collection configs, with index-type and parameter defaults
+   (see `references/vector_schema_examples.md`).
+3. **Framework memory wiring** — LangGraph checkpointer + Store, CrewAI memory
+   configuration, MAF thread serialization and context providers
+   (see `references/memory_apis.md`).
+4. **Hybrid retrieval over memories** — BM25 + dense fusion with RRF, and the decision
+   rule for when hybrid beats pure-dense (see `references/rag_memory_patterns.md`).
+5. **Write/eviction policy design** — what to store, when to summarize, how to
+   deduplicate, TTL and deletion procedures (including user-data erasure).
+
+## Decision Frameworks
+
+### Backend selection
+
+| Situation | Default choice | Why | Reconsider when |
+|---|---|---|---|
+| Already running Postgres | **pgvector** (+ `tsvector` for lexical) | One database for state, memory, and search; transactional writes | > ~10M vectors per tenant or heavy ANN QPS — move vectors to a dedicated engine |
+| Azure-native stack / MAF | **Azure AI Search** | Managed hybrid (BM25 + vector + RRF) out of the box | Cost-sensitive small deployments — pgvector is cheaper |
+| Dedicated vector workload, self-hosted | **Qdrant** | Named dense+sparse vectors per point, server-side RRF fusion, payload filters | Team has no ops capacity — prefer managed |
+| Prototype / single process | LangGraph `InMemoryStore` or SQLite | Zero infrastructure | Anything multi-instance or restart-sensitive |
+
+### Hybrid vs pure-dense retrieval
+
+| Signal in your memory queries | Verdict |
+|---|---|
+| Exact identifiers: ticket IDs, SKUs, error codes, usernames, version strings | **Hybrid required** — embeddings blur exact tokens |
+| Domain jargon or codenames unlikely to be in the embedding model's training data | **Hybrid required** |
+| Purely conceptual recall ("what does the user like?") | Pure dense is fine; hybrid adds latency for little gain |
+| Short queries (1-3 words) | Hybrid — BM25 carries short queries better |
+| Multilingual memories with a strong multilingual embedder | Dense-first; add lexical only if IDs appear |
+
+Calibrated defaults: RRF constant k=60; retrieve top-20 from each retriever, fuse, keep
+top-5 for context injection; equal weighting unless offline evaluation says otherwise.
+
+### Memory write policy
+
+| Policy | When to use | Cost profile |
+|---|---|---|
+| **Hot-path write** (agent writes memory during the turn) | Explicit user statements ("remember that..."), critical corrections | Adds latency + tokens to every turn; keep to 0-1 writes/turn |
+| **Background reflection** (batch job summarizes threads into memories) | Preference inference, episodic summaries, dedup passes | Deferred cost; run per-thread-close or on a schedule with a hard budget |
+| **Write-through entity update** | Structured facts with a natural key (user profile fields) | Cheap; overwrite in place, keep `updated_at` |
+
+Always: deduplicate before write (reject new entry if cosine similarity to an existing
+memory in the same namespace exceeds ~0.9 — tune per embedder), summarize episodic runs
+instead of storing transcripts, and record provenance (`source_thread_id`, timestamp).
+
+### Eviction and retention defaults
+
+| Memory type | Default retention | Eviction trigger |
+|---|---|---|
+| Thread checkpoints | 30-90 days after last activity | Archive or delete by `thread_id` |
+| Episodic memories | Keep last N=100 per namespace + summaries of the rest | Count cap, then summarize-and-delete |
+| Semantic memories | Indefinite while referenced | Superseded-fact overwrite; staleness review when hit rate ~ 0 |
+| User-requested erasure | Immediate | Delete by user namespace across ALL layers (checkpoints included) — see `references/memory_apis.md` |
+
+## Framework Surfaces (summary)
+
+Full runnable examples live in `references/memory_apis.md`. The one-line map:
+
+- **LangGraph** (as of LangGraph 1.x): checkpointer (`InMemorySaver` / `SqliteSaver` /
+  `PostgresSaver`) = thread state; Store API (`BaseStore` / `InMemoryStore` /
+  `PostgresStore` with namespaced `put`/`get`/`search` and optional semantic index) =
+  long-term memory. Compile with BOTH: `graph.compile(checkpointer=..., store=...)`.
+- **CrewAI** (as of CrewAI 0.1xx, 2025): `Crew(memory=True)` enables short-term +
+  long-term + entity memory; stock backends are ChromaDB (RAG layers) and SQLite
+  (long-term) — Qdrant is NOT a stock CrewAI memory backend. Custom paths via
+  `LongTermMemory(storage=LTMSQLiteStorage(db_path=...))`; embedder via `embedder={...}`.
+- **Microsoft Agent Framework** (public preview, 2025): conversation state lives in
+  `AgentThread` (serialize/deserialize for persistence); long-term memory is injected
+  via context providers (`AIContextProvider`) and custom chat-message stores. The old
+  Semantic Kernel `IMemoryStore` is legacy and must not be used with MAF.
+
+## Failure Modes
+
+| Symptom | Diagnosis | Fix |
+|---|---|---|
+| "Long-term memory" vanishes when a new conversation starts | Memories were written to the checkpointer (thread-scoped), not a store | Move cross-session facts to the Store layer; checkpointer keeps only thread state |
+| Memory retrieval returns near-duplicates of the same fact | No dedup on write | Add similarity-threshold dedup + periodic merge pass |
+| Agent recalls another user's data | Namespace/filter missing on the read path | Enforce tenant namespace in EVERY query (store namespace tuple, Qdrant payload filter, AI Search `$filter`); add a cross-tenant test |
+| Exact ID lookups fail ("ticket ABC-1234 not found" though stored) | Pure-dense retrieval blurring identifiers | Add lexical arm + RRF fusion (see decision table above) |
+| Memory store grows unbounded; retrieval gets slower and noisier | Transcript-as-memory anti-pattern, no eviction | Adopt write policy (summarize + dedup) and eviction defaults |
+| State lost on service restart | In-memory saver/store in production | `PostgresSaver` + `PostgresStore` (or managed equivalents); call `.setup()` once |
+| Fusion returns worse results than dense alone | Lexical arm indexes noisy fields (whole transcripts) | Index only the memory `text` field lexically; tune BM25 k1/b (see `references/vector_schema_examples.md`) |
+| Background reflection job loops forever re-summarizing | No budget/exit condition on the curation loop | Apply the six exit conditions (below) to the reflection loop |
+
+## Hub Canon Integration
+
+Memory work plugs into the hub's safety canon at two points: the **curation loop** and
+the **persistence gates**.
+
+**Exit conditions for memory loops.** Any memory-maintenance loop (retrieval-retry,
+background reflection, dedup/merge) must declare all six canonical exit conditions
+before iteration 1:
+
+| Exit condition | Memory-loop instantiation (calibrated default) |
+|---|---|
+| `max_iterations` | Retrieval reformulation: max 2 retries. Reflection pass: max 1 summarize-write cycle per thread |
+| `no_progress` | Same query (normalized) returning the same empty/identical result set twice -> stop retrying, answer without memory |
+| `oscillation` | Write-delete-write on the same memory key over window 4 (A-B-A-B) -> freeze the key, escalate; guards promote/demote churn |
+| `budget` | Hard cap on embedding calls + tokens per reflection run (e.g. 50 embedding calls / 20k tokens); counters never reset mid-run |
+| `success_predicate` | Declared before the loop: e.g. "top-1 retrieved memory passes the grounding check against the user turn" — report the evidence on exit |
+| `escalation_trigger` | Cross-tenant read attempt, or any user-data erasure request -> stop, surface to a human |
+
+**5-Phase Protocol mapping.** Memory infrastructure changes are consequential:
+- *Phase 1 DISCOVERY (read-only):* inventory existing schemas, collections, namespaces,
+  and row counts before proposing anything.
+- *Phase 2 MANIFEST:* list tables/collections to create or migrate, the rollback plan
+  (schema migrations down-scripts; collection snapshots), and declared exit conditions.
+- *Phase 3 HUMAN GATE:* dropping a collection, altering an index (rebuild cost), and
+  deleting user data are Class 3 IRREVERSIBLE or Class 2 COSTLY — per gate rules R1/R2
+  they must be gated and must define rollback. Never auto-run destructive migrations.
+- *Phase 4 IMPLEMENTATION:* apply strictly per manifest; new namespaces before new
+  writes.
+- *Phase 5 SELF-REVIEW:* verify with evidence — row counts, a cross-tenant negative
+  test, and a memory hit-rate probe (see `references/rag_memory_patterns.md` section 5).
+
+**HARDENED gate.** Agents that own memory writes (curator/reflection agents) go through
+the same `loop_auditor.py` >= 90 (HARDENED) gate as any other agent: their spec must
+declare the six exit conditions above, gate destructive memory operations, and emit a
+structured handoff (memories written, deduped, evicted, evidence of success_predicate).
+
+## When NOT to Use
+
+- **Designing the document-RAG pipeline** (corpus chunking strategy, embedding model
+  choice, reranker selection, ingestion): use `rag-architect`. This skill covers
+  chunking only for *memory entries*.
+- **Wiring LangGraph graphs, state schemas, reducers, or interrupts**: use
+  `langgraph-state-design`. This skill only covers its checkpointer/Store memory
+  surfaces.
+- **CrewAI role/task design**: use `crewai-role-engineering`; here only the memory
+  config.
+- **MAF enterprise hosting, DI, and telemetry**: use `ms-agent-framework-enterprise`.
+- **Token/cost reduction for LLM calls** (caching, routing): use `llm-cost-optimizer`
+  and `multi-llm-routing`.
+- **Measuring memory/retrieval quality with eval frameworks**: use
+  `agentic-evals-benchmarking`; this skill defines the memory-specific metrics only.
 
 ## References
 
 | File | Summary |
 |------|---------|
-| `references/rag_memory_patterns.md` | Reciprocal Rank Fusion (RRF) C# implementation codes, search results merging, and Postgres persistent checkpointer setups |
-
+| `references/memory_apis.md` | Real framework memory APIs: LangGraph checkpointer vs Store (semantic search config, namespacing), CrewAI memory configuration, MAF AgentThread + context providers; write policies, multi-tenancy, retention/erasure |
+| `references/vector_schema_examples.md` | Concrete schemas: pgvector DDL with HNSW/IVFFlat tuning, Azure AI Search index JSON, Qdrant collection config with sparse+dense vectors; BM25 parameter guidance |
+| `references/rag_memory_patterns.md` | Hybrid retrieval over memories: RRF implementations (Python + C#), when hybrid beats pure-dense, memory-vs-document chunking, durable checkpointer setup, memory quality evaluation |

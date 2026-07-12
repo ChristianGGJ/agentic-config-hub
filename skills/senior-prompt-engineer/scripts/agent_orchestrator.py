@@ -35,6 +35,26 @@ class AgentPattern(Enum):
     CUSTOM = "custom"
 
 
+# Relative input-cost multipliers by capability tier, normalized to fast = 1.0.
+# Absolute $/MTok prices change too often to hard-code: pass --price-per-mtok
+# with your provider's current published input price for dollar estimates.
+COST_TIER_MULTIPLIERS = {
+    'fast': 1.0,       # small/fast models (e.g. Haiku-class, mini/nano/flash-class)
+    'standard': 4.0,   # balanced workhorse models (e.g. Sonnet-class)
+    'frontier': 15.0   # top capability/reasoning models (e.g. Opus-class)
+}
+
+
+def infer_tier(model_name: str) -> str:
+    """Heuristically map a model name from the config to a capability tier."""
+    name = (model_name or '').lower()
+    if any(k in name for k in ('opus', 'frontier')):
+        return 'frontier'
+    if any(k in name for k in ('haiku', 'mini', 'nano', 'flash', 'lite')):
+        return 'fast'
+    return 'standard'
+
+
 @dataclass
 class ToolDefinition:
     """Definition of an agent tool"""
@@ -55,7 +75,7 @@ class AgentConfig:
     max_iterations: int = 10
     system_prompt: str = ""
     temperature: float = 0.7
-    model: str = "gpt-4"
+    model: str = "unspecified"
 
 
 @dataclass
@@ -177,7 +197,7 @@ def load_config(path: Path) -> AgentConfig:
         max_iterations=int(data.get('max_iterations', 10)),
         system_prompt=data.get('system_prompt', ''),
         temperature=float(data.get('temperature', 0.7)),
-        model=data.get('model', 'gpt-4')
+        model=data.get('model', 'unspecified')
     )
 
 
@@ -369,44 +389,44 @@ def generate_mermaid_diagram(config: AgentConfig) -> str:
     return '\n'.join(lines)
 
 
-def estimate_cost(config: AgentConfig, runs: int = 100) -> Dict[str, Any]:
-    """Estimate token costs for agent runs"""
+def estimate_cost(config: AgentConfig, runs: int = 100, tier: Optional[str] = None,
+                  price_per_mtok: Optional[float] = None) -> Dict[str, Any]:
+    """Estimate token usage and relative cost for agent runs.
+
+    Costs are reported as relative units (tokens/1000 * tier multiplier,
+    fast tier = 1.0x). If price_per_mtok is provided, USD estimates are
+    added, treating all tokens at the given input price (a rough lower
+    bound: output tokens typically cost 3-5x input).
+    """
     validation = validate_agent(config)
     min_tokens, max_tokens = validation.estimated_tokens_per_run
 
-    # Cost per 1K tokens
-    costs = {
-        'gpt-4': {'input': 0.03, 'output': 0.06},
-        'gpt-4-turbo': {'input': 0.01, 'output': 0.03},
-        'gpt-3.5-turbo': {'input': 0.0005, 'output': 0.0015},
-        'claude-3-opus': {'input': 0.015, 'output': 0.075},
-        'claude-3-sonnet': {'input': 0.003, 'output': 0.015},
-    }
+    resolved_tier = tier or infer_tier(config.model)
+    multiplier = COST_TIER_MULTIPLIERS.get(resolved_tier, COST_TIER_MULTIPLIERS['standard'])
 
-    model_cost = costs.get(config.model, costs['gpt-4'])
+    units_min = round(min_tokens / 1000 * multiplier, 4)
+    units_max = round(max_tokens / 1000 * multiplier, 4)
 
-    # Assume 60% input, 40% output
-    input_tokens = min_tokens * 0.6
-    output_tokens = min_tokens * 0.4
-
-    cost_per_run_min = (input_tokens / 1000 * model_cost['input'] +
-                        output_tokens / 1000 * model_cost['output'])
-
-    input_tokens_max = max_tokens * 0.6
-    output_tokens_max = max_tokens * 0.4
-    cost_per_run_max = (input_tokens_max / 1000 * model_cost['input'] +
-                        output_tokens_max / 1000 * model_cost['output'])
-
-    return {
+    result = {
         'model': config.model,
+        'cost_tier': resolved_tier,
         'tokens_per_run': {'min': min_tokens, 'max': max_tokens},
-        'cost_per_run': {'min': round(cost_per_run_min, 4), 'max': round(cost_per_run_max, 4)},
+        'relative_cost_units_per_run': {'min': units_min, 'max': units_max},
         'estimated_monthly': {
             'runs': runs * 30,
-            'cost_min': round(cost_per_run_min * runs * 30, 2),
-            'cost_max': round(cost_per_run_max * runs * 30, 2)
+            'relative_units_min': round(units_min * runs * 30, 2),
+            'relative_units_max': round(units_max * runs * 30, 2)
         }
     }
+
+    if price_per_mtok is not None:
+        usd_min = round(min_tokens / 1_000_000 * price_per_mtok, 6)
+        usd_max = round(max_tokens / 1_000_000 * price_per_mtok, 6)
+        result['usd_per_run'] = {'min': usd_min, 'max': usd_max}
+        result['estimated_monthly']['usd_min'] = round(usd_min * runs * 30, 2)
+        result['estimated_monthly']['usd_max'] = round(usd_max * runs * 30, 2)
+
+    return result
 
 
 def format_validation_report(config: AgentConfig, result: ValidationResult) -> str:
@@ -417,42 +437,42 @@ def format_validation_report(config: AgentConfig, result: ValidationResult) -> s
     lines.append("=" * 50)
     lines.append("")
 
-    lines.append(f"📋 AGENT INFO")
+    lines.append("AGENT INFO")
     lines.append(f"  Name:    {config.name}")
     lines.append(f"  Pattern: {config.pattern.value}")
     lines.append(f"  Model:   {config.model}")
     lines.append("")
 
-    lines.append(f"🔧 TOOLS ({len(config.tools)} registered)")
+    lines.append(f"TOOLS ({len(config.tools)} registered)")
     for tool in config.tools:
         status = result.tool_status.get(tool.name, "Unknown")
-        emoji = "✅" if status.startswith("OK") else "⚠️"
-        lines.append(f"  {emoji} {tool.name} - {status}")
+        marker = "[OK]" if status.startswith("OK") else "[WARN]"
+        lines.append(f"  {marker} {tool.name} - {status}")
     lines.append("")
 
-    lines.append("📊 FLOW ANALYSIS")
+    lines.append("FLOW ANALYSIS")
     lines.append(f"  Max iterations:      {result.max_depth}")
     lines.append(f"  Estimated tokens:    {result.estimated_tokens_per_run[0]:,} - {result.estimated_tokens_per_run[1]:,}")
-    lines.append(f"  Potential loop:      {'⚠️ Yes' if result.potential_infinite_loop else '✅ No'}")
+    lines.append(f"  Potential loop:      {'[WARN] Yes' if result.potential_infinite_loop else '[OK] No'}")
     lines.append("")
 
     if result.errors:
-        lines.append(f"❌ ERRORS ({len(result.errors)})")
+        lines.append(f"ERRORS ({len(result.errors)})")
         for error in result.errors:
-            lines.append(f"  • {error}")
+            lines.append(f"  - {error}")
         lines.append("")
 
     if result.warnings:
-        lines.append(f"⚠️ WARNINGS ({len(result.warnings)})")
+        lines.append(f"WARNINGS ({len(result.warnings)})")
         for warning in result.warnings:
-            lines.append(f"  • {warning}")
+            lines.append(f"  - {warning}")
         lines.append("")
 
     # Overall status
     if result.is_valid:
-        lines.append("✅ VALIDATION PASSED")
+        lines.append("[PASS] VALIDATION PASSED")
     else:
-        lines.append("❌ VALIDATION FAILED")
+        lines.append("[FAIL] VALIDATION FAILED")
 
     lines.append("")
     lines.append("=" * 50)
@@ -475,7 +495,7 @@ Agent config format (YAML):
 
 name: research_assistant
 pattern: react
-model: gpt-4
+model: my-provider-standard-model   # any name; tier inferred or set via --tier
 max_iterations: 10
 tools:
   - name: web_search
@@ -493,6 +513,10 @@ tools:
                        help='Visualization format (default: ascii)')
     parser.add_argument('--estimate-cost', '-e', action='store_true', help='Estimate token costs')
     parser.add_argument('--runs', '-r', type=int, default=100, help='Daily runs for cost estimation')
+    parser.add_argument('--tier', choices=sorted(COST_TIER_MULTIPLIERS.keys()), default=None,
+                       help='Capability tier for cost estimation (default: inferred from model name)')
+    parser.add_argument('--price-per-mtok', type=float, default=None,
+                       help='Current input price in $ per million tokens; enables USD estimates')
     parser.add_argument('--output', '-o', help='Output file path')
     parser.add_argument('--json', '-j', action='store_true', help='Output as JSON')
 
@@ -534,18 +558,24 @@ tools:
 
     # Cost estimation
     if args.estimate_cost:
-        costs = estimate_cost(config, args.runs)
+        costs = estimate_cost(config, args.runs, args.tier, args.price_per_mtok)
         if args.json:
             output_parts.append(json.dumps(costs, indent=2))
         else:
             output_parts.append("")
-            output_parts.append("💰 COST ESTIMATION")
-            output_parts.append(f"  Model: {costs['model']}")
+            output_parts.append("COST ESTIMATION")
+            output_parts.append(f"  Model: {costs['model']} (tier: {costs['cost_tier']})")
             output_parts.append(f"  Tokens per run: {costs['tokens_per_run']['min']:,} - {costs['tokens_per_run']['max']:,}")
-            output_parts.append(f"  Cost per run: ${costs['cost_per_run']['min']:.4f} - ${costs['cost_per_run']['max']:.4f}")
+            output_parts.append(f"  Relative cost per run: {costs['relative_cost_units_per_run']['min']:,.2f} - "
+                                f"{costs['relative_cost_units_per_run']['max']:,.2f} units (fast tier = 1.0x)")
             output_parts.append(f"  Monthly ({costs['estimated_monthly']['runs']:,} runs):")
-            output_parts.append(f"    Min: ${costs['estimated_monthly']['cost_min']:.2f}")
-            output_parts.append(f"    Max: ${costs['estimated_monthly']['cost_max']:.2f}")
+            output_parts.append(f"    Min: {costs['estimated_monthly']['relative_units_min']:,.2f} units")
+            output_parts.append(f"    Max: {costs['estimated_monthly']['relative_units_max']:,.2f} units")
+            if 'usd_per_run' in costs:
+                output_parts.append(f"  USD per run (at ${args.price_per_mtok}/MTok input): "
+                                    f"${costs['usd_per_run']['min']:.4f} - ${costs['usd_per_run']['max']:.4f}")
+                output_parts.append(f"  USD monthly: ${costs['estimated_monthly']['usd_min']:.2f} - "
+                                    f"${costs['estimated_monthly']['usd_max']:.2f}")
 
     # Output
     output = '\n'.join(output_parts)

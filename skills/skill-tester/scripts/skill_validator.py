@@ -1,16 +1,28 @@
 #!/usr/bin/env python3
 """
-Skill Validator - Validates skill directories against quality standards
+Skill Validator - Validates skill directories against hub quality standards
 
 This script validates a skill directory structure, documentation, and Python scripts
-against the agentic-config-hub ecosystem standards. It checks for required files, proper
-formatting, and compliance with tier-specific requirements.
+against the agentic-config-hub ecosystem standards (skills/CLAUDE.md).
+
+Hub canon enforced by default:
+  - SKILL.md is the only mandatory file (doc-only knowledge packages are valid)
+  - Frontmatter has exactly two required fields, both quoted:
+      name: "<kebab-case, matches folder name>"
+      description: "Use when ..."
+  - Legacy metadata fields (Name/Tier/Category/Dependencies/Author/Version) are
+    OPTIONAL; they are never required and never fail validation
+  - Scripts (when present) must be stdlib-only with argparse CLI and main guard;
+    library modules (no CLI entry point) are exempt from the CLI checks
+
+Tier requirements (BASIC/STANDARD/POWERFUL) are legacy metadata and are only
+enforced when --tier is passed explicitly.
 
 Usage:
     python skill_validator.py <skill_path> [--tier TIER] [--json] [--verbose]
 
 Author: Claude Skills Engineering Team
-Version: 1.0.0
+Version: 2.0.0
 Dependencies: Python Standard Library Only
 """
 
@@ -104,7 +116,7 @@ class ValidationReport:
 class SkillValidator:
     """Main skill validation engine"""
     
-    # Tier requirements
+    # Tier requirements (LEGACY metadata - only enforced when --tier is passed)
     TIER_REQUIREMENTS = {
         "BASIC": {
             "min_skill_md_lines": 100,
@@ -132,12 +144,23 @@ class SkillValidator:
         }
     }
     
-    REQUIRED_SKILL_MD_SECTIONS = [
-        "Name", "Description", "Features", "Usage", "Examples"
-    ]
-    
-    FRONTMATTER_REQUIRED_FIELDS = [
-        "Name", "Tier", "Category", "Dependencies", "Author", "Version"
+    # Recommended sections (suggestions only - hub canon does not mandate headings).
+    # Each entry maps a section concept to a regex alternation of accepted headings.
+    RECOMMENDED_SKILL_MD_SECTIONS = {
+        "Description": r"(?:Description|Overview|Purpose)",
+        "Features": r"(?:Features|Capabilities|Core\s+Features|Core\s+Capabilities)",
+        "Usage": r"(?:Usage|How\s+to\s+Use|Quick\s+Start|Workflows?)",
+        "Examples": r"(?:Examples?|Usage\s+Scenarios|Worked\s+Example)"
+    }
+
+    # Hub canon (skills/CLAUDE.md): exactly two REQUIRED frontmatter fields,
+    # both quoted. name matches the folder; description starts with "Use when".
+    FRONTMATTER_REQUIRED_FIELDS = ["name", "description"]
+
+    # Legacy metadata fields - OPTIONAL. Accepted in frontmatter or in a body
+    # metadata block; never required, never a validation failure.
+    FRONTMATTER_OPTIONAL_METADATA = [
+        "Name", "Tier", "Category", "Dependencies", "Author", "Version", "Last Updated"
     ]
     
     def __init__(self, skill_path: str, target_tier: Optional[str] = None, verbose: bool = False):
