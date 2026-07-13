@@ -45,6 +45,12 @@ description: "Use when designing agentic ecosystems, hardening agents with exit 
 - Composition happens one level up: agents and workflows combine skills; skills never
   combine each other.
 
+**Before creating a new skill,** follow the discovery method in
+`agentic-system-architect/references/skill_discovery_design.md` (atomic delimitation,
+canonical-syntax extraction, defensive anti-pattern mining, interface definition,
+anti-duplication) and run its `skill_overlap_check.py` against `skills/` — if the
+capability can be delivered by combining or extending existing skills, do not add a file.
+
 ## Python Script Rules
 
 Every script in `scripts/` must satisfy all of the following (these are CI gates):

@@ -281,6 +281,24 @@ python scripts/hitl_gate_validator.py assets/workflow-template.md
 python scripts/hitl_gate_validator.py workflows/release.json --json
 ```
 
+### 5. skill_overlap_check.py
+
+**Purpose:** Deterministic anti-duplication check for skill discovery (step 5 of `references/skill_discovery_design.md`). Sweeps a `skills/` registry for the highest capability-overlap pairs, or compares a proposed skill's description against every existing skill (`--against`), using a stdlib Jaccard similarity over frontmatter descriptions. No LLM, no network.
+
+**Key flags:**
+- `skills_dir` (positional) - path to the skills/ directory
+- `--against TEXT` / `--against-file PATH` - compare a proposed skill against the registry
+- `--threshold` - overlap at/above this flags (default 0.15, deliberately sensitive); `--top`, `--json`
+
+**Result:** exit 0 clean, exit 3 when an overlap is at/above threshold (advisory: apply the combine-or-extend test before creating a new skill), exit 1 on I/O/usage error.
+
+**Usage examples:**
+
+```bash
+python scripts/skill_overlap_check.py ../../skills/ --json
+python scripts/skill_overlap_check.py ../../skills/ --against "Use when generating idempotent EF Core migration scripts for production"
+```
+
 ## End-to-End Workflow
 
 Ecosystem design itself follows the 5-Phase Protocol. The architect agent practices what it enforces:
@@ -326,6 +344,7 @@ Project documentation exists. Phase 1 absorbs it into context packs, and from th
 | `references/react_reasoning_patterns.md` | ReAct, Reflexion, and Plan-and-Execute in depth: when to use each, trace structure, and anti-patterns |
 | `references/hitl_defensive_architectures.md` | Gate placement strategies, irreversibility classification, rollback design, and escalation paths |
 | `references/four_pillar_ecosystem.md` | The context/skills/agents/workflows architecture: responsibilities, knowledge flow, atomicity, and directory conventions |
+| `references/skill_discovery_design.md` | Method for discovering/scoping a NEW skill: atomic delimitation, canonical-syntax extraction, defensive anti-pattern mining (loop fuel), interface definition, and anti-duplication (backed by `scripts/skill_overlap_check.py`) |
 | `references/multi_framework_orchestration.md` | Task distribution rubric across CrewAI, LangGraph, and Microsoft Agent Framework, and API-First agential microservices design rules |
 
 

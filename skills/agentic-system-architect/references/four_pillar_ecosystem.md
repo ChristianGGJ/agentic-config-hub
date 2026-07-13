@@ -202,6 +202,12 @@ is in the wrong pillar — move it downstream instead.
 5. **Workflows own sequencing.** If an agent prompt says "then hand off to the deploy agent",
    that sequencing must move into a workflow step with `depends_on`.
 
+> **Discovering a new skill?** These rules define *what* a skill is; the research method
+> for scoping one — atomic delimitation, canonical-syntax extraction, defensive
+> anti-pattern mining, interface definition, and the anti-duplication check (with the
+> deterministic `scripts/skill_overlap_check.py`) — is in
+> `references/skill_discovery_design.md`. Run it before authoring any new skill.
+
 ---
 
 ## Directory Layout

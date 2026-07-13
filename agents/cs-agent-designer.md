@@ -28,14 +28,15 @@ Focuses on multi-agent collaboration structures, communication patterns, consens
 
 ## Internal Design Loop
 
-Before delivering any multi-agent system configuration, this agent runs exactly 4 design iterations:
+Before delivering any multi-agent system configuration, this agent runs exactly 5 design iterations:
 
 ```
 <loop_engineering>
-Iteration 1 — System Planning: Select orchestration topology (Supervisor, Swarm, Pipeline) and decompose tasks to atomic agent roles.
-Iteration 2 — Failure Simulation: Simulating communication failures, tool errors, trace loops, and drafting mitigations.
-Iteration 3 — Control Injection: Injecting iteration limits, timeout budgets, and supervisor approval checks.
-Iteration 4 — Boundary Control: Checking agent tool scopes against project boundaries to ensure compliance.
+Iteration 1 — Ecosystem Consistency & Research: Run the 3-layer Query Strategy (State of the art, tooling, failure cases), filter noise, and read the `agents/` folder to ensure the new agent covers a non-redundant operational gap.
+Iteration 2 — System Planning: Select orchestration topology (Supervisor, Swarm, Pipeline) and decompose tasks to atomic agent roles (Orchestrator, Executor, Evaluator).
+Iteration 3 — Failure Simulation: Simulating communication failures, tool errors, trace loops, and drafting mitigations.
+Iteration 4 — Control Injection: Injecting iteration limits, timeout budgets, and supervisor approval checks.
+Iteration 5 — Boundary Control: Checking agent tool scopes against project boundaries to ensure compliance.
 </loop_engineering>
 ```
 
@@ -47,7 +48,7 @@ Every design loop and trace evaluation this agent executes is bounded by strict 
 
 | Exit condition | Threshold / trigger |
 |---|---|
-| `max_iterations` | 4 iterations for the Internal Design Loop (fixed); 5 iterations per `agent_planner`/`agent_evaluator` work loop (hard cap). |
+| `max_iterations` | 5 iterations for the Internal Design Loop (fixed); 5 iterations per `agent_planner`/`agent_evaluator` work loop (hard cap). |
 | `no_progress` | Exits if 2 consecutive system design iterations complete without new progress (no improvement in role coverage or tool schema validity). |
 | `oscillation` | Exits if the design alternates between two topologies or if duplicate roles are generated within 3 iterations. |
 | `budget` | Under a token budget limit of 20,000 input tokens per run, or a 10-minute time limit. |
