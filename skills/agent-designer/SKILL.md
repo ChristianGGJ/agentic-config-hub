@@ -22,6 +22,19 @@ This skill owns: single-agent persona/system-prompt/tool design (see `references
 
 ## Core Capabilities
 
+### 0. Research and Discovery (Query Engineering)
+
+Before designing an agent, the designer must research and synthesize capabilities using a strict methodology:
+
+#### 3-Layer Query Strategy
+1. **State of the Art:** Search for current industry best practices and canonical design patterns for the specific technical problem.
+2. **Tooling Identification:** Track down which APIs, SDKs, or CLI tools are most efficient for the agent to interact with its environment.
+3. **Failure Case Detection:** Proactively search for the most common errors made by humans or AI when performing the specific task, using these as preventative bounds.
+
+#### Strict Noise Filtering & Capability Synthesis
+- **Prioritize Official Documentation:** Rely strictly on technical docs (e.g., MSDN, LangGraph docs, corporate GitHubs).
+- **Capability Synthesis:** Extract only real, operational capabilities (action verbs and technical flows). Discard generic marketing noise, ambiguous adjectives, and commercial promises.
+
 ### 1. Agent Architecture Patterns
 
 #### Single Agent Pattern
@@ -61,37 +74,53 @@ This skill owns: single-agent persona/system-prompt/tool design (see `references
 ### 2. Agent Role Definition
 
 #### Role Specification Framework
-- **Identity:** Name, purpose statement, core competencies
-- **Responsibilities:** Primary tasks, decision boundaries, success criteria
-- **Capabilities:** Required tools, knowledge domains, processing limits
-- **Interfaces:** Input/output formats, communication protocols
-- **Constraints:** Security boundaries, resource limits, operational guidelines
+
+Every agent role is specified across these five engineering fields. **None is optional — `Constraints` in particular is the hard rail that prevents hallucination, controls cost, and bounds autonomy; it is software configuration, never narrative.**
+
+- **Identity:** Name, purpose statement, core competencies.
+- **Responsibilities:** Primary tasks, decision boundaries, success criteria.
+- **Capabilities:** Required tools, knowledge domains, processing limits.
+- **Interfaces:** Input/output formats, communication protocols.
+- **Constraints:** Security boundaries, resource limits (token / time / tool-call budgets), and operational guidelines — enforced as explicit config, not left to the model's discretion.
+
+#### CrewAI-Native Profile Mapping (Role / Goal / Backstory)
+
+Frameworks such as CrewAI model an agent as a `Role` / `Goal` / `Backstory` triple. Map the specification above onto that triple **additively** — the triple is a presentation layer over the engineering fields, it does not replace them:
+
+- **Role:** Canonical position (derived from Identity + Responsibilities).
+- **Goal:** The measurable objective that defines task success (from Responsibilities).
+- **Backstory:** The identity narrative that shapes tone and technical rigor. **Backstory tunes behavior only** — security boundaries, resource limits, and tool allowlists stay in `Constraints` as explicit config, never encoded as story.
 
 #### Common Agent Archetypes
 
-**Coordinator Agent**
+Five co-equal archetypes, each with a distinct technical purpose. They classify into three functional taxonomy classes — **Orchestrator, Executor, Evaluator** — but the two infrastructure archetypes (Interface, Monitor) are **not** subclasses of Executor or Evaluator; their purpose is orthogonal and must not be collapsed into them.
+
+**Coordinator Agent** — *Orchestrator class*
 - Orchestrates multi-agent workflows
 - Makes high-level decisions and resource allocation
-- Monitors system health and performance
-- Handles escalations and conflict resolution
+- Monitors system-level progress; handles escalations and conflict resolution
 
-**Specialist Agent**
-- Deep expertise in specific domain (code, data, research)
+**Specialist Agent** — *Executor class*
+- Deep expertise in a specific domain (code, data, research)
 - Optimized tools and knowledge for specialized tasks
-- High-quality output within narrow scope
-- Clear handoff protocols for out-of-scope requests
+- High-quality output within a narrow scope; clear handoff for out-of-scope requests
 
-**Interface Agent**
+**Evaluator / Critic Agent** — *Evaluator class*
+- Audits and verifies the work of other agents against hard acceptance criteria
+- Runs strict QA checklists; issues PASS / FAIL verdicts
+- Never produces the artifact it audits (producer/critic separation)
+
+**Interface Agent** — *Infrastructure*
 - Handles external interactions (users, APIs, systems)
 - Protocol translation and format conversion
 - Authentication and authorization management
-- User experience optimization
 
-**Monitor Agent**
+**Monitor Agent** — *Infrastructure*
 - System health monitoring and alerting
 - Performance metrics collection and analysis
-- Anomaly detection and reporting
-- Compliance and audit trail maintenance
+- Anomaly detection, compliance and audit-trail maintenance
+
+**Taxonomy note (identity-crisis guard):** classify every agent by its primary function — *Orchestrator* (divides subtasks, coordinates flow), *Executor* (actuates tools, produces output), *Evaluator* (audits others via strict checklists). This prevents role confusion, but never force Interface (protocol / auth infra) or Monitor (observability infra) into an Executor or Evaluator box — they are infrastructure roles carrying their own responsibilities.
 
 **Persona and system-prompt authoring:** turning an archetype into a deployable agent means writing its system prompt. Use the three-layer method (Role Definition -> Boundaries -> Output Contract) in `references/agent_prompt_design.md`, which includes one complete worked system prompt per archetype above.
 
@@ -285,6 +314,7 @@ Orchestration at ecosystem scale — gating, sequencing, and governance across m
 ## Implementation Guidelines
 
 ### Architecture Decision Process
+0. **Ecosystem Consistency Analysis (Anti-Redundancy):** **MANDATORY**. Before proposing any new agent, you must read the current `agents/` folder of the repository. Ask: "Does this new agent propose skills that an existing agent already has, or does it truly cover an operational gap?" Do not proceed if redundant.
 1. **Requirements Analysis:** Understand system goals, constraints, scale
 2. **Pattern Selection:** Choose appropriate architecture pattern
 3. **Agent Design:** Define roles, responsibilities, interfaces
