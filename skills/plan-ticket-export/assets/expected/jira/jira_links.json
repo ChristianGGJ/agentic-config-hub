@@ -1,0 +1,155 @@
+[
+  {
+    "method": "POST",
+    "path": "/rest/api/3/issueLink",
+    "blocker_task": "requirements",
+    "dependent_task": "architecture",
+    "body": {
+      "type": {
+        "name": "Blocks"
+      },
+      "inwardIssue": {
+        "key": "<<RESOLVE:acfhub-8669767d-architecture>>"
+      },
+      "outwardIssue": {
+        "key": "<<RESOLVE:acfhub-8669767d-requirements>>"
+      }
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/rest/api/3/issueLink",
+    "blocker_task": "requirements",
+    "dependent_task": "ui-design",
+    "body": {
+      "type": {
+        "name": "Blocks"
+      },
+      "inwardIssue": {
+        "key": "<<RESOLVE:acfhub-8669767d-ui-design>>"
+      },
+      "outwardIssue": {
+        "key": "<<RESOLVE:acfhub-8669767d-requirements>>"
+      }
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/rest/api/3/issueLink",
+    "blocker_task": "architecture",
+    "dependent_task": "backend-impl",
+    "body": {
+      "type": {
+        "name": "Blocks"
+      },
+      "inwardIssue": {
+        "key": "<<RESOLVE:acfhub-8669767d-backend-impl>>"
+      },
+      "outwardIssue": {
+        "key": "<<RESOLVE:acfhub-8669767d-architecture>>"
+      }
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/rest/api/3/issueLink",
+    "blocker_task": "architecture",
+    "dependent_task": "frontend-impl",
+    "body": {
+      "type": {
+        "name": "Blocks"
+      },
+      "inwardIssue": {
+        "key": "<<RESOLVE:acfhub-8669767d-frontend-impl>>"
+      },
+      "outwardIssue": {
+        "key": "<<RESOLVE:acfhub-8669767d-architecture>>"
+      }
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/rest/api/3/issueLink",
+    "blocker_task": "ui-design",
+    "dependent_task": "frontend-impl",
+    "body": {
+      "type": {
+        "name": "Blocks"
+      },
+      "inwardIssue": {
+        "key": "<<RESOLVE:acfhub-8669767d-frontend-impl>>"
+      },
+      "outwardIssue": {
+        "key": "<<RESOLVE:acfhub-8669767d-ui-design>>"
+      }
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/rest/api/3/issueLink",
+    "blocker_task": "backend-impl",
+    "dependent_task": "integration",
+    "body": {
+      "type": {
+        "name": "Blocks"
+      },
+      "inwardIssue": {
+        "key": "<<RESOLVE:acfhub-8669767d-integration>>"
+      },
+      "outwardIssue": {
+        "key": "<<RESOLVE:acfhub-8669767d-backend-impl>>"
+      }
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/rest/api/3/issueLink",
+    "blocker_task": "frontend-impl",
+    "dependent_task": "integration",
+    "body": {
+      "type": {
+        "name": "Blocks"
+      },
+      "inwardIssue": {
+        "key": "<<RESOLVE:acfhub-8669767d-integration>>"
+      },
+      "outwardIssue": {
+        "key": "<<RESOLVE:acfhub-8669767d-frontend-impl>>"
+      }
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/rest/api/3/issueLink",
+    "blocker_task": "integration",
+    "dependent_task": "qa-testing",
+    "body": {
+      "type": {
+        "name": "Blocks"
+      },
+      "inwardIssue": {
+        "key": "<<RESOLVE:acfhub-8669767d-qa-testing>>"
+      },
+      "outwardIssue": {
+        "key": "<<RESOLVE:acfhub-8669767d-integration>>"
+      }
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/rest/api/3/issueLink",
+    "blocker_task": "qa-testing",
+    "dependent_task": "launch",
+    "body": {
+      "type": {
+        "name": "Blocks"
+      },
+      "inwardIssue": {
+        "key": "<<RESOLVE:acfhub-8669767d-launch>>"
+      },
+      "outwardIssue": {
+        "key": "<<RESOLVE:acfhub-8669767d-qa-testing>>"
+      }
+    }
+  }
+]

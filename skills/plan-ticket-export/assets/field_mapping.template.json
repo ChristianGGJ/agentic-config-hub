@@ -1,0 +1,16 @@
+{
+  "_comment": "Field-mapping and target-coordinate template for plan-ticket-export. Copy and edit. These values are NON-SECRET identifiers (project keys, gids, list ids). NEVER put API tokens here - tokens stay in env vars named in the runbook. Any missing coordinate falls back to a $PLACEHOLDER that the runbook tells you to set.",
+  "jira": {
+    "project_key": "PLAN",
+    "issue_type": "Task",
+    "blocks_link_type": "Blocks"
+  },
+  "asana": {
+    "workspace_gid": "1200000000000000",
+    "project_gid": "1200000000000001"
+  },
+  "trello": {
+    "board_id": "5f00000000000000000000bb",
+    "list_id": "5f00000000000000000000aa"
+  }
+}

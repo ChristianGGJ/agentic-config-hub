@@ -1,0 +1,62 @@
+{
+  "name": "product-launch-sample",
+  "version": "0.1.0",
+  "tasks": [
+    {
+      "id": "requirements",
+      "title": "Freeze launch requirements",
+      "description": "Gather and freeze the launch requirements with sign-off from product and legal.",
+      "depends_on": [],
+      "owner": "pm"
+    },
+    {
+      "id": "architecture",
+      "title": "Define service architecture",
+      "description": "Define service architecture and public interfaces.",
+      "depends_on": ["requirements"],
+      "owner": "tech-lead"
+    },
+    {
+      "id": "ui-design",
+      "title": "Design the user interface",
+      "description": "Design and review the user interface against the frozen requirements.",
+      "depends_on": ["requirements"],
+      "owner": "design"
+    },
+    {
+      "id": "backend-impl",
+      "title": "Implement backend services",
+      "description": "Implement backend services against the approved architecture.",
+      "depends_on": ["architecture"],
+      "owner": "backend"
+    },
+    {
+      "id": "frontend-impl",
+      "title": "Implement frontend",
+      "description": "Implement the frontend against the approved design and architecture.",
+      "depends_on": ["architecture", "ui-design"],
+      "owner": "frontend"
+    },
+    {
+      "id": "integration",
+      "title": "Integrate and wire environments",
+      "description": "Integrate frontend and backend, wire staging and production environments.",
+      "depends_on": ["backend-impl", "frontend-impl"],
+      "owner": "backend"
+    },
+    {
+      "id": "qa-testing",
+      "title": "End-to-end QA pass",
+      "description": "Run the end-to-end test pass and fix launch-blocking defects.",
+      "depends_on": ["integration"],
+      "owner": "qa"
+    },
+    {
+      "id": "launch",
+      "title": "Public launch",
+      "description": "Cut over to production and announce the public launch.",
+      "depends_on": ["qa-testing"],
+      "owner": "pm"
+    }
+  ]
+}

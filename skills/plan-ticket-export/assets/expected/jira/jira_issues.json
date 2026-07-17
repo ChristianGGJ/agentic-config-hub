@@ -1,0 +1,290 @@
+[
+  {
+    "method": "POST",
+    "path": "/rest/api/3/issue",
+    "task_id": "requirements",
+    "idempotency_label": "acfhub-8669767d-requirements",
+    "body": {
+      "fields": {
+        "project": {
+          "key": "PLAN"
+        },
+        "issuetype": {
+          "name": "Task"
+        },
+        "summary": "Freeze launch requirements",
+        "description": {
+          "type": "doc",
+          "version": 1,
+          "content": [
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "Gather and freeze the launch requirements with sign-off from product and legal."
+                }
+              ]
+            }
+          ]
+        },
+        "labels": [
+          "acfhub-8669767d",
+          "acfhub-8669767d-requirements"
+        ]
+      }
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/rest/api/3/issue",
+    "task_id": "architecture",
+    "idempotency_label": "acfhub-8669767d-architecture",
+    "body": {
+      "fields": {
+        "project": {
+          "key": "PLAN"
+        },
+        "issuetype": {
+          "name": "Task"
+        },
+        "summary": "Define service architecture",
+        "description": {
+          "type": "doc",
+          "version": 1,
+          "content": [
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "Define service architecture and public interfaces."
+                }
+              ]
+            }
+          ]
+        },
+        "labels": [
+          "acfhub-8669767d",
+          "acfhub-8669767d-architecture"
+        ]
+      }
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/rest/api/3/issue",
+    "task_id": "ui-design",
+    "idempotency_label": "acfhub-8669767d-ui-design",
+    "body": {
+      "fields": {
+        "project": {
+          "key": "PLAN"
+        },
+        "issuetype": {
+          "name": "Task"
+        },
+        "summary": "Design the user interface",
+        "description": {
+          "type": "doc",
+          "version": 1,
+          "content": [
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "Design and review the user interface against the frozen requirements."
+                }
+              ]
+            }
+          ]
+        },
+        "labels": [
+          "acfhub-8669767d",
+          "acfhub-8669767d-ui-design"
+        ]
+      }
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/rest/api/3/issue",
+    "task_id": "backend-impl",
+    "idempotency_label": "acfhub-8669767d-backend-impl",
+    "body": {
+      "fields": {
+        "project": {
+          "key": "PLAN"
+        },
+        "issuetype": {
+          "name": "Task"
+        },
+        "summary": "Implement backend services",
+        "description": {
+          "type": "doc",
+          "version": 1,
+          "content": [
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "Implement backend services against the approved architecture."
+                }
+              ]
+            }
+          ]
+        },
+        "labels": [
+          "acfhub-8669767d",
+          "acfhub-8669767d-backend-impl"
+        ]
+      }
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/rest/api/3/issue",
+    "task_id": "frontend-impl",
+    "idempotency_label": "acfhub-8669767d-frontend-impl",
+    "body": {
+      "fields": {
+        "project": {
+          "key": "PLAN"
+        },
+        "issuetype": {
+          "name": "Task"
+        },
+        "summary": "Implement frontend",
+        "description": {
+          "type": "doc",
+          "version": 1,
+          "content": [
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "Implement the frontend against the approved design and architecture."
+                }
+              ]
+            }
+          ]
+        },
+        "labels": [
+          "acfhub-8669767d",
+          "acfhub-8669767d-frontend-impl"
+        ]
+      }
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/rest/api/3/issue",
+    "task_id": "integration",
+    "idempotency_label": "acfhub-8669767d-integration",
+    "body": {
+      "fields": {
+        "project": {
+          "key": "PLAN"
+        },
+        "issuetype": {
+          "name": "Task"
+        },
+        "summary": "Integrate and wire environments",
+        "description": {
+          "type": "doc",
+          "version": 1,
+          "content": [
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "Integrate frontend and backend, wire staging and production environments."
+                }
+              ]
+            }
+          ]
+        },
+        "labels": [
+          "acfhub-8669767d",
+          "acfhub-8669767d-integration"
+        ]
+      }
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/rest/api/3/issue",
+    "task_id": "qa-testing",
+    "idempotency_label": "acfhub-8669767d-qa-testing",
+    "body": {
+      "fields": {
+        "project": {
+          "key": "PLAN"
+        },
+        "issuetype": {
+          "name": "Task"
+        },
+        "summary": "End-to-end QA pass",
+        "description": {
+          "type": "doc",
+          "version": 1,
+          "content": [
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "Run the end-to-end test pass and fix launch-blocking defects."
+                }
+              ]
+            }
+          ]
+        },
+        "labels": [
+          "acfhub-8669767d",
+          "acfhub-8669767d-qa-testing"
+        ]
+      }
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/rest/api/3/issue",
+    "task_id": "launch",
+    "idempotency_label": "acfhub-8669767d-launch",
+    "body": {
+      "fields": {
+        "project": {
+          "key": "PLAN"
+        },
+        "issuetype": {
+          "name": "Task"
+        },
+        "summary": "Public launch",
+        "description": {
+          "type": "doc",
+          "version": 1,
+          "content": [
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "Cut over to production and announce the public launch."
+                }
+              ]
+            }
+          ]
+        },
+        "labels": [
+          "acfhub-8669767d",
+          "acfhub-8669767d-launch"
+        ]
+      }
+    }
+  }
+]
