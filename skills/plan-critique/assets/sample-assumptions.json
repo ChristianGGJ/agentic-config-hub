@@ -1,0 +1,51 @@
+{
+  "assumptions": [
+    {
+      "id": "ASM-1",
+      "statement": "Payment provider sandbox will be available from week 2",
+      "type": "external-commitment",
+      "invalidation_test": "Request sandbox credentials in week 1; escalate if not issued within 3 business days",
+      "owner": "alice",
+      "last_reviewed": "2026-06-30",
+      "affected_task_ids": ["T7"]
+    },
+    {
+      "id": "ASM-2",
+      "statement": "The dashboard can reuse the intranet component library",
+      "type": "technical",
+      "evidence_source": "Component inventory audit, 2026-05",
+      "owner": "ben",
+      "last_reviewed": "2026-06-30",
+      "affected_task_ids": ["T4"]
+    },
+    {
+      "id": "ASM-3",
+      "statement": "Customer data volume stays under one million records in year one",
+      "type": "estimate",
+      "evidence_source": "2025 customer growth report",
+      "invalidation_test": "Monthly record-count check against the growth curve",
+      "last_reviewed": "2026-06-30",
+      "affected_task_ids": ["T4", "T6"]
+    },
+    {
+      "id": "ASM-4",
+      "statement": "No regulatory approval is needed for the payment flows",
+      "type": "external-commitment",
+      "evidence_source": "Informal note from finance, 2025",
+      "invalidation_test": "Written confirmation from compliance counsel",
+      "owner": "ben",
+      "last_reviewed": "2025-11-02",
+      "affected_task_ids": ["T7", "T8"]
+    },
+    {
+      "id": "ASM-5",
+      "statement": "Two frontend engineers remain allocated for the full build phase",
+      "type": "capability",
+      "evidence_source": "Resource plan approved 2026-06-15",
+      "invalidation_test": "Weekly allocation check in the resource tool",
+      "owner": "alice",
+      "last_reviewed": "2026-07-01",
+      "affected_task_ids": ["T4", "T6"]
+    }
+  ]
+}

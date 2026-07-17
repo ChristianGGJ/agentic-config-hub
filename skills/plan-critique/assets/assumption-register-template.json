@@ -1,0 +1,14 @@
+{
+  "assumptions": [
+    {
+      "id": "ASM-1",
+      "statement": "<the premise the plan silently depends on, stated as a claim that can be false>",
+      "type": "<one of: estimate | dependency | capability | technical | external-commitment>",
+      "evidence_source": "<where the belief comes from: document, dataset, named commitment - never a restatement of the assumption>",
+      "invalidation_test": "<the cheapest observation that would reveal the assumption is false>",
+      "owner": "<person accountable for re-testing and escalation>",
+      "last_reviewed": "YYYY-MM-DD",
+      "affected_task_ids": ["<task id from plan.json>"]
+    }
+  ]
+}

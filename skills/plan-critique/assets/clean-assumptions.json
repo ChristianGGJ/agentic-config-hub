@@ -1,0 +1,24 @@
+{
+  "assumptions": [
+    {
+      "id": "ASM-1",
+      "statement": "Traffic profile stays within 2x of the 2026 Q2 baseline during rollout",
+      "type": "estimate",
+      "evidence_source": "Traffic analytics export, 2026-06",
+      "invalidation_test": "Alert if sustained traffic exceeds 1.5x baseline for 24 hours",
+      "owner": "ben",
+      "last_reviewed": "2026-07-01",
+      "affected_task_ids": ["C5"]
+    },
+    {
+      "id": "ASM-2",
+      "statement": "The on-call team has capacity to absorb the new service",
+      "type": "capability",
+      "evidence_source": "On-call load report, 2026-06",
+      "invalidation_test": "Confirm rota coverage before the handoff session",
+      "owner": "carol",
+      "last_reviewed": "2026-07-01",
+      "affected_task_ids": ["C6"]
+    }
+  ]
+}

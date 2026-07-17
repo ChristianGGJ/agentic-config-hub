@@ -1,0 +1,67 @@
+{
+  "name": "api-hardening",
+  "version": "0.1.0",
+  "tasks": [
+    {
+      "id": "C1",
+      "wbs_id": "1.1",
+      "description": "Define hardening requirements and scope",
+      "deliverable": "Approved scope document",
+      "owner": "alice",
+      "duration_days": 3,
+      "estimate_basis": "Scoping actuals from the 2025 security review",
+      "depends_on": []
+    },
+    {
+      "id": "C2",
+      "wbs_id": "1.2",
+      "description": "Legal and compliance review of the data retention policy",
+      "deliverable": "Compliance sign-off",
+      "owner": "ben",
+      "duration_days": 2,
+      "estimate_basis": "Compliance team SLA, standing agreement",
+      "depends_on": ["C1"]
+    },
+    {
+      "id": "C3",
+      "wbs_id": "2.1",
+      "description": "Implement request sanitization layer",
+      "deliverable": "Sanitization middleware in place",
+      "owner": "carol",
+      "duration_days": 5,
+      "estimate_basis": "Analogous middleware module, Q1 2026 actuals",
+      "depends_on": ["C1"]
+    },
+    {
+      "id": "C4",
+      "wbs_id": "2.2",
+      "description": "Integration and regression testing of the hardened API",
+      "deliverable": "Test report with zero open criticals",
+      "owner": "alice",
+      "duration_days": 4,
+      "estimate_basis": "Test-suite runtime history, last 6 releases",
+      "milestone": true,
+      "depends_on": ["C3"]
+    },
+    {
+      "id": "C5",
+      "wbs_id": "3.1",
+      "description": "Staged production rollout",
+      "deliverable": "Hardened API serving all traffic",
+      "owner": "ben",
+      "duration_days": 2,
+      "estimate_basis": "Release runbook v4 timings",
+      "depends_on": ["C2", "C4"]
+    },
+    {
+      "id": "C6",
+      "wbs_id": "3.2",
+      "description": "Operations training and handoff to the on-call team",
+      "deliverable": "Signed handoff checklist",
+      "owner": "carol",
+      "duration_days": 2,
+      "estimate_basis": "Previous handoff sessions, 2025-2026",
+      "depends_on": ["C5"]
+    }
+  ]
+}

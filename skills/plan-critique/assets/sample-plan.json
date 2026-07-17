@@ -1,0 +1,84 @@
+{
+  "name": "customer-portal-launch",
+  "version": "0.1.0",
+  "tasks": [
+    {
+      "id": "T1",
+      "wbs_id": "1.1",
+      "description": "Discovery and requirements workshop with the customer success team",
+      "deliverable": "Signed-off requirements brief",
+      "owner": "alice",
+      "duration_days": 5,
+      "estimate_basis": "Actuals from three comparable workshop engagements, 2024-2025",
+      "depends_on": []
+    },
+    {
+      "id": "T2",
+      "wbs_id": "1.2",
+      "description": "Architecture design for the portal platform",
+      "deliverable": "Approved architecture decision record",
+      "owner": "alice",
+      "duration_days": 6,
+      "depends_on": ["T1"]
+    },
+    {
+      "id": "T3",
+      "wbs_id": "2.1",
+      "description": "Build authentication module",
+      "deliverable": "Working SSO login flow",
+      "owner": "alice",
+      "duration_days": 5,
+      "estimate_basis": "Analogous to the intranet SSO build, 2025 actuals",
+      "depends_on": ["T2"]
+    },
+    {
+      "id": "T4",
+      "wbs_id": "2.2",
+      "description": "Build customer dashboard",
+      "deliverable": "Dashboard with account, billing and usage views",
+      "owner": "alice",
+      "duration_days": 45,
+      "estimate_basis": "Team judgment",
+      "depends_on": ["T2"]
+    },
+    {
+      "id": "T5",
+      "wbs_id": "2.3",
+      "description": "Set up continuous integration pipeline",
+      "deliverable": "Pipeline building every commit",
+      "owner": "ben",
+      "duration_days": 4,
+      "estimate_basis": "Copied from the 2025 platform repo setup",
+      "depends_on": ["T2"]
+    },
+    {
+      "id": "T6",
+      "wbs_id": "2.4",
+      "description": "Build notification service",
+      "deliverable": "Email and in-app notifications",
+      "owner": "alice",
+      "duration_days": 6,
+      "estimate_basis": "Analogous to the alerting service build, Q1 2026",
+      "depends_on": ["T2"]
+    },
+    {
+      "id": "T7",
+      "wbs_id": "2.5",
+      "description": "Payment provider integration",
+      "deliverable": "Card and invoice payments working in sandbox",
+      "owner": "alice",
+      "duration_days": 16,
+      "depends_on": ["T3"]
+    },
+    {
+      "id": "T8",
+      "wbs_id": "3.1",
+      "description": "Production deployment and rollout",
+      "deliverable": "Portal live for all customers",
+      "owner": "ben",
+      "duration_days": 3,
+      "estimate_basis": "Release runbook from the 2025 portal release",
+      "depends_on": ["T4", "T6", "T7"]
+    }
+  ]
+}
