@@ -1,0 +1,26 @@
+{
+  "plan": "<path to the canonical plan.json this register hardens>",
+  "version": "0.1.0",
+  "scenarios": [
+    {
+      "scenario_id": "PM-001",
+      "axes": {
+        "<axis_name>": "<level>"
+      },
+      "failure_narrative": "<It is <date> and the plan has failed. Past-tense story of the mechanism.>",
+      "likelihood": "<low|medium|high>",
+      "impact": "<low|medium|high|critical>",
+      "basis": "<evidence|judgment>",
+      "evidence": "<cited data when basis=evidence, else empty string>",
+      "early_warning_signal": "<observable leading indicator that fires before the failure>",
+      "affected_task_ids": ["<plan task id>"],
+      "contingency_trigger": {
+        "task_id": "<plan task id>",
+        "condition": "<threshold that activates the contingency>"
+      },
+      "mitigation": "<plan delta: task, buffer, or gate to add - or delete this field and set accepted_by>",
+      "accepted_by": "<name of the person explicitly accepting the unmitigated risk - only instead of mitigation>",
+      "owner": "<person accountable for the mitigation or acceptance>"
+    }
+  ]
+}

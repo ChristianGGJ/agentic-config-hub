@@ -1,0 +1,68 @@
+{
+  "plan": "sample-plan.json",
+  "version": "0.1.0",
+  "scenarios": [
+    {
+      "scenario_id": "PM-001",
+      "axes": {
+        "supplier_delay": "6_weeks_late",
+        "demand_multiplier": "1x",
+        "key_person_loss": "none"
+      },
+      "failure_narrative": "It is 2026-11-30 and the warehouse launch has failed. The racking supplier delivered six weeks late, T2 installation slipped past the load-test window, and go-live was cancelled after the launch date had already been announced to customers.",
+      "likelihood": "medium",
+      "impact": "critical",
+      "basis": "evidence",
+      "evidence": "supplier delivered late on 2 of the last 4 orders (procurement log 2025-2026)",
+      "early_warning_signal": "supplier misses the 50 percent production checkpoint in week 3",
+      "affected_task_ids": ["T1", "T2", "T6"],
+      "contingency_trigger": {
+        "task_id": "T2",
+        "condition": "racking hardware not on site 20 working days before load-test start"
+      },
+      "mitigation": "add task: qualify a second racking supplier before contract signature; add 10 working days of schedule buffer ahead of T5",
+      "owner": "procurement-lead"
+    },
+    {
+      "scenario_id": "PM-002",
+      "axes": {
+        "supplier_delay": "on_time",
+        "demand_multiplier": "3x",
+        "key_person_loss": "none"
+      },
+      "failure_narrative": "It is 2026-11-30 and the launch has failed. Orders ran at three times forecast in the first week, the WMS integration saturated, pick queues backed up, and the operation collapsed into manual spreadsheets within four days.",
+      "likelihood": "low",
+      "impact": "high",
+      "basis": "judgment",
+      "evidence": "",
+      "early_warning_signal": "pre-launch waitlist grows past 2x forecast",
+      "affected_task_ids": ["T4", "T5"],
+      "contingency_trigger": {
+        "task_id": "T5",
+        "condition": "load test fails at 3x forecast volume"
+      },
+      "mitigation": "extend T5 load test to 3x forecast volume; add an order rate-limiting fallback task before go-live",
+      "owner": "engineering-lead"
+    },
+    {
+      "scenario_id": "PM-003",
+      "axes": {
+        "supplier_delay": "on_time",
+        "demand_multiplier": "1x",
+        "key_person_loss": "lead_engineer_out"
+      },
+      "failure_narrative": "It is 2026-11-30 and the launch has failed. The lead engineer left in month two, the WMS integration knowledge left with them, T4 stalled for five weeks while a replacement ramped up, and the go-live date collapsed.",
+      "likelihood": "medium",
+      "impact": "high",
+      "basis": "judgment",
+      "evidence": "",
+      "early_warning_signal": "",
+      "affected_task_ids": ["T4"],
+      "contingency_trigger": {
+        "task_id": "T99",
+        "condition": "bus-factor review flags a single point of knowledge"
+      },
+      "mitigation": "add task: pair a second engineer on the WMS integration from week one and document the integration runbook"
+    }
+  ]
+}

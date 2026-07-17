@@ -1,0 +1,325 @@
+{
+  "spec_name": "warehouse-launch-stress",
+  "axes": [
+    "supplier_delay",
+    "demand_multiplier",
+    "key_person_loss"
+  ],
+  "total_combinations": 12,
+  "emitted": 12,
+  "truncated": false,
+  "scenarios": [
+    {
+      "scenario_id": "PM-001",
+      "axes": {
+        "supplier_delay": "on_time",
+        "demand_multiplier": "1x",
+        "key_person_loss": "none"
+      },
+      "narrative_prompt": "It is <PROJECT_END_DATE>. The plan '<PLAN_NAME>' has failed. In this future the following stressors held: supplier_delay=on_time, demand_multiplier=1x, key_person_loss=none. Write the specific story of how the failure unfolded, in past tense, as accomplished fact (prospective hindsight, Klein 2007). Name the failure mechanism, the first observable early-warning signal, and the plan task ids the failure hit. Do not hedge and do not assign blame; describe the mechanism.",
+      "register_stub": {
+        "failure_narrative": "<FILL: past-tense failure story asserting the failure as fact>",
+        "likelihood": "<FILL: low|medium|high>",
+        "impact": "<FILL: low|medium|high|critical>",
+        "basis": "<FILL: evidence|judgment>",
+        "evidence": "<FILL: cited data if basis=evidence, else empty>",
+        "early_warning_signal": "<FILL: observable leading indicator>",
+        "affected_task_ids": [
+          "<FILL: plan task id>"
+        ],
+        "contingency_trigger": {
+          "task_id": "<FILL: plan task id>",
+          "condition": "<FILL: threshold that activates the contingency>"
+        },
+        "mitigation": "<FILL: plan delta, or remove and set accepted_by instead>",
+        "owner": "<FILL: person accountable for the mitigation>"
+      }
+    },
+    {
+      "scenario_id": "PM-002",
+      "axes": {
+        "supplier_delay": "on_time",
+        "demand_multiplier": "1x",
+        "key_person_loss": "lead_engineer_out"
+      },
+      "narrative_prompt": "It is <PROJECT_END_DATE>. The plan '<PLAN_NAME>' has failed. In this future the following stressors held: supplier_delay=on_time, demand_multiplier=1x, key_person_loss=lead_engineer_out. Write the specific story of how the failure unfolded, in past tense, as accomplished fact (prospective hindsight, Klein 2007). Name the failure mechanism, the first observable early-warning signal, and the plan task ids the failure hit. Do not hedge and do not assign blame; describe the mechanism.",
+      "register_stub": {
+        "failure_narrative": "<FILL: past-tense failure story asserting the failure as fact>",
+        "likelihood": "<FILL: low|medium|high>",
+        "impact": "<FILL: low|medium|high|critical>",
+        "basis": "<FILL: evidence|judgment>",
+        "evidence": "<FILL: cited data if basis=evidence, else empty>",
+        "early_warning_signal": "<FILL: observable leading indicator>",
+        "affected_task_ids": [
+          "<FILL: plan task id>"
+        ],
+        "contingency_trigger": {
+          "task_id": "<FILL: plan task id>",
+          "condition": "<FILL: threshold that activates the contingency>"
+        },
+        "mitigation": "<FILL: plan delta, or remove and set accepted_by instead>",
+        "owner": "<FILL: person accountable for the mitigation>"
+      }
+    },
+    {
+      "scenario_id": "PM-003",
+      "axes": {
+        "supplier_delay": "on_time",
+        "demand_multiplier": "3x",
+        "key_person_loss": "none"
+      },
+      "narrative_prompt": "It is <PROJECT_END_DATE>. The plan '<PLAN_NAME>' has failed. In this future the following stressors held: supplier_delay=on_time, demand_multiplier=3x, key_person_loss=none. Write the specific story of how the failure unfolded, in past tense, as accomplished fact (prospective hindsight, Klein 2007). Name the failure mechanism, the first observable early-warning signal, and the plan task ids the failure hit. Do not hedge and do not assign blame; describe the mechanism.",
+      "register_stub": {
+        "failure_narrative": "<FILL: past-tense failure story asserting the failure as fact>",
+        "likelihood": "<FILL: low|medium|high>",
+        "impact": "<FILL: low|medium|high|critical>",
+        "basis": "<FILL: evidence|judgment>",
+        "evidence": "<FILL: cited data if basis=evidence, else empty>",
+        "early_warning_signal": "<FILL: observable leading indicator>",
+        "affected_task_ids": [
+          "<FILL: plan task id>"
+        ],
+        "contingency_trigger": {
+          "task_id": "<FILL: plan task id>",
+          "condition": "<FILL: threshold that activates the contingency>"
+        },
+        "mitigation": "<FILL: plan delta, or remove and set accepted_by instead>",
+        "owner": "<FILL: person accountable for the mitigation>"
+      }
+    },
+    {
+      "scenario_id": "PM-004",
+      "axes": {
+        "supplier_delay": "on_time",
+        "demand_multiplier": "3x",
+        "key_person_loss": "lead_engineer_out"
+      },
+      "narrative_prompt": "It is <PROJECT_END_DATE>. The plan '<PLAN_NAME>' has failed. In this future the following stressors held: supplier_delay=on_time, demand_multiplier=3x, key_person_loss=lead_engineer_out. Write the specific story of how the failure unfolded, in past tense, as accomplished fact (prospective hindsight, Klein 2007). Name the failure mechanism, the first observable early-warning signal, and the plan task ids the failure hit. Do not hedge and do not assign blame; describe the mechanism.",
+      "register_stub": {
+        "failure_narrative": "<FILL: past-tense failure story asserting the failure as fact>",
+        "likelihood": "<FILL: low|medium|high>",
+        "impact": "<FILL: low|medium|high|critical>",
+        "basis": "<FILL: evidence|judgment>",
+        "evidence": "<FILL: cited data if basis=evidence, else empty>",
+        "early_warning_signal": "<FILL: observable leading indicator>",
+        "affected_task_ids": [
+          "<FILL: plan task id>"
+        ],
+        "contingency_trigger": {
+          "task_id": "<FILL: plan task id>",
+          "condition": "<FILL: threshold that activates the contingency>"
+        },
+        "mitigation": "<FILL: plan delta, or remove and set accepted_by instead>",
+        "owner": "<FILL: person accountable for the mitigation>"
+      }
+    },
+    {
+      "scenario_id": "PM-005",
+      "axes": {
+        "supplier_delay": "2_weeks_late",
+        "demand_multiplier": "1x",
+        "key_person_loss": "none"
+      },
+      "narrative_prompt": "It is <PROJECT_END_DATE>. The plan '<PLAN_NAME>' has failed. In this future the following stressors held: supplier_delay=2_weeks_late, demand_multiplier=1x, key_person_loss=none. Write the specific story of how the failure unfolded, in past tense, as accomplished fact (prospective hindsight, Klein 2007). Name the failure mechanism, the first observable early-warning signal, and the plan task ids the failure hit. Do not hedge and do not assign blame; describe the mechanism.",
+      "register_stub": {
+        "failure_narrative": "<FILL: past-tense failure story asserting the failure as fact>",
+        "likelihood": "<FILL: low|medium|high>",
+        "impact": "<FILL: low|medium|high|critical>",
+        "basis": "<FILL: evidence|judgment>",
+        "evidence": "<FILL: cited data if basis=evidence, else empty>",
+        "early_warning_signal": "<FILL: observable leading indicator>",
+        "affected_task_ids": [
+          "<FILL: plan task id>"
+        ],
+        "contingency_trigger": {
+          "task_id": "<FILL: plan task id>",
+          "condition": "<FILL: threshold that activates the contingency>"
+        },
+        "mitigation": "<FILL: plan delta, or remove and set accepted_by instead>",
+        "owner": "<FILL: person accountable for the mitigation>"
+      }
+    },
+    {
+      "scenario_id": "PM-006",
+      "axes": {
+        "supplier_delay": "2_weeks_late",
+        "demand_multiplier": "1x",
+        "key_person_loss": "lead_engineer_out"
+      },
+      "narrative_prompt": "It is <PROJECT_END_DATE>. The plan '<PLAN_NAME>' has failed. In this future the following stressors held: supplier_delay=2_weeks_late, demand_multiplier=1x, key_person_loss=lead_engineer_out. Write the specific story of how the failure unfolded, in past tense, as accomplished fact (prospective hindsight, Klein 2007). Name the failure mechanism, the first observable early-warning signal, and the plan task ids the failure hit. Do not hedge and do not assign blame; describe the mechanism.",
+      "register_stub": {
+        "failure_narrative": "<FILL: past-tense failure story asserting the failure as fact>",
+        "likelihood": "<FILL: low|medium|high>",
+        "impact": "<FILL: low|medium|high|critical>",
+        "basis": "<FILL: evidence|judgment>",
+        "evidence": "<FILL: cited data if basis=evidence, else empty>",
+        "early_warning_signal": "<FILL: observable leading indicator>",
+        "affected_task_ids": [
+          "<FILL: plan task id>"
+        ],
+        "contingency_trigger": {
+          "task_id": "<FILL: plan task id>",
+          "condition": "<FILL: threshold that activates the contingency>"
+        },
+        "mitigation": "<FILL: plan delta, or remove and set accepted_by instead>",
+        "owner": "<FILL: person accountable for the mitigation>"
+      }
+    },
+    {
+      "scenario_id": "PM-007",
+      "axes": {
+        "supplier_delay": "2_weeks_late",
+        "demand_multiplier": "3x",
+        "key_person_loss": "none"
+      },
+      "narrative_prompt": "It is <PROJECT_END_DATE>. The plan '<PLAN_NAME>' has failed. In this future the following stressors held: supplier_delay=2_weeks_late, demand_multiplier=3x, key_person_loss=none. Write the specific story of how the failure unfolded, in past tense, as accomplished fact (prospective hindsight, Klein 2007). Name the failure mechanism, the first observable early-warning signal, and the plan task ids the failure hit. Do not hedge and do not assign blame; describe the mechanism.",
+      "register_stub": {
+        "failure_narrative": "<FILL: past-tense failure story asserting the failure as fact>",
+        "likelihood": "<FILL: low|medium|high>",
+        "impact": "<FILL: low|medium|high|critical>",
+        "basis": "<FILL: evidence|judgment>",
+        "evidence": "<FILL: cited data if basis=evidence, else empty>",
+        "early_warning_signal": "<FILL: observable leading indicator>",
+        "affected_task_ids": [
+          "<FILL: plan task id>"
+        ],
+        "contingency_trigger": {
+          "task_id": "<FILL: plan task id>",
+          "condition": "<FILL: threshold that activates the contingency>"
+        },
+        "mitigation": "<FILL: plan delta, or remove and set accepted_by instead>",
+        "owner": "<FILL: person accountable for the mitigation>"
+      }
+    },
+    {
+      "scenario_id": "PM-008",
+      "axes": {
+        "supplier_delay": "2_weeks_late",
+        "demand_multiplier": "3x",
+        "key_person_loss": "lead_engineer_out"
+      },
+      "narrative_prompt": "It is <PROJECT_END_DATE>. The plan '<PLAN_NAME>' has failed. In this future the following stressors held: supplier_delay=2_weeks_late, demand_multiplier=3x, key_person_loss=lead_engineer_out. Write the specific story of how the failure unfolded, in past tense, as accomplished fact (prospective hindsight, Klein 2007). Name the failure mechanism, the first observable early-warning signal, and the plan task ids the failure hit. Do not hedge and do not assign blame; describe the mechanism.",
+      "register_stub": {
+        "failure_narrative": "<FILL: past-tense failure story asserting the failure as fact>",
+        "likelihood": "<FILL: low|medium|high>",
+        "impact": "<FILL: low|medium|high|critical>",
+        "basis": "<FILL: evidence|judgment>",
+        "evidence": "<FILL: cited data if basis=evidence, else empty>",
+        "early_warning_signal": "<FILL: observable leading indicator>",
+        "affected_task_ids": [
+          "<FILL: plan task id>"
+        ],
+        "contingency_trigger": {
+          "task_id": "<FILL: plan task id>",
+          "condition": "<FILL: threshold that activates the contingency>"
+        },
+        "mitigation": "<FILL: plan delta, or remove and set accepted_by instead>",
+        "owner": "<FILL: person accountable for the mitigation>"
+      }
+    },
+    {
+      "scenario_id": "PM-009",
+      "axes": {
+        "supplier_delay": "6_weeks_late",
+        "demand_multiplier": "1x",
+        "key_person_loss": "none"
+      },
+      "narrative_prompt": "It is <PROJECT_END_DATE>. The plan '<PLAN_NAME>' has failed. In this future the following stressors held: supplier_delay=6_weeks_late, demand_multiplier=1x, key_person_loss=none. Write the specific story of how the failure unfolded, in past tense, as accomplished fact (prospective hindsight, Klein 2007). Name the failure mechanism, the first observable early-warning signal, and the plan task ids the failure hit. Do not hedge and do not assign blame; describe the mechanism.",
+      "register_stub": {
+        "failure_narrative": "<FILL: past-tense failure story asserting the failure as fact>",
+        "likelihood": "<FILL: low|medium|high>",
+        "impact": "<FILL: low|medium|high|critical>",
+        "basis": "<FILL: evidence|judgment>",
+        "evidence": "<FILL: cited data if basis=evidence, else empty>",
+        "early_warning_signal": "<FILL: observable leading indicator>",
+        "affected_task_ids": [
+          "<FILL: plan task id>"
+        ],
+        "contingency_trigger": {
+          "task_id": "<FILL: plan task id>",
+          "condition": "<FILL: threshold that activates the contingency>"
+        },
+        "mitigation": "<FILL: plan delta, or remove and set accepted_by instead>",
+        "owner": "<FILL: person accountable for the mitigation>"
+      }
+    },
+    {
+      "scenario_id": "PM-010",
+      "axes": {
+        "supplier_delay": "6_weeks_late",
+        "demand_multiplier": "1x",
+        "key_person_loss": "lead_engineer_out"
+      },
+      "narrative_prompt": "It is <PROJECT_END_DATE>. The plan '<PLAN_NAME>' has failed. In this future the following stressors held: supplier_delay=6_weeks_late, demand_multiplier=1x, key_person_loss=lead_engineer_out. Write the specific story of how the failure unfolded, in past tense, as accomplished fact (prospective hindsight, Klein 2007). Name the failure mechanism, the first observable early-warning signal, and the plan task ids the failure hit. Do not hedge and do not assign blame; describe the mechanism.",
+      "register_stub": {
+        "failure_narrative": "<FILL: past-tense failure story asserting the failure as fact>",
+        "likelihood": "<FILL: low|medium|high>",
+        "impact": "<FILL: low|medium|high|critical>",
+        "basis": "<FILL: evidence|judgment>",
+        "evidence": "<FILL: cited data if basis=evidence, else empty>",
+        "early_warning_signal": "<FILL: observable leading indicator>",
+        "affected_task_ids": [
+          "<FILL: plan task id>"
+        ],
+        "contingency_trigger": {
+          "task_id": "<FILL: plan task id>",
+          "condition": "<FILL: threshold that activates the contingency>"
+        },
+        "mitigation": "<FILL: plan delta, or remove and set accepted_by instead>",
+        "owner": "<FILL: person accountable for the mitigation>"
+      }
+    },
+    {
+      "scenario_id": "PM-011",
+      "axes": {
+        "supplier_delay": "6_weeks_late",
+        "demand_multiplier": "3x",
+        "key_person_loss": "none"
+      },
+      "narrative_prompt": "It is <PROJECT_END_DATE>. The plan '<PLAN_NAME>' has failed. In this future the following stressors held: supplier_delay=6_weeks_late, demand_multiplier=3x, key_person_loss=none. Write the specific story of how the failure unfolded, in past tense, as accomplished fact (prospective hindsight, Klein 2007). Name the failure mechanism, the first observable early-warning signal, and the plan task ids the failure hit. Do not hedge and do not assign blame; describe the mechanism.",
+      "register_stub": {
+        "failure_narrative": "<FILL: past-tense failure story asserting the failure as fact>",
+        "likelihood": "<FILL: low|medium|high>",
+        "impact": "<FILL: low|medium|high|critical>",
+        "basis": "<FILL: evidence|judgment>",
+        "evidence": "<FILL: cited data if basis=evidence, else empty>",
+        "early_warning_signal": "<FILL: observable leading indicator>",
+        "affected_task_ids": [
+          "<FILL: plan task id>"
+        ],
+        "contingency_trigger": {
+          "task_id": "<FILL: plan task id>",
+          "condition": "<FILL: threshold that activates the contingency>"
+        },
+        "mitigation": "<FILL: plan delta, or remove and set accepted_by instead>",
+        "owner": "<FILL: person accountable for the mitigation>"
+      }
+    },
+    {
+      "scenario_id": "PM-012",
+      "axes": {
+        "supplier_delay": "6_weeks_late",
+        "demand_multiplier": "3x",
+        "key_person_loss": "lead_engineer_out"
+      },
+      "narrative_prompt": "It is <PROJECT_END_DATE>. The plan '<PLAN_NAME>' has failed. In this future the following stressors held: supplier_delay=6_weeks_late, demand_multiplier=3x, key_person_loss=lead_engineer_out. Write the specific story of how the failure unfolded, in past tense, as accomplished fact (prospective hindsight, Klein 2007). Name the failure mechanism, the first observable early-warning signal, and the plan task ids the failure hit. Do not hedge and do not assign blame; describe the mechanism.",
+      "register_stub": {
+        "failure_narrative": "<FILL: past-tense failure story asserting the failure as fact>",
+        "likelihood": "<FILL: low|medium|high>",
+        "impact": "<FILL: low|medium|high|critical>",
+        "basis": "<FILL: evidence|judgment>",
+        "evidence": "<FILL: cited data if basis=evidence, else empty>",
+        "early_warning_signal": "<FILL: observable leading indicator>",
+        "affected_task_ids": [
+          "<FILL: plan task id>"
+        ],
+        "contingency_trigger": {
+          "task_id": "<FILL: plan task id>",
+          "condition": "<FILL: threshold that activates the contingency>"
+        },
+        "mitigation": "<FILL: plan delta, or remove and set accepted_by instead>",
+        "owner": "<FILL: person accountable for the mitigation>"
+      }
+    }
+  ]
+}

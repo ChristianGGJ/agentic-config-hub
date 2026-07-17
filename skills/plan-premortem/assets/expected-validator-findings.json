@@ -1,0 +1,30 @@
+{
+  "register": "assets/sample-premortem-register.json",
+  "plan": "assets/sample-plan.json",
+  "scenario_count": 3,
+  "threshold": "high",
+  "strict": false,
+  "findings": [
+    {
+      "severity": "ERROR",
+      "scenario_id": "PM-003",
+      "check": "V4",
+      "message": "early_warning_signal is missing or empty; a scenario without a leading indicator is an unfalsifiable story"
+    },
+    {
+      "severity": "ERROR",
+      "scenario_id": "PM-003",
+      "check": "V5",
+      "message": "contingency_trigger.task_id 'T99' does not exist in the plan"
+    },
+    {
+      "severity": "ERROR",
+      "scenario_id": "PM-003",
+      "check": "V6",
+      "message": "owner is missing or empty; every scenario needs a person accountable for its mitigation"
+    }
+  ],
+  "error_count": 3,
+  "warning_count": 0,
+  "status": "FAIL"
+}

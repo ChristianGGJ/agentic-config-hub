@@ -1,0 +1,54 @@
+{
+  "name": "warehouse-launch",
+  "version": "0.1.0",
+  "tasks": [
+    {
+      "id": "T1",
+      "description": "Sign supplier contract for racking hardware",
+      "depends_on": [],
+      "owner": "procurement-lead",
+      "duration_days": 10,
+      "estimate_basis": "two prior hardware procurements (2025)"
+    },
+    {
+      "id": "T2",
+      "description": "Receive and install racking hardware",
+      "depends_on": ["T1"],
+      "owner": "ops-lead",
+      "duration_days": 15,
+      "estimate_basis": "supplier installation quote"
+    },
+    {
+      "id": "T3",
+      "description": "Hire and train warehouse staff",
+      "depends_on": [],
+      "owner": "hr-lead",
+      "duration_days": 20,
+      "estimate_basis": "HR hiring funnel averages"
+    },
+    {
+      "id": "T4",
+      "description": "Integrate WMS with the order pipeline",
+      "depends_on": [],
+      "owner": "engineering-lead",
+      "duration_days": 25,
+      "estimate_basis": "analogous integration project (2024)"
+    },
+    {
+      "id": "T5",
+      "description": "End-to-end load test at projected demand",
+      "depends_on": ["T2", "T3", "T4"],
+      "owner": "engineering-lead",
+      "duration_days": 5,
+      "estimate_basis": "load-test runbook"
+    },
+    {
+      "id": "T6",
+      "description": "Warehouse go-live",
+      "depends_on": ["T5"],
+      "owner": "ops-lead",
+      "duration_days": 1,
+      "milestone": true
+    }
+  ]
+}

@@ -1,0 +1,18 @@
+{
+  "name": "warehouse-launch-stress",
+  "plan": "sample-plan.json",
+  "axes": [
+    {
+      "name": "supplier_delay",
+      "levels": ["on_time", "2_weeks_late", "6_weeks_late"]
+    },
+    {
+      "name": "demand_multiplier",
+      "levels": ["1x", "3x"]
+    },
+    {
+      "name": "key_person_loss",
+      "levels": ["none", "lead_engineer_out"]
+    }
+  ]
+}
