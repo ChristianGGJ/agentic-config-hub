@@ -1,0 +1,97 @@
+{
+  "name": "Customer Portal MVP",
+  "version": "0.1.0",
+  "tasks": [
+    {
+      "id": "t-1-1",
+      "description": "Stakeholder requirements workshop",
+      "depends_on": [],
+      "wbs_id": "1.1",
+      "deliverable": "Signed requirements register",
+      "owner": "business-analyst",
+      "estimate_hours": 16,
+      "estimate_basis": "analogous: two prior discovery workshops"
+    },
+    {
+      "id": "t-1-2",
+      "description": "Scope statement with explicit exclusions",
+      "depends_on": [],
+      "wbs_id": "1.2",
+      "deliverable": "Approved scope statement",
+      "owner": "project-manager",
+      "estimate_hours": 12,
+      "estimate_basis": "expert judgment"
+    },
+    {
+      "id": "t-2-1-1",
+      "description": "Login and session management",
+      "depends_on": [],
+      "wbs_id": "2.1.1",
+      "deliverable": "Login flow passing the auth test suite",
+      "owner": "backend-dev",
+      "estimate_hours": 40,
+      "estimate_basis": "analogous: Q1 auth revamp actuals"
+    },
+    {
+      "id": "t-2-1-2",
+      "description": "Password reset flow",
+      "depends_on": [],
+      "wbs_id": "2.1.2",
+      "deliverable": "Reset flow with rate limiting enabled",
+      "owner": "backend-dev",
+      "estimate_hours": 24,
+      "estimate_basis": "expert judgment"
+    },
+    {
+      "id": "t-2-2-1",
+      "description": "Usage summary widgets",
+      "depends_on": [],
+      "wbs_id": "2.2.1",
+      "deliverable": "Dashboard widgets rendering live usage data",
+      "owner": "frontend-dev",
+      "estimate_hours": 32,
+      "estimate_basis": "three-point estimate"
+    },
+    {
+      "id": "t-2-2-2",
+      "description": "Billing history view",
+      "depends_on": [],
+      "wbs_id": "2.2.2",
+      "deliverable": "Paginated billing history with CSV export",
+      "owner": "frontend-dev",
+      "estimate_hours": 24,
+      "estimate_basis": "three-point estimate"
+    },
+    {
+      "id": "t-3-1",
+      "description": "System test cycle",
+      "depends_on": [],
+      "wbs_id": "3.1",
+      "deliverable": "Test report with zero open critical defects",
+      "owner": "qa-engineer",
+      "estimate_hours": 40,
+      "estimate_basis": "analogous: previous release test cycle"
+    },
+    {
+      "id": "t-3-2",
+      "description": "Production deployment and go-live",
+      "depends_on": [],
+      "wbs_id": "3.2",
+      "deliverable": "Portal live behind production DNS with rollback runbook",
+      "owner": "devops-engineer",
+      "estimate_hours": 16,
+      "estimate_basis": "expert judgment",
+      "milestone": true
+    },
+    {
+      "id": "t-3-3",
+      "description": "User training pack",
+      "depends_on": [],
+      "wbs_id": "3.3",
+      "deliverable": "Training deck and quick-start guide published",
+      "owner": "business-analyst",
+      "estimate_hours": 24,
+      "estimate_basis": "expert judgment"
+    }
+  ]
+}

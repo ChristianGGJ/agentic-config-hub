@@ -1,0 +1,17 @@
+{
+  "name": "Data Warehouse Migration",
+  "objective": "Retire the legacy on-prem warehouse and serve all reporting from the cloud platform.",
+  "elements": [
+    {"id": "1", "description": "Assessment and inventory", "parent": null},
+    {"id": "1.1", "description": "Inventory source systems", "parent": "1", "deliverable": "Source system inventory", "estimate_hours": 24},
+    {"id": "1.2", "description": "Inventory source systems", "parent": "1", "deliverable": "Migration risk register", "estimate_hours": 16},
+    {"id": "2", "description": "Migration build", "parent": null},
+    {"id": "2.1", "description": "Build extraction pipelines", "parent": "2", "deliverable": "Extraction pipelines in production", "estimate_hours": 200},
+    {"id": "3", "description": "Cutover and validation", "parent": null},
+    {"id": "3.1", "description": "Execute production cutover runbook", "parent": "3", "estimate_hours": 40},
+    {"id": "3.1", "description": "Decommission legacy warehouse", "parent": "3", "estimate_hours": 24},
+    {"id": "3.2", "description": "Validate migrated data quality", "parent": "3", "deliverable": "Reconciliation report", "estimate_hours": 32},
+    {"id": "3.3", "description": "Validate migrated data quality checks", "parent": "3", "estimate_hours": 16},
+    {"id": "4.1", "description": "Post-migration hypercare", "parent": "9", "deliverable": "Hypercare log", "estimate_hours": 40}
+  ]
+}
