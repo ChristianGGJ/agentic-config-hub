@@ -1,0 +1,96 @@
+{
+  "name": "customer-portal-launch",
+  "version": "0.1.0",
+  "tasks": [
+    {
+      "id": "req-signoff",
+      "description": "Collect and sign off portal requirements with stakeholders",
+      "depends_on": [],
+      "owner": "ana.pm",
+      "duration_days": 5,
+      "baseline_start": "2026-06-01",
+      "baseline_finish": "2026-06-05",
+      "milestone": false
+    },
+    {
+      "id": "api-design",
+      "description": "Design the portal REST API surface and error contract",
+      "depends_on": ["req-signoff"],
+      "owner": "luis.dev",
+      "duration_days": 5,
+      "baseline_start": "2026-06-08",
+      "baseline_finish": "2026-06-12",
+      "milestone": false
+    },
+    {
+      "id": "db-schema",
+      "description": "Model and migrate the customer/account database schema",
+      "depends_on": ["req-signoff"],
+      "owner": "sara.dba",
+      "duration_days": 3,
+      "baseline_start": "2026-06-08",
+      "baseline_finish": "2026-06-10",
+      "milestone": false
+    },
+    {
+      "id": "api-build",
+      "description": "Implement portal API endpoints against the approved design",
+      "depends_on": ["api-design", "db-schema"],
+      "owner": "luis.dev",
+      "duration_days": 15,
+      "baseline_start": "2026-06-15",
+      "baseline_finish": "2026-07-03",
+      "milestone": false
+    },
+    {
+      "id": "frontend-build",
+      "description": "Build the portal frontend against the API contract",
+      "depends_on": ["api-design"],
+      "owner": "mei.fe",
+      "duration_days": 20,
+      "baseline_start": "2026-06-15",
+      "baseline_finish": "2026-07-10",
+      "milestone": false
+    },
+    {
+      "id": "beta-release",
+      "description": "Ship the internal beta build to the pilot user group",
+      "depends_on": ["api-build"],
+      "owner": "ana.pm",
+      "duration_days": 1,
+      "baseline_start": "2026-07-08",
+      "baseline_finish": "2026-07-08",
+      "milestone": true
+    },
+    {
+      "id": "integration-test",
+      "description": "End-to-end integration test pass across API and frontend",
+      "depends_on": ["api-build", "frontend-build"],
+      "owner": "qa.team",
+      "duration_days": 5,
+      "baseline_start": "2026-07-13",
+      "baseline_finish": "2026-07-17",
+      "milestone": false
+    },
+    {
+      "id": "uat-signoff",
+      "description": "Business user acceptance testing and formal sign-off",
+      "depends_on": ["integration-test"],
+      "owner": "ana.pm",
+      "duration_days": 3,
+      "baseline_start": "2026-07-20",
+      "baseline_finish": "2026-07-22",
+      "milestone": true
+    },
+    {
+      "id": "go-live",
+      "description": "Production cutover of the customer portal",
+      "depends_on": ["uat-signoff"],
+      "owner": "ops.team",
+      "duration_days": 1,
+      "baseline_start": "2026-07-24",
+      "baseline_finish": "2026-07-24",
+      "milestone": true
+    }
+  ]
+}

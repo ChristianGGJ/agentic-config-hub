@@ -1,0 +1,5 @@
+{
+  "project_start": "2026-06-01",
+  "workweek": ["Mon", "Tue", "Wed", "Thu", "Fri"],
+  "holidays": ["2026-06-19", "2026-07-03"]
+}

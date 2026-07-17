@@ -1,0 +1,15 @@
+{"task_id": "req-signoff", "timestamp": "2026-06-01T09:00:00", "status": "in_progress", "percent_complete": 20, "actual_start": "2026-06-01", "source": "standup", "evidence": "kickoff meeting minutes"}
+{"task_id": "req-signoff", "timestamp": "2026-06-05T17:00:00", "status": "done", "percent_complete": 100, "actual_finish": "2026-06-05", "source": "standup", "evidence": "signed requirements doc v1.0"}
+{"task_id": "api-design", "timestamp": "2026-06-08T09:30:00", "status": "in_progress", "percent_complete": 15, "actual_start": "2026-06-08", "source": "standup"}
+{"task_id": "db-schema", "timestamp": "2026-06-08T10:00:00", "status": "in_progress", "percent_complete": 40, "actual_start": "2026-06-08", "source": "standup"}
+{"task_id": "db-schema", "timestamp": "2026-06-10T15:00:00", "status": "done", "percent_complete": 100, "actual_finish": "2026-06-10", "source": "standup", "evidence": "migration merged"}
+{"task_id": "api-design", "timestamp": "2026-06-12T16:00:00", "status": "done", "percent_complete": 100, "actual_finish": "2026-06-12", "source": "standup", "evidence": "design review approved"}
+{"task_id": "api-build", "timestamp": "2026-06-15T09:00:00", "status": "in_progress", "percent_complete": 10, "actual_start": "2026-06-15", "source": "standup"}
+{"task_id": "frontend-build", "timestamp": "2026-06-15T09:15:00", "status": "in_progress", "percent_complete": 15, "actual_start": "2026-06-15", "source": "standup"}
+{"task_id": "api-build", "timestamp": "2026-06-26T17:00:00", "status": "in_progress", "percent_complete": 60, "source": "standup"}
+{"task_id": "frontend-build", "timestamp": "2026-06-30T17:00:00", "status": "in_progress", "percent_complete": 60, "source": "standup"}
+{"task_id": "api-build", "timestamp": "2026-07-03T16:30:00", "status": "done", "percent_complete": 100, "actual_finish": "2026-07-03", "source": "standup", "evidence": "all endpoints merged, CI green"}
+{"task_id": "beta-release", "timestamp": "2026-07-08T12:00:00", "status": "done", "percent_complete": 100, "actual_start": "2026-07-08", "actual_finish": "2026-07-08", "source": "release-log", "evidence": "beta tag v0.9.0 deployed"}
+{"task_id": "frontend-build", "timestamp": "2026-07-10T16:00:00", "status": "done", "percent_complete": 100, "actual_finish": "2026-07-10", "source": "standup", "evidence": "UI complete, e2e smoke green"}
+{"task_id": "integration-test", "timestamp": "2026-07-13T09:00:00", "status": "in_progress", "percent_complete": 30, "actual_start": "2026-07-13", "source": "qa-report"}
+{"task_id": "integration-test", "timestamp": "2026-07-14T17:00:00", "status": "in_progress", "percent_complete": 55, "source": "qa-report", "evidence": "22 of 40 e2e suites passing"}

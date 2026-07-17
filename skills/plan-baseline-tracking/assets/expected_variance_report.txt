@@ -1,0 +1,58 @@
+BASELINE VARIANCE REPORT (plan-baseline-tracking)
+================================================================
+Plan      : customer-portal-launch
+Data date : 2026-07-15
+Thresholds: slip>0wd stale>7d gap>=20pct missed>5pct
+Calendar  : workweek=Mon,Tue,Wed,Thu,Fri holidays=0
+
+TASK             MS STATUS       PCT    EXP   SVAR  FVAR  FLAGS
+---------------------------------------------------------------
+req-signoff      .  done          100    100    +0    +0  -
+api-design       .  done          100    100    +1    +2  finish-slip,late-start
+db-schema        .  in_progress   100    100    +0    +0  finish-without-done,invalid-transition
+api-build        .  in_progress    92    100    +2     .  late-start,ninety-percent-syndrome,overdue
+frontend-build   .  in_progress    60    100    +0     .  behind-expected,overdue,percent-regression,stale-update
+beta-release     M  not_started     0    100     .     .  behind-expected,milestone-breach,no-status-reported
+integration-test .  not_started     0     60     .     .  behind-expected,no-status-reported
+uat-signoff      M  in_progress     5      0    +0     .  future-actual-date
+go-live          M  not_started     0      0     .     .  -
+
+DCMA-STYLE HEALTH SUMMARY
+  missed-task percentage : 66.7% (4 of 6 task(s) due by 2026-07-15)
+  behind-expected        : 3 finding(s)
+  finish-slip            : 1 finding(s)
+  finish-without-done    : 1 finding(s)
+  future-actual-date     : 1 finding(s)
+  invalid-transition     : 1 finding(s)
+  late-start             : 2 finding(s)
+  milestone-breach       : 1 finding(s)
+  missed-task-percentage : 1 finding(s)
+  ninety-percent-syndrome : 1 finding(s)
+  no-status-reported     : 2 finding(s)
+  overdue                : 2 finding(s)
+  percent-regression     : 1 finding(s)
+  stale-update           : 1 finding(s)
+  unknown-task           : 1 finding(s)
+
+FINDINGS (19):
+  [CRITICAL] <plan>: missed-task-percentage - 66.7% of the 6 task(s) due by 2026-07-15 missed their baseline finish (threshold 5%; DCMA guideline is 5%)
+  [CRITICAL] beta-release: milestone-breach - milestone baseline_finish 2026-07-08 has passed and the task is not done
+  [CRITICAL] db-schema: finish-without-done - actual_finish 2026-06-10 is on the ledger but latest status is in_progress
+  [CRITICAL] db-schema: invalid-transition - status moved done -> in_progress at 2026-07-13T09:00:00 (line 15); 'done' is terminal without a human-gated rebaseline
+  [CRITICAL] frontend-build: percent-regression - percent_complete fell from 70 to 60 at 2026-07-06T17:30:00 (line 12); the status ledger is append-only, never rewritten
+  [CRITICAL] perf-tuning: unknown-task - status event (line 13) references a task_id absent from the baseline plan
+  [CRITICAL] uat-signoff: future-actual-date - actual_start 2026-07-20 is later than the data date 2026-07-15 (a forecast typed into an actual field is a data defect)
+  [WARNING] api-build: late-start - started +2 working day(s) after baseline_start 2026-06-15
+  [WARNING] api-build: ninety-percent-syndrome - 2 event(s) at >= 90% complete without reaching done; subjective percent-complete is masking a slip
+  [WARNING] api-build: overdue - baseline_finish 2026-07-03 has passed and the task is not done
+  [WARNING] api-design: finish-slip - finished +2 working day(s) after baseline_finish 2026-06-12
+  [WARNING] api-design: late-start - started +1 working day(s) after baseline_start 2026-06-08
+  [WARNING] beta-release: behind-expected - reported 0% vs 100% expected from the baseline window (gap 100 points)
+  [WARNING] beta-release: no-status-reported - baseline_start 2026-07-08 has passed and no status event was ever recorded
+  [WARNING] frontend-build: behind-expected - reported 60% vs 100% expected from the baseline window (gap 40 points)
+  [WARNING] frontend-build: overdue - baseline_finish 2026-07-10 has passed and the task is not done
+  [WARNING] frontend-build: stale-update - last status event is 9 day(s) old (threshold 7); active tasks must report
+  [WARNING] integration-test: behind-expected - reported 0% vs 60% expected from the baseline window (gap 60 points)
+  [WARNING] integration-test: no-status-reported - baseline_start 2026-07-13 has passed and no status event was ever recorded
+
+VERDICT: UNHEALTHY (7 critical, 12 warning finding(s))
