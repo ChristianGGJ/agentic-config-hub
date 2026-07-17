@@ -1,0 +1,119 @@
+{
+  "mode": "schedule",
+  "plan": "product-launch-sample",
+  "status": "PASS",
+  "project_start": "2026-03-02",
+  "first_working_day": "2026-03-02",
+  "project_finish_date": "2026-03-27",
+  "working_days_total": 19,
+  "calendar": {
+    "workweek": [
+      "Mon",
+      "Tue",
+      "Wed",
+      "Thu",
+      "Fri"
+    ],
+    "holidays_applied": [
+      "2026-03-17"
+    ]
+  },
+  "tasks": [
+    {
+      "id": "requirements",
+      "duration_days": 3,
+      "milestone": false,
+      "early_start": "2026-03-02",
+      "early_finish": "2026-03-04",
+      "late_start": "2026-03-02",
+      "late_finish": "2026-03-04",
+      "total_float_days": 0,
+      "is_critical": true
+    },
+    {
+      "id": "architecture",
+      "duration_days": 2,
+      "milestone": false,
+      "early_start": "2026-03-05",
+      "early_finish": "2026-03-06",
+      "late_start": "2026-03-06",
+      "late_finish": "2026-03-09",
+      "total_float_days": 1,
+      "is_critical": false
+    },
+    {
+      "id": "ui-design",
+      "duration_days": 4,
+      "milestone": false,
+      "early_start": "2026-03-05",
+      "early_finish": "2026-03-10",
+      "late_start": "2026-03-05",
+      "late_finish": "2026-03-10",
+      "total_float_days": 0,
+      "is_critical": true
+    },
+    {
+      "id": "backend-impl",
+      "duration_days": 6,
+      "milestone": false,
+      "early_start": "2026-03-09",
+      "early_finish": "2026-03-16",
+      "late_start": "2026-03-10",
+      "late_finish": "2026-03-18",
+      "total_float_days": 1,
+      "is_critical": false
+    },
+    {
+      "id": "frontend-impl",
+      "duration_days": 5,
+      "milestone": false,
+      "early_start": "2026-03-11",
+      "early_finish": "2026-03-18",
+      "late_start": "2026-03-11",
+      "late_finish": "2026-03-18",
+      "total_float_days": 0,
+      "is_critical": true
+    },
+    {
+      "id": "integration",
+      "duration_days": 3,
+      "milestone": false,
+      "early_start": "2026-03-19",
+      "early_finish": "2026-03-23",
+      "late_start": "2026-03-19",
+      "late_finish": "2026-03-23",
+      "total_float_days": 0,
+      "is_critical": true
+    },
+    {
+      "id": "qa-testing",
+      "duration_days": 4,
+      "milestone": false,
+      "early_start": "2026-03-24",
+      "early_finish": "2026-03-27",
+      "late_start": "2026-03-24",
+      "late_finish": "2026-03-27",
+      "total_float_days": 0,
+      "is_critical": true
+    },
+    {
+      "id": "launch",
+      "duration_days": 0,
+      "milestone": true,
+      "early_start": "2026-03-27",
+      "early_finish": "2026-03-27",
+      "late_start": "2026-03-27",
+      "late_finish": "2026-03-27",
+      "total_float_days": 0,
+      "is_critical": true
+    }
+  ],
+  "critical_path": [
+    "requirements",
+    "ui-design",
+    "frontend-impl",
+    "integration",
+    "qa-testing",
+    "launch"
+  ]
+}

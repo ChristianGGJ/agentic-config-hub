@@ -1,0 +1,70 @@
+{
+  "name": "product-launch-sample",
+  "version": "0.1.0",
+  "tasks": [
+    {
+      "id": "requirements",
+      "description": "Gather and freeze launch requirements",
+      "depends_on": [],
+      "duration_days": 3,
+      "owner": "pm",
+      "estimate_basis": "analogous: last two launches took 3 working days"
+    },
+    {
+      "id": "architecture",
+      "description": "Define service architecture and interfaces",
+      "depends_on": ["requirements"],
+      "duration_days": 2,
+      "owner": "tech-lead",
+      "estimate_basis": "expert judgment, reviewed by two engineers"
+    },
+    {
+      "id": "ui-design",
+      "description": "Design and review the user interface",
+      "depends_on": ["requirements"],
+      "duration_days": 4,
+      "owner": "design",
+      "estimate_basis": "analogous: prior redesign took 4 working days"
+    },
+    {
+      "id": "backend-impl",
+      "description": "Implement backend services",
+      "depends_on": ["architecture"],
+      "duration_days": 6,
+      "owner": "backend",
+      "estimate_basis": "bottom-up from architecture interface list"
+    },
+    {
+      "id": "frontend-impl",
+      "description": "Implement frontend against the approved design",
+      "depends_on": ["architecture", "ui-design"],
+      "duration_days": 5,
+      "owner": "frontend",
+      "estimate_basis": "bottom-up from screen inventory"
+    },
+    {
+      "id": "integration",
+      "description": "Integrate frontend and backend, wire environments",
+      "depends_on": ["backend-impl", "frontend-impl"],
+      "duration_days": 3,
+      "owner": "backend",
+      "estimate_basis": "analogous: previous integration took 3 working days"
+    },
+    {
+      "id": "qa-testing",
+      "description": "End-to-end test pass and defect fixes",
+      "depends_on": ["integration"],
+      "duration_days": 4,
+      "owner": "qa",
+      "estimate_basis": "test-case count divided by historical daily throughput"
+    },
+    {
+      "id": "launch",
+      "description": "Public launch",
+      "depends_on": ["qa-testing"],
+      "milestone": true,
+      "wbs_id": "1.9",
+      "deliverable": "product live in production"
+    }
+  ]
+}
