@@ -66,6 +66,10 @@ This guide explains how to use the standards library for consistent quality acro
 
 **Types:** feat, fix, docs, style, refactor, perf, test, chore, ci
 
+**Universal authorization rule (Core Principle 4):** no agent commits, pushes, or performs
+any critical/irreversible operation without an explicit, per-action human order. A branch- or
+scope-level approval is not standing consent. See `git/git-workflow-standards.md`.
+
 **Examples:**
 ```bash
 feat(agents): implement cs-content-creator agent
@@ -142,7 +146,7 @@ cat standards/git/git-workflow-standards.md
 **Priority Order:**
 1. **Security** - Non-negotiable, always enforced
 2. **Quality** - Zero defect handoff required
-3. **Git** - Conventional commits for all changes
+3. **Git** - Conventional commits; no commit or critical op without an explicit human order
 4. **Documentation** - Living docs stay current
 5. **Communication** - Clear, pragmatic, actionable
 
@@ -150,6 +154,7 @@ cat standards/git/git-workflow-standards.md
 
 ### Before Committing Code
 
+- [ ] Authorization: an explicit, per-action human order to commit was given (Core Principle 4)
 - [ ] Communication: Documentation is clear and actionable
 - [ ] Quality: All tests passing, code reviewed
 - [ ] Git: Conventional commit message format

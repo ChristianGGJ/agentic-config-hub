@@ -97,6 +97,11 @@ measurable stopping rule, not a suggestion.
 
 ### Approval and Irreversibility
 
+- **Universal rule (git standard, Core Principle 4): never commit, push, or perform any
+  critical/irreversible operation without an explicit, per-action human order.** A branch- or
+  scope-level approval is not standing consent to commit; each critical action is authorized on
+  its own. Reversible authoring and dry-run validations proceed; a commit, push, or any
+  irreversible state waits for the explicit order. Taking one without it is a Red Line violation.
 - **The key irreversible action is pushing tickets to an external PM tool (Jira / Asana / Trello)
   via plan-ticket-export output.** Transmission to any external system is irreversible: once
   tickets land in someone else's board they cannot be silently withdrawn. This step therefore

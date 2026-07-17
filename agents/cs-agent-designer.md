@@ -57,6 +57,7 @@ Every design loop and trace evaluation this agent executes is bounded by strict 
 
 ### Approval and Irreversibility
 
+- **Universal rule (git standard, Core Principle 4): never commit, push, or perform any critical/irreversible operation without an explicit, per-action human order.** A branch- or scope-level approval is not standing consent to commit; each critical action is authorized on its own. Reversible authoring proceeds; a commit, push, or any irreversible state waits for the explicit order. Taking one without it is a Red Line violation.
 - Any **irreversible action** (such as scaffolding new configuration directories, modifying production agent templates, or deleting registry entries) requires a hard stop at a **HUMAN GATE** for explicit approval.
 - The agent presents the change manifest and awaits human confirmation.
 

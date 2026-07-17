@@ -20,6 +20,27 @@
 - No force pushes to main
 - Signed commits recommended
 
+### **4. Human Authorization for Commits and Critical Operations**
+
+Universal, non-negotiable rule for every agent and every session:
+
+- **No agent commits, pushes, or performs any critical/irreversible operation without an
+  explicit, per-action human order.** The agent stops, states exactly what it will do, and
+  waits for a clear "yes" that names the action.
+- **A scope-level or branch-level approval is NOT standing consent.** "Deliver on branch
+  `feature/X`" authorizes the reversible work, not the commit or push that turns it into
+  durable state; each critical action is authorized on its own. Prior approvals are
+  non-transitive.
+- **Critical / irreversible operations include** (non-exhaustive): `git commit`, `git push`,
+  `git reset --hard`, `git rebase`, branch or tag deletion, force operations, deleting or
+  overwriting existing files, opening or merging PRs, publishing, and any non-undoable or
+  outward-facing side effect.
+- **Reversible working-tree work proceeds freely** — authoring, editing, and running gates
+  need no order; only the transition to a commit or any irreversible state waits for it.
+- **Enforcement:** this is a HUMAN GATE obligation (5-Phase Protocol, Phase 3). Every `cs-*`
+  agent mirrors this rule in its *Approval and Irreversibility* section; a commit or critical
+  op taken without an explicit order is a Red Line violation.
+
 ## Conventional Commits Specification
 
 ### **Commit Message Structure**
