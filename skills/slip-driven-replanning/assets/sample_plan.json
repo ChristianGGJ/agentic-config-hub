@@ -1,0 +1,67 @@
+{
+  "name": "website-relaunch",
+  "version": "0.1.0",
+  "tasks": [
+    {
+      "id": "design",
+      "description": "Finalize page designs and design tokens",
+      "depends_on": [],
+      "owner": "ana",
+      "duration_days": 5,
+      "estimate_basis": "analogous to 2025 microsite redesign",
+      "baseline_start": "2026-08-03",
+      "baseline_finish": "2026-08-07"
+    },
+    {
+      "id": "cms-setup",
+      "description": "Configure CMS instance and content model",
+      "depends_on": ["design"],
+      "owner": "luis",
+      "duration_days": 4,
+      "estimate_basis": "vendor quote plus one buffer day",
+      "baseline_start": "2026-08-10",
+      "baseline_finish": "2026-08-13"
+    },
+    {
+      "id": "frontend",
+      "description": "Implement frontend templates against the design system",
+      "depends_on": ["design"],
+      "owner": "marta",
+      "duration_days": 8,
+      "estimate_basis": "bottom-up per template",
+      "baseline_start": "2026-08-10",
+      "baseline_finish": "2026-08-19"
+    },
+    {
+      "id": "content",
+      "description": "Migrate and edit content into the new model",
+      "depends_on": ["cms-setup"],
+      "owner": "sofia",
+      "duration_days": 6,
+      "estimate_basis": "page count x 0.25 days",
+      "baseline_start": "2026-08-14",
+      "baseline_finish": "2026-08-21"
+    },
+    {
+      "id": "qa",
+      "description": "Cross-browser QA and accessibility pass",
+      "depends_on": ["frontend", "content"],
+      "owner": "diego",
+      "duration_days": 4,
+      "estimate_basis": "checklist-driven, two devices per browser",
+      "baseline_start": "2026-08-24",
+      "baseline_finish": "2026-08-27"
+    },
+    {
+      "id": "launch",
+      "description": "Production cutover and public launch",
+      "depends_on": ["qa"],
+      "owner": "ana",
+      "duration_days": 1,
+      "estimate_basis": "runbook rehearsed on staging",
+      "baseline_start": "2026-08-28",
+      "baseline_finish": "2026-08-28",
+      "milestone": true
+    }
+  ]
+}

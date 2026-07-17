@@ -1,0 +1,101 @@
+{
+  "plan_name": "website-relaunch",
+  "decision": "ESCALATE",
+  "decision_reason": "1 milestone breach(es), worst +4 days",
+  "exit_code": 1,
+  "threshold_days": 5,
+  "project_finish": {
+    "baseline": "2026-08-28",
+    "recomputed": "2026-09-01",
+    "delta_calendar_days": 4
+  },
+  "critical_path_changes": {
+    "entered": [
+      "frontend"
+    ],
+    "left": [
+      "cms-setup",
+      "content"
+    ]
+  },
+  "task_slips": [
+    {
+      "id": "frontend",
+      "baseline_finish": "2026-08-19",
+      "recomputed_finish": "2026-08-25",
+      "slip_days": 6
+    },
+    {
+      "id": "launch",
+      "baseline_finish": "2026-08-28",
+      "recomputed_finish": "2026-09-01",
+      "slip_days": 4
+    },
+    {
+      "id": "qa",
+      "baseline_finish": "2026-08-27",
+      "recomputed_finish": "2026-08-31",
+      "slip_days": 4
+    }
+  ],
+  "float_consumption": [
+    {
+      "id": "frontend",
+      "baseline_float_days": 2,
+      "recomputed_float_days": 0,
+      "float_consumed_days": 2
+    },
+    {
+      "id": "cms-setup",
+      "baseline_float_days": 0,
+      "recomputed_float_days": 2,
+      "float_consumed_days": -2
+    },
+    {
+      "id": "content",
+      "baseline_float_days": 0,
+      "recomputed_float_days": 2,
+      "float_consumed_days": -2
+    }
+  ],
+  "tasks_added": [],
+  "tasks_removed": [],
+  "milestone_breaches": [
+    {
+      "task_id": "launch",
+      "deadline": "2026-08-28",
+      "recomputed_finish": "2026-09-01",
+      "breach_days": 4,
+      "hardness": "contractual",
+      "source": "registry"
+    }
+  ],
+  "compression_candidates": [
+    {
+      "id": "frontend",
+      "calendar_span_days": 16,
+      "techniques": [
+        "fast_track",
+        "crash"
+      ]
+    },
+    {
+      "id": "qa",
+      "calendar_span_days": 6,
+      "techniques": [
+        "fast_track",
+        "crash"
+      ]
+    },
+    {
+      "id": "design",
+      "calendar_span_days": 5,
+      "techniques": [
+        "fast_track",
+        "crash"
+      ]
+    }
+  ],
+  "brooks_law_warning": "Brooks's Law: crashing by adding people to a late task makes it later (ramp-up plus communication overhead). Prefer fast-tracking discretionary dependencies; treat added-resource re-estimates as suspect.",
+  "notification_draft": "SUBJECT: Schedule impact: website-relaunch finish moves 2026-08-28 -> 2026-09-01 (+4 days)\nTrigger: confirmed slip on task 'frontend' (+4 days; cause: Design-system upgrade broke the template build; rework required)\nImpact: forecast project finish moves from 2026-08-28 to 2026-09-01 (+4 calendar days).\nMilestone breach: 'launch' (contractual) deadline 2026-08-28, new forecast 2026-09-01 (+4 days).\nOptions for the approval gate:\n  1. COMPRESS - candidates on the new critical path: frontend, qa, design\n     Brooks's Law: crashing by adding people to a late task makes it later (ramp-up plus communication overhead). Prefer fast-tracking discretionary dependencies; treat added-resource re-estimates as suspect.\n  2. REBASELINE - requires change-control approval at a human gate; the old baseline stays in git history\n  3. DESCOPE or renegotiate the breached milestone(s)\nNo plan changes have been applied. This replan is held for human approval."
+}

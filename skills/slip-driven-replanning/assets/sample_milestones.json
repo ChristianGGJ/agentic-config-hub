@@ -1,0 +1,10 @@
+{
+  "milestones": [
+    {
+      "task_id": "launch",
+      "deadline": "2026-08-28",
+      "hardness": "contractual",
+      "note": "Public launch date announced to customers; penalty clause in vendor contract"
+    }
+  ]
+}

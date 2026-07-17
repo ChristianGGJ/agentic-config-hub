@@ -1,0 +1,20 @@
+{
+  "plan_name": "website-relaunch",
+  "generated_by": "plan-baseline-tracking baseline_variance.py --json",
+  "variances": [
+    {
+      "task_id": "frontend",
+      "slip_days": 4,
+      "status": "in_progress",
+      "cause": "Design-system upgrade broke the template build; rework required",
+      "cause_class": "dependency",
+      "timestamp": "2026-08-14"
+    },
+    {
+      "task_id": "cms-setup",
+      "slip_days": 0,
+      "status": "done",
+      "timestamp": "2026-08-13"
+    }
+  ]
+}

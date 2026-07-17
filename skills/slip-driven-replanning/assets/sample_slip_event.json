@@ -1,0 +1,7 @@
+{
+  "task_id": "frontend",
+  "reported_delay_days": 4,
+  "cause": "Design-system upgrade broke the template build; rework required",
+  "cause_class": "dependency",
+  "timestamp": "2026-08-14T09:30:00"
+}

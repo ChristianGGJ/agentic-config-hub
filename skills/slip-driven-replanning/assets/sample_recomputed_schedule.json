@@ -1,0 +1,53 @@
+{
+  "plan_name": "website-relaunch",
+  "project_finish": "2026-09-01",
+  "calendar": {
+    "workweek": ["Mon", "Tue", "Wed", "Thu", "Fri"],
+    "holidays_applied": []
+  },
+  "tasks": [
+    {
+      "id": "design",
+      "start": "2026-08-03",
+      "finish": "2026-08-07",
+      "is_critical": true,
+      "total_float_days": 0
+    },
+    {
+      "id": "cms-setup",
+      "start": "2026-08-10",
+      "finish": "2026-08-13",
+      "is_critical": false,
+      "total_float_days": 2
+    },
+    {
+      "id": "frontend",
+      "start": "2026-08-10",
+      "finish": "2026-08-25",
+      "is_critical": true,
+      "total_float_days": 0
+    },
+    {
+      "id": "content",
+      "start": "2026-08-14",
+      "finish": "2026-08-21",
+      "is_critical": false,
+      "total_float_days": 2
+    },
+    {
+      "id": "qa",
+      "start": "2026-08-26",
+      "finish": "2026-08-31",
+      "is_critical": true,
+      "total_float_days": 0
+    },
+    {
+      "id": "launch",
+      "start": "2026-09-01",
+      "finish": "2026-09-01",
+      "is_critical": true,
+      "total_float_days": 0,
+      "milestone": true
+    }
+  ]
+}

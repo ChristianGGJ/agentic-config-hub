@@ -1,0 +1,10 @@
+{
+  "milestones": [
+    {
+      "task_id": "launch",
+      "deadline": "2026-09-02",
+      "hardness": "aspirational",
+      "note": "Internal stretch date; one buffer week exists before the contractual commitment"
+    }
+  ]
+}
