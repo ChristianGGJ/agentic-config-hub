@@ -1,0 +1,95 @@
+{
+  "project": "aurora-customer-payments-portal",
+  "stakeholders": [
+    {
+      "id": "ST-1",
+      "role": "Residential bill-paying customer",
+      "category": "user",
+      "interest": "high",
+      "influence": "low",
+      "inference_basis": "Brief: 'residential customers can view their monthly bills and pay them online by debit or credit card' - the portal exists for this actor.",
+      "engagement": "keep_informed"
+    },
+    {
+      "id": "ST-2",
+      "role": "Customer support agent handling disputes and lockouts",
+      "category": "operator",
+      "interest": "high",
+      "influence": "medium",
+      "inference_basis": "Brief: 'the customer support team takes over payment disputes, failed payments, and account-lockout tickets raised through the portal'.",
+      "engagement": "keep_informed"
+    },
+    {
+      "id": "ST-3",
+      "role": "Platform on-call engineer",
+      "category": "operator",
+      "interest": "medium",
+      "influence": "medium",
+      "inference_basis": "Brief: 'a small platform team carries the on-call pager for portal availability' - they run the system after launch.",
+      "engagement": "keep_informed"
+    },
+    {
+      "id": "ST-4",
+      "role": "Payment gateway vendor",
+      "category": "supplier",
+      "interest": "medium",
+      "influence": "high",
+      "inference_basis": "Brief: 'card payments are processed through an external payment gateway vendor' - an external dependency on the critical payment path.",
+      "engagement": "keep_satisfied"
+    },
+    {
+      "id": "ST-5",
+      "role": "Cloud hosting provider",
+      "category": "supplier",
+      "interest": "low",
+      "influence": "medium",
+      "inference_basis": "Brief: 'the portal runs on a public cloud hosting provider under an existing enterprise agreement'.",
+      "engagement": "monitor"
+    },
+    {
+      "id": "ST-6",
+      "role": "National data protection authority (GDPR supervisory authority)",
+      "category": "regulator",
+      "interest": "low",
+      "influence": "high",
+      "inference_basis": "Inferred from domain: brief states bills contain 'personal data of residents in an EU member state', which activates GDPR and its supervisory authority (verify jurisdiction).",
+      "engagement": "keep_satisfied"
+    },
+    {
+      "id": "ST-7",
+      "role": "Card schemes via acquiring bank (PCI DSS compliance regime)",
+      "category": "regulator",
+      "interest": "low",
+      "influence": "high",
+      "inference_basis": "Inferred from domain: card payments imply contractual PCI DSS obligations enforced through the acquirer, even though 'Aurora does not want to store card numbers itself' (SAQ scope still applies - verify current PCI DSS version).",
+      "engagement": "keep_satisfied"
+    },
+    {
+      "id": "ST-8",
+      "role": "Energy market regulator (billing accuracy audits)",
+      "category": "regulator",
+      "interest": "medium",
+      "influence": "high",
+      "inference_basis": "Brief: 'the energy market regulator audits billing accuracy annually' and launch is tied to a 'regulated billing-cycle change'.",
+      "engagement": "keep_satisfied"
+    },
+    {
+      "id": "ST-9",
+      "role": "CFO (funding sponsor)",
+      "category": "sponsor",
+      "interest": "high",
+      "influence": "high",
+      "inference_basis": "Brief: 'the CFO is funding the initiative and expects it to cut call-center payment handling by half within a year of launch'.",
+      "engagement": "manage_closely"
+    },
+    {
+      "id": "ST-10",
+      "role": "Offline paper-billing customers (many elderly)",
+      "category": "third_party",
+      "interest": "low",
+      "influence": "low",
+      "inference_basis": "Brief: 'paper billing continues for customers who do not enroll; the portal must not degrade service for offline customers, many of them elderly' - affected without using the system.",
+      "engagement": "monitor"
+    }
+  ]
+}

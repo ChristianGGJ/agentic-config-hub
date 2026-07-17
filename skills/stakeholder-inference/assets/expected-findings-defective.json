@@ -1,0 +1,42 @@
+{
+  "tool": "stakeholder_register_validator",
+  "register": "sample-stakeholder-register-defective.json",
+  "project": "aurora-customer-payments-portal",
+  "entries": 6,
+  "categories_covered": [
+    "operator",
+    "sponsor",
+    "supplier",
+    "third_party",
+    "user"
+  ],
+  "waivers": {},
+  "findings": [
+    {
+      "rule": "V3",
+      "severity": "HIGH",
+      "where": "entry 'ST-2'",
+      "message": "duplicate id 'ST-2' (already used by entry #2)"
+    },
+    {
+      "rule": "V6",
+      "severity": "MEDIUM",
+      "where": "entry 'ST-4'",
+      "message": "inference_basis is missing or empty; an entry without a stated basis is an unsupported guess"
+    },
+    {
+      "rule": "V4",
+      "severity": "HIGH",
+      "where": "category:regulator",
+      "message": "no 'regulator' entry and no waiver; missing regulator coverage is the classic stakeholder blind spot - add the entry or waive with --waive regulator:<reason>"
+    }
+  ],
+  "notes": [],
+  "counts": {
+    "HIGH": 2,
+    "MEDIUM": 1,
+    "LOW": 0
+  },
+  "result": "FAIL",
+  "exit_code": 1
+}
