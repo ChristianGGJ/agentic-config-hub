@@ -1,0 +1,111 @@
+{
+  "profile": "data-privacy",
+  "description": "GDPR/CCPA prerequisite concerns that must hold BEFORE personal data is collected or processed - the canonical 'GDPR before the customer database' family. Trigger-based: concerns activate only when the artifact shows evidence of personal-data handling, or when a regulator appears in the stakeholder register. Regulations are external standards: verify against current regulation and jurisdiction. This profile is not legal advice.",
+  "triggers": [
+    "personal (data|information)",
+    "customer (accounts?|databases?|records?|profiles?|data)",
+    "user (accounts?|profiles?|records?|data)",
+    "\\bPII\\b",
+    "email (address(es)?|lists?|newsletters?)",
+    "newsletter",
+    "sign[- ]?up",
+    "\\bCRM\\b",
+    "loyalty (program|scheme)",
+    "analytics",
+    "tracking"
+  ],
+  "activated_by": ["regulator"],
+  "concerns": [
+    {
+      "id": "lawful-basis",
+      "concern": "Documented lawful basis for processing personal data (GDPR Art. 6)",
+      "severity": "CRITICAL",
+      "indicators": [
+        "lawful basis",
+        "legal basis",
+        "legitimate interest",
+        "\\bconsent\\b"
+      ],
+      "prerequisite_note": "GDPR Art. 6: a lawful basis (consent, contract, legitimate interests, ...) must be identified and documented BEFORE any personal data is collected - it cannot be retrofitted onto data already gathered. Verify against current regulation and jurisdiction.",
+      "seed_question": "Under which lawful basis will each category of personal data be processed, and where is that documented?"
+    },
+    {
+      "id": "dpia",
+      "concern": "Data Protection Impact Assessment before high-risk processing (GDPR Arts. 25/35)",
+      "severity": "CRITICAL",
+      "indicators": [
+        "\\bDPIA\\b",
+        "data[- ]protection impact assessment",
+        "privacy impact assessment",
+        "data protection by design",
+        "privacy by design"
+      ],
+      "prerequisite_note": "GDPR Arts. 25/35: a DPIA and data-protection-by-design measures must be completed BEFORE building a customer database or starting any large-scale processing of personal data - the canonical 'GDPR before the customer database' ordering. Verify against current regulation and jurisdiction.",
+      "seed_question": "Has a DPIA been performed for the planned processing, and which design decisions did it change?"
+    },
+    {
+      "id": "retention",
+      "concern": "Defined retention periods and deletion schedule (GDPR Art. 5(1)(e))",
+      "severity": "HIGH",
+      "indicators": [
+        "retention",
+        "storage limitation",
+        "deletion schedule",
+        "delete after",
+        "erasure schedule",
+        "data lifecycle"
+      ],
+      "prerequisite_note": "GDPR Art. 5(1)(e): retention periods must be defined BEFORE collection; indefinite storage of personal data is non-compliant by default. Verify against current regulation and jurisdiction.",
+      "seed_question": "How long is each category of personal data kept, and what mechanism deletes it when the period ends?"
+    },
+    {
+      "id": "processor-agreements",
+      "concern": "Data Processing Agreements with third-party processors (GDPR Art. 28)",
+      "severity": "HIGH",
+      "triggers": [
+        "third[- ]part(y|ies)",
+        "\\bvendor\\b",
+        "\\bSaaS\\b",
+        "hosted",
+        "platform",
+        "integrat",
+        "outsourc"
+      ],
+      "indicators": [
+        "\\bDPA\\b",
+        "data processing agreement",
+        "processor agreement",
+        "sub-?processor"
+      ],
+      "prerequisite_note": "GDPR Art. 28: a Data Processing Agreement must be in place BEFORE any third-party processor (hosting, e-mail, analytics) touches personal data. Verify against current regulation and jurisdiction.",
+      "seed_question": "Which third parties will process personal data on your behalf, and is a DPA signed with each of them?"
+    },
+    {
+      "id": "data-subject-rights",
+      "concern": "Handling of access, erasure, and portability requests (GDPR Arts. 15-22)",
+      "severity": "MEDIUM",
+      "indicators": [
+        "subject access",
+        "right to erasure",
+        "right to be forgotten",
+        "data portability",
+        "\\bDSAR\\b"
+      ],
+      "prerequisite_note": "GDPR Arts. 15-22: a working process for data-subject requests is required from the first day personal data exists, not after the first request arrives. Verify against current regulation and jurisdiction.",
+      "seed_question": "Who receives and answers a data-subject access or erasure request, and within what deadline?"
+    },
+    {
+      "id": "breach-notification",
+      "concern": "Personal-data breach notification process (GDPR Arts. 33-34)",
+      "severity": "MEDIUM",
+      "indicators": [
+        "breach notification",
+        "breach response",
+        "72[- ]hours?",
+        "incident disclosure"
+      ],
+      "prerequisite_note": "GDPR Arts. 33-34: the 72-hour supervisory-authority notification path must exist BEFORE go-live; it cannot be designed mid-breach. Verify against current regulation and jurisdiction.",
+      "seed_question": "If customer data leaks on launch day, who notifies which authority within 72 hours, and through what process?"
+    }
+  ]
+}

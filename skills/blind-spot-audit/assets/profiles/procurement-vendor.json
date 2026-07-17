@@ -1,0 +1,88 @@
+{
+  "profile": "procurement-vendor",
+  "description": "Vendor and procurement concerns. Activated when the artifact mentions third parties, vendors, or purchasing - or when a supplier stakeholder appears in the register (stakeholder-linked activation). Mined from procurement lead-time overruns and the NIST SP 800-37 authorize-before-operate discipline.",
+  "triggers": [
+    "vendor",
+    "supplier",
+    "third[- ]part(y|ies)",
+    "outsourc",
+    "\\bSaaS\\b",
+    "contractor",
+    "procure",
+    "purchase",
+    "\\bagency\\b",
+    "platform"
+  ],
+  "activated_by": ["supplier"],
+  "concerns": [
+    {
+      "id": "vendor-selection",
+      "concern": "Vendor evaluation and selection process",
+      "severity": "HIGH",
+      "indicators": [
+        "\\bRFP\\b",
+        "vendor evaluation",
+        "due diligence",
+        "shortlist",
+        "selection criteria"
+      ],
+      "prerequisite_note": null,
+      "seed_question": "How is the vendor chosen - what criteria, what alternatives, and who decides?"
+    },
+    {
+      "id": "contract-sla",
+      "concern": "Signed contract with service-level commitments",
+      "severity": "HIGH",
+      "indicators": [
+        "\\bSLA\\b",
+        "service[- ]level",
+        "uptime commitment",
+        "support contract",
+        "penalt"
+      ],
+      "prerequisite_note": "A signed contract and SLA must exist BEFORE the delivery schedule depends on the vendor - verbal commitments are not schedulable.",
+      "seed_question": "Is there a signed contract and SLA with every vendor the schedule depends on?"
+    },
+    {
+      "id": "procurement-lead-time",
+      "concern": "Ordering and onboarding lead times in the plan",
+      "severity": "CRITICAL",
+      "indicators": [
+        "lead[- ]time",
+        "purchase order",
+        "\\bPO\\b",
+        "ordering timeline",
+        "procurement plan"
+      ],
+      "prerequisite_note": "Ordering, contracting, and onboarding lead times are predecessor work: they must appear in the plan BEFORE the tasks that consume the purchased goods or services.",
+      "seed_question": "How long does it take to order, contract, and onboard each vendor, and where is that time in the plan?"
+    },
+    {
+      "id": "vendor-security-review",
+      "concern": "Third-party security assessment before access is granted",
+      "severity": "HIGH",
+      "indicators": [
+        "SOC ?2",
+        "ISO ?27001",
+        "security (assessment|questionnaire|review)",
+        "pen(etration)? test"
+      ],
+      "prerequisite_note": "Third-party security review must complete BEFORE the vendor receives access or data (NIST SP 800-37 Rev. 2 authorize-before-operate discipline; verify against current revision).",
+      "seed_question": "What security evidence (SOC 2, ISO 27001, questionnaire) is required from each vendor before they get access?"
+    },
+    {
+      "id": "exit-strategy",
+      "concern": "Vendor lock-in and exit strategy",
+      "severity": "MEDIUM",
+      "indicators": [
+        "lock[- ]in",
+        "exit (clause|plan|strategy)",
+        "data export",
+        "migration (away|plan|path)",
+        "termination"
+      ],
+      "prerequisite_note": null,
+      "seed_question": "If this vendor fails or triples its price, how do you get your data and operations out, and how long does that take?"
+    }
+  ]
+}

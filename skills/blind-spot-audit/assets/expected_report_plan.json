@@ -1,0 +1,83 @@
+{
+  "brief": "crm-launch",
+  "mode": "plan",
+  "artifact": "assets/sample_plan.json",
+  "profiles_applied": [
+    "data-privacy"
+  ],
+  "stakeholder_categories": [],
+  "fail_on": "critical",
+  "findings": [
+    {
+      "id": "data-privacy.dpia",
+      "domain": "data-privacy",
+      "concern": "Data Protection Impact Assessment before high-risk processing (GDPR Arts. 25/35)",
+      "status": "missing",
+      "severity": "CRITICAL",
+      "evidence": "no evidence found: 0 of 5 indicator pattern(s) matched across 5 text unit(s); activated by trigger evidence 'customer database' in task T1",
+      "prerequisite_note": "GDPR Arts. 25/35: a DPIA and data-protection-by-design measures must be completed BEFORE building a customer database or starting any large-scale processing of personal data - the canonical 'GDPR before the customer database' ordering. Verify against current regulation and jurisdiction.",
+      "seed_question": "Has a DPIA been performed for the planned processing, and which design decisions did it change?"
+    },
+    {
+      "id": "data-privacy.lawful-basis",
+      "domain": "data-privacy",
+      "concern": "Documented lawful basis for processing personal data (GDPR Art. 6)",
+      "status": "missing",
+      "severity": "CRITICAL",
+      "evidence": "no evidence found: 0 of 4 indicator pattern(s) matched across 5 text unit(s); activated by trigger evidence 'customer database' in task T1",
+      "prerequisite_note": "GDPR Art. 6: a lawful basis (consent, contract, legitimate interests, ...) must be identified and documented BEFORE any personal data is collected - it cannot be retrofitted onto data already gathered. Verify against current regulation and jurisdiction.",
+      "seed_question": "Under which lawful basis will each category of personal data be processed, and where is that documented?"
+    },
+    {
+      "id": "data-privacy.processor-agreements",
+      "domain": "data-privacy",
+      "concern": "Data Processing Agreements with third-party processors (GDPR Art. 28)",
+      "status": "missing",
+      "severity": "HIGH",
+      "evidence": "no evidence found: 0 of 4 indicator pattern(s) matched across 5 text unit(s); activated by trigger evidence 'customer database' in task T1",
+      "prerequisite_note": "GDPR Art. 28: a Data Processing Agreement must be in place BEFORE any third-party processor (hosting, e-mail, analytics) touches personal data. Verify against current regulation and jurisdiction.",
+      "seed_question": "Which third parties will process personal data on your behalf, and is a DPA signed with each of them?"
+    },
+    {
+      "id": "data-privacy.retention",
+      "domain": "data-privacy",
+      "concern": "Defined retention periods and deletion schedule (GDPR Art. 5(1)(e))",
+      "status": "missing",
+      "severity": "HIGH",
+      "evidence": "no evidence found: 0 of 6 indicator pattern(s) matched across 5 text unit(s); activated by trigger evidence 'customer database' in task T1",
+      "prerequisite_note": "GDPR Art. 5(1)(e): retention periods must be defined BEFORE collection; indefinite storage of personal data is non-compliant by default. Verify against current regulation and jurisdiction.",
+      "seed_question": "How long is each category of personal data kept, and what mechanism deletes it when the period ends?"
+    },
+    {
+      "id": "data-privacy.breach-notification",
+      "domain": "data-privacy",
+      "concern": "Personal-data breach notification process (GDPR Arts. 33-34)",
+      "status": "missing",
+      "severity": "MEDIUM",
+      "evidence": "no evidence found: 0 of 4 indicator pattern(s) matched across 5 text unit(s); activated by trigger evidence 'customer database' in task T1",
+      "prerequisite_note": "GDPR Arts. 33-34: the 72-hour supervisory-authority notification path must exist BEFORE go-live; it cannot be designed mid-breach. Verify against current regulation and jurisdiction.",
+      "seed_question": "If customer data leaks on launch day, who notifies which authority within 72 hours, and through what process?"
+    },
+    {
+      "id": "data-privacy.data-subject-rights",
+      "domain": "data-privacy",
+      "concern": "Handling of access, erasure, and portability requests (GDPR Arts. 15-22)",
+      "status": "missing",
+      "severity": "MEDIUM",
+      "evidence": "no evidence found: 0 of 5 indicator pattern(s) matched across 5 text unit(s); activated by trigger evidence 'customer database' in task T1",
+      "prerequisite_note": "GDPR Arts. 15-22: a working process for data-subject requests is required from the first day personal data exists, not after the first request arrives. Verify against current regulation and jurisdiction.",
+      "seed_question": "Who receives and answers a data-subject access or erasure request, and within what deadline?"
+    }
+  ],
+  "skipped_not_triggered": [],
+  "summary": {
+    "concerns_evaluated": 6,
+    "covered": 0,
+    "partial": 0,
+    "missing": 6,
+    "skipped": 0,
+    "gate_failures": 2,
+    "gate": "FAIL"
+  },
+  "disclaimer": "Deterministic floor only: 'missing' means no indicator evidence was found in the artifact, never proven-missing, and 'covered' means indicator terms are present, never that the concern is handled well. Paraphrases evade regex: run the LLM semantic pass described in SKILL.md before treating this report as complete. Exit 0 is not proof of completeness."
+}

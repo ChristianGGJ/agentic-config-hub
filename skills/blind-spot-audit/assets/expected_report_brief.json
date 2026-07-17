@@ -1,0 +1,154 @@
+{
+  "brief": "sample_brief.md",
+  "mode": "brief",
+  "artifact": "assets/sample_brief.md",
+  "profiles_applied": [
+    "data-privacy",
+    "ecommerce"
+  ],
+  "stakeholder_categories": [],
+  "fail_on": "critical",
+  "findings": [
+    {
+      "id": "data-privacy.dpia",
+      "domain": "data-privacy",
+      "concern": "Data Protection Impact Assessment before high-risk processing (GDPR Arts. 25/35)",
+      "status": "missing",
+      "severity": "CRITICAL",
+      "evidence": "no evidence found: 0 of 5 indicator pattern(s) matched across 1 text unit(s); activated by trigger evidence 'customer accounts' in brief",
+      "prerequisite_note": "GDPR Arts. 25/35: a DPIA and data-protection-by-design measures must be completed BEFORE building a customer database or starting any large-scale processing of personal data - the canonical 'GDPR before the customer database' ordering. Verify against current regulation and jurisdiction.",
+      "seed_question": "Has a DPIA been performed for the planned processing, and which design decisions did it change?"
+    },
+    {
+      "id": "data-privacy.lawful-basis",
+      "domain": "data-privacy",
+      "concern": "Documented lawful basis for processing personal data (GDPR Art. 6)",
+      "status": "missing",
+      "severity": "CRITICAL",
+      "evidence": "no evidence found: 0 of 4 indicator pattern(s) matched across 1 text unit(s); activated by trigger evidence 'customer accounts' in brief",
+      "prerequisite_note": "GDPR Art. 6: a lawful basis (consent, contract, legitimate interests, ...) must be identified and documented BEFORE any personal data is collected - it cannot be retrofitted onto data already gathered. Verify against current regulation and jurisdiction.",
+      "seed_question": "Under which lawful basis will each category of personal data be processed, and where is that documented?"
+    },
+    {
+      "id": "ecommerce.logistics",
+      "domain": "ecommerce",
+      "concern": "Shipping, fulfillment, and delivery logistics",
+      "status": "missing",
+      "severity": "CRITICAL",
+      "evidence": "no evidence found: 0 of 8 indicator pattern(s) matched across 1 text unit(s)",
+      "prerequisite_note": null,
+      "seed_question": "How does a sold item physically reach the buyer - who packs, who ships, at what cost, and with what delivery promise?"
+    },
+    {
+      "id": "ecommerce.payment-processing",
+      "domain": "ecommerce",
+      "concern": "Payment methods, gateway integration, and PCI obligations",
+      "status": "missing",
+      "severity": "CRITICAL",
+      "evidence": "no evidence found: 0 of 8 indicator pattern(s) matched across 1 text unit(s)",
+      "prerequisite_note": "A payment gateway account (with KYC/merchant onboarding lead time) must exist BEFORE the first sale can be taken; gateway onboarding is predecessor work, not launch-day work.",
+      "seed_question": "Which payment methods are accepted at launch, through which gateway, and who carries the PCI scope?"
+    },
+    {
+      "id": "data-privacy.processor-agreements",
+      "domain": "data-privacy",
+      "concern": "Data Processing Agreements with third-party processors (GDPR Art. 28)",
+      "status": "missing",
+      "severity": "HIGH",
+      "evidence": "no evidence found: 0 of 4 indicator pattern(s) matched across 1 text unit(s); activated by trigger evidence 'customer accounts' in brief",
+      "prerequisite_note": "GDPR Art. 28: a Data Processing Agreement must be in place BEFORE any third-party processor (hosting, e-mail, analytics) touches personal data. Verify against current regulation and jurisdiction.",
+      "seed_question": "Which third parties will process personal data on your behalf, and is a DPA signed with each of them?"
+    },
+    {
+      "id": "data-privacy.retention",
+      "domain": "data-privacy",
+      "concern": "Defined retention periods and deletion schedule (GDPR Art. 5(1)(e))",
+      "status": "missing",
+      "severity": "HIGH",
+      "evidence": "no evidence found: 0 of 6 indicator pattern(s) matched across 1 text unit(s); activated by trigger evidence 'customer accounts' in brief",
+      "prerequisite_note": "GDPR Art. 5(1)(e): retention periods must be defined BEFORE collection; indefinite storage of personal data is non-compliant by default. Verify against current regulation and jurisdiction.",
+      "seed_question": "How long is each category of personal data kept, and what mechanism deletes it when the period ends?"
+    },
+    {
+      "id": "ecommerce.fraud-prevention",
+      "domain": "ecommerce",
+      "concern": "Payment fraud and chargeback handling",
+      "status": "missing",
+      "severity": "HIGH",
+      "evidence": "no evidence found: 0 of 6 indicator pattern(s) matched across 1 text unit(s)",
+      "prerequisite_note": null,
+      "seed_question": "How are fraudulent orders detected before shipment, and who absorbs chargeback losses?"
+    },
+    {
+      "id": "ecommerce.returns-refunds",
+      "domain": "ecommerce",
+      "concern": "Returns, refunds, and exchange policy",
+      "status": "missing",
+      "severity": "HIGH",
+      "evidence": "no evidence found: 0 of 5 indicator pattern(s) matched across 1 text unit(s)",
+      "prerequisite_note": null,
+      "seed_question": "What is the returns and refund policy, who pays return shipping, and what happens to returned stock?"
+    },
+    {
+      "id": "data-privacy.breach-notification",
+      "domain": "data-privacy",
+      "concern": "Personal-data breach notification process (GDPR Arts. 33-34)",
+      "status": "missing",
+      "severity": "MEDIUM",
+      "evidence": "no evidence found: 0 of 4 indicator pattern(s) matched across 1 text unit(s); activated by trigger evidence 'customer accounts' in brief",
+      "prerequisite_note": "GDPR Arts. 33-34: the 72-hour supervisory-authority notification path must exist BEFORE go-live; it cannot be designed mid-breach. Verify against current regulation and jurisdiction.",
+      "seed_question": "If customer data leaks on launch day, who notifies which authority within 72 hours, and through what process?"
+    },
+    {
+      "id": "data-privacy.data-subject-rights",
+      "domain": "data-privacy",
+      "concern": "Handling of access, erasure, and portability requests (GDPR Arts. 15-22)",
+      "status": "missing",
+      "severity": "MEDIUM",
+      "evidence": "no evidence found: 0 of 5 indicator pattern(s) matched across 1 text unit(s); activated by trigger evidence 'customer accounts' in brief",
+      "prerequisite_note": "GDPR Arts. 15-22: a working process for data-subject requests is required from the first day personal data exists, not after the first request arrives. Verify against current regulation and jurisdiction.",
+      "seed_question": "Who receives and answers a data-subject access or erasure request, and within what deadline?"
+    },
+    {
+      "id": "ecommerce.sales-tax",
+      "domain": "ecommerce",
+      "concern": "Sales tax / VAT registration and collection",
+      "status": "missing",
+      "severity": "MEDIUM",
+      "evidence": "no evidence found: 0 of 4 indicator pattern(s) matched across 1 text unit(s)",
+      "prerequisite_note": "VAT/sales-tax registration thresholds can require registration BEFORE the first cross-border sale (e.g. EU OSS). Verify against current jurisdiction.",
+      "seed_question": "Where must the store register for VAT or sales tax before selling, and who files the returns?"
+    },
+    {
+      "id": "ecommerce.inventory",
+      "domain": "ecommerce",
+      "concern": "Inventory and stock management",
+      "status": "partial",
+      "severity": "MEDIUM",
+      "evidence": "matched 1 of 5 indicator(s); first: 'restock' in brief: \"...sign up for our email newsletter for restock announcements - Seasonal collections an...\"",
+      "prerequisite_note": null,
+      "seed_question": "How is stock tracked across channels, and what happens when an item sells out mid-order?"
+    },
+    {
+      "id": "ecommerce.customer-acquisition",
+      "domain": "ecommerce",
+      "concern": "Marketing and customer acquisition channels",
+      "status": "covered",
+      "severity": "HIGH",
+      "evidence": "matched 3 of 8 indicator(s); first: 'marketing' in brief: \"...ront platform - Instagram and Pinterest marketing to drive traffic to the store - Shopper...\"",
+      "prerequisite_note": null,
+      "seed_question": "Which channels bring buyers to the store, at what acquisition cost, and how is that measured?"
+    }
+  ],
+  "skipped_not_triggered": [],
+  "summary": {
+    "concerns_evaluated": 13,
+    "covered": 1,
+    "partial": 1,
+    "missing": 11,
+    "skipped": 0,
+    "gate_failures": 4,
+    "gate": "FAIL"
+  },
+  "disclaimer": "Deterministic floor only: 'missing' means no indicator evidence was found in the artifact, never proven-missing, and 'covered' means indicator terms are present, never that the concern is handled well. Paraphrases evade regex: run the LLM semantic pass described in SKILL.md before treating this report as complete. Exit 0 is not proof of completeness."
+}

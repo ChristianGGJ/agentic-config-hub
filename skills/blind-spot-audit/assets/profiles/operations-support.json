@@ -1,0 +1,92 @@
+{
+  "profile": "operations-support",
+  "description": "Day-2 operations concerns that idea-stage briefs and build-focused plans systematically omit: support, monitoring, incident response, backup, training, and maintenance. The Hershey SAP/Siebel 1999 cutover (training and testing prerequisites skipped before a hard go-live date) is the canonical mined failure for this family.",
+  "concerns": [
+    {
+      "id": "customer-support",
+      "concern": "Customer support channel and staffing",
+      "severity": "HIGH",
+      "indicators": [
+        "help ?desk",
+        "\\bsupport\\b",
+        "ticketing",
+        "service desk",
+        "live chat",
+        "\\bFAQ\\b"
+      ],
+      "prerequisite_note": null,
+      "seed_question": "Who answers customer questions and complaints, through which channel, and within what response time?"
+    },
+    {
+      "id": "monitoring-alerting",
+      "concern": "Monitoring, alerting, and observability",
+      "severity": "HIGH",
+      "indicators": [
+        "monitor",
+        "alert",
+        "observab",
+        "on[- ]call",
+        "uptime",
+        "dashboard"
+      ],
+      "prerequisite_note": null,
+      "seed_question": "How do you learn the system is down or degraded before customers tell you?"
+    },
+    {
+      "id": "incident-response",
+      "concern": "Incident response and escalation process",
+      "severity": "HIGH",
+      "indicators": [
+        "incident",
+        "runbook",
+        "escalat",
+        "postmortem",
+        "outage"
+      ],
+      "prerequisite_note": null,
+      "seed_question": "When the first production incident happens, who is paged, what runbook do they follow, and who can roll back?"
+    },
+    {
+      "id": "backup-recovery",
+      "concern": "Backup, restore, and disaster recovery",
+      "severity": "CRITICAL",
+      "indicators": [
+        "backup",
+        "restore",
+        "disaster recovery",
+        "\\bRTO\\b",
+        "\\bRPO\\b"
+      ],
+      "prerequisite_note": "A verified restore path must exist BEFORE production data exists; an unverified backup is a hope, not a control.",
+      "seed_question": "What is backed up, how often, and when was a restore last actually tested?"
+    },
+    {
+      "id": "staff-training",
+      "concern": "Operator and staff training before cutover",
+      "severity": "MEDIUM",
+      "indicators": [
+        "training",
+        "onboard",
+        "handover",
+        "enablement",
+        "operator documentation"
+      ],
+      "prerequisite_note": "Operator training is predecessor work for any cutover (Hershey SAP/Siebel 1999: training and testing were skipped to hold a hard go-live date, and order fulfillment collapsed in peak season).",
+      "seed_question": "Who operates this after launch, and when in the plan do they get trained on it?"
+    },
+    {
+      "id": "maintenance-lifecycle",
+      "concern": "Maintenance, patching, and lifecycle ownership",
+      "severity": "MEDIUM",
+      "indicators": [
+        "maintenance",
+        "patch",
+        "upgrade",
+        "deprecat",
+        "end[- ]of[- ]life"
+      ],
+      "prerequisite_note": null,
+      "seed_question": "Who owns patching, upgrades, and dependency lifecycle after the build team moves on?"
+    }
+  ]
+}

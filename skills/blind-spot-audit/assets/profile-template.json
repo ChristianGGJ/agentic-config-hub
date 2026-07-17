@@ -1,0 +1,34 @@
+{
+  "profile": "your-domain-name",
+  "description": "One paragraph: what concern family this profile covers, which mined failure sources it is derived from, and any 'verify against current docs/jurisdiction' caveats.",
+  "triggers": [
+    "OPTIONAL profile-level activation regex 1 (case-insensitive)",
+    "OPTIONAL profile-level activation regex 2"
+  ],
+  "activated_by": [],
+  "concerns": [
+    {
+      "id": "kebab-case-concern-id",
+      "concern": "One-line human statement of the concern area",
+      "severity": "CRITICAL",
+      "triggers": [
+        "OPTIONAL concern-level activation regex (unioned with profile-level)"
+      ],
+      "activated_by": [],
+      "indicators": [
+        "\\bevidence[- ]regex\\b",
+        "second indicator term"
+      ],
+      "covered_min": 2,
+      "prerequisite_note": "Use for prerequisite-class concerns: state WHAT must be true BEFORE which work, and cite the source (regulation article, standard, named case). Set to null for plain scope concerns.",
+      "seed_question": "The single question sequential-elicitation should ask a human when this concern is missing or partial."
+    }
+  ],
+  "_field_notes": {
+    "severity": "One of CRITICAL | HIGH | MEDIUM | LOW (blind_spot_report contract).",
+    "activated_by": "Stakeholder categories from the stakeholder_register contract: user | operator | supplier | regulator | sponsor | third_party. A matching category in --stakeholders activates the concern even without a text trigger.",
+    "activation": "No triggers AND no activated_by (profile + concern level combined) = concern is unconditional. Otherwise the concern is skipped unless a trigger regex matches the artifact or an activated_by category is present in the register.",
+    "covered_min": "Distinct indicator patterns that must match for status 'covered' (default 2; capped at the number of indicators). Exactly one match below the threshold = 'partial'; zero = 'missing'.",
+    "authoring": "See references/profile_authoring_guide.md for the full recipe and the data-privacy worked example."
+  }
+}

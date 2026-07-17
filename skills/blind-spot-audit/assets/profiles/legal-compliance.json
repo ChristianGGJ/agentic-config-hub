@@ -1,0 +1,100 @@
+{
+  "profile": "legal-compliance",
+  "description": "Legal obligations frequently omitted at idea stage: terms and policies, IP and licensing, sector regulatory approval, consumer protection, and accessibility. External standards - verify against current jurisdiction. This profile is not legal advice.",
+  "concerns": [
+    {
+      "id": "terms-and-policies",
+      "concern": "Customer-facing terms of service and policies",
+      "severity": "HIGH",
+      "indicators": [
+        "terms of service",
+        "terms and conditions",
+        "privacy policy",
+        "\\bEULA\\b",
+        "acceptable use"
+      ],
+      "prerequisite_note": null,
+      "seed_question": "Which customer-facing terms and policies exist at launch, and who reviewed them?"
+    },
+    {
+      "id": "licensing-ip",
+      "concern": "Licensing, trademarks, and intellectual property",
+      "severity": "MEDIUM",
+      "indicators": [
+        "licen[cs]",
+        "trademark",
+        "copyright",
+        "intellectual property",
+        "open[- ]source compliance"
+      ],
+      "prerequisite_note": null,
+      "seed_question": "Which third-party IP, fonts, images, or code does the project use, and under what license?"
+    },
+    {
+      "id": "regulatory-approval",
+      "concern": "Sector regulatory approval or operating license",
+      "severity": "CRITICAL",
+      "triggers": [
+        "health",
+        "medical",
+        "\\bpharma\\b",
+        "financ",
+        "insurance",
+        "lending",
+        "\\bcredit\\b",
+        "gambling",
+        "alcohol",
+        "\\bfood\\b",
+        "aviation",
+        "energy",
+        "telecom"
+      ],
+      "activated_by": ["regulator"],
+      "indicators": [
+        "regulatory approval",
+        "operating licen[cs]e",
+        "authori[sz]ation",
+        "\\bpermit\\b",
+        "accreditation"
+      ],
+      "prerequisite_note": "Regulated activities require authorization BEFORE operations begin; approval lead times belong in the plan as predecessor tasks, not as a post-launch fix. Verify against current jurisdiction.",
+      "seed_question": "Does any regulator have to approve this activity before launch, and how long does approval take?"
+    },
+    {
+      "id": "consumer-protection",
+      "concern": "Consumer-protection rules for distance selling",
+      "severity": "MEDIUM",
+      "triggers": [
+        "\\bsell(ing)?\\b",
+        "\\bsales?\\b",
+        "subscription",
+        "pricing",
+        "checkout",
+        "\\bstore\\b",
+        "\\bshop\\b"
+      ],
+      "indicators": [
+        "consumer (rights|protection)",
+        "distance selling",
+        "cooling[- ]off",
+        "withdrawal period"
+      ],
+      "prerequisite_note": "EU distance-selling rules (e.g. the 14-day withdrawal right) apply from the first online sale, so the policy work is a predecessor of the launch task. Verify against current jurisdiction.",
+      "seed_question": "Which consumer-protection rules (withdrawal, warranty, pricing display) apply where you sell?"
+    },
+    {
+      "id": "accessibility",
+      "concern": "Accessibility obligations for the public-facing product",
+      "severity": "MEDIUM",
+      "indicators": [
+        "accessib",
+        "\\bWCAG\\b",
+        "\\bADA\\b",
+        "EN 301 549",
+        "screen reader"
+      ],
+      "prerequisite_note": null,
+      "seed_question": "Which accessibility standard does the product target, and how is conformance verified before launch?"
+    }
+  ]
+}

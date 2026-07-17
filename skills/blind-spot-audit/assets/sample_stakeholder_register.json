@@ -1,0 +1,59 @@
+{
+  "project": "terra-and-thread-online-store",
+  "stakeholders": [
+    {
+      "id": "S1",
+      "role": "Prospective customers across Europe buying handmade ceramics",
+      "category": "user",
+      "interest": "high",
+      "influence": "low",
+      "inference_basis": "Brief targets buyers across Europe purchasing mugs, bowls, and vases year-round instead of only at weekend craft markets",
+      "engagement": "keep_informed"
+    },
+    {
+      "id": "S2",
+      "role": "Studio team operating the store day to day",
+      "category": "operator",
+      "interest": "high",
+      "influence": "high",
+      "inference_basis": "Brief plans catalog upkeep, seasonal drops, customer accounts, and a newsletter alongside continued weekend markets - all run by the studio itself",
+      "engagement": "manage_closely"
+    },
+    {
+      "id": "S3",
+      "role": "Hosted storefront platform provider",
+      "category": "supplier",
+      "interest": "low",
+      "influence": "high",
+      "inference_basis": "Brief states the brand site is built on a hosted storefront platform; the store depends on the provider's uptime, features, and subscription terms",
+      "engagement": "keep_satisfied"
+    },
+    {
+      "id": "S4",
+      "role": "Data protection authority for the store's home jurisdiction",
+      "category": "regulator",
+      "interest": "low",
+      "influence": "high",
+      "inference_basis": "Brief collects EU customer personal data (customer accounts, email newsletter), activating lawful-processing obligations and the supervisory authority's audit and penalty powers",
+      "engagement": "keep_satisfied"
+    },
+    {
+      "id": "S5",
+      "role": "Studio owners funding the launch",
+      "category": "sponsor",
+      "interest": "high",
+      "influence": "high",
+      "inference_basis": "Brief's year-one goals (500 orders, 2,000 subscribers) imply an owner-funded launch budget the owners expect the store to pay back within year one",
+      "engagement": "manage_closely"
+    },
+    {
+      "id": "S6",
+      "role": "Weekend craft-market organizers",
+      "category": "third_party",
+      "interest": "low",
+      "influence": "low",
+      "inference_basis": "Brief commits to keeping the studio's weekend market presence alongside the store; organizers are affected if online demand displaces market attendance",
+      "engagement": "monitor"
+    }
+  ]
+}

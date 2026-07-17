@@ -1,0 +1,113 @@
+{
+  "profile": "ecommerce",
+  "description": "Scope domains every online-commerce initiative must address. Concern list mined from Standish CHAOS incomplete-requirements factors and commerce launch postmortems; briefs written from the inside view (Kahneman & Tversky 1979) reliably cover product and marketing while omitting money-flow and goods-flow domains.",
+  "concerns": [
+    {
+      "id": "logistics",
+      "concern": "Shipping, fulfillment, and delivery logistics",
+      "severity": "CRITICAL",
+      "indicators": [
+        "\\bship(ping|ments?|s)?\\b",
+        "fulfil?lment",
+        "\\bdeliver(y|ies|ed|ing)?\\b",
+        "courier",
+        "carrier",
+        "warehous",
+        "last[- ]mile",
+        "postage"
+      ],
+      "prerequisite_note": null,
+      "seed_question": "How does a sold item physically reach the buyer - who packs, who ships, at what cost, and with what delivery promise?"
+    },
+    {
+      "id": "payment-processing",
+      "concern": "Payment methods, gateway integration, and PCI obligations",
+      "severity": "CRITICAL",
+      "indicators": [
+        "\\bpayments?\\b",
+        "checkout",
+        "payment gateway",
+        "\\bStripe\\b",
+        "\\bPayPal\\b",
+        "\\bAdyen\\b",
+        "card process",
+        "\\bPCI([- ]DSS)?\\b"
+      ],
+      "prerequisite_note": "A payment gateway account (with KYC/merchant onboarding lead time) must exist BEFORE the first sale can be taken; gateway onboarding is predecessor work, not launch-day work.",
+      "seed_question": "Which payment methods are accepted at launch, through which gateway, and who carries the PCI scope?"
+    },
+    {
+      "id": "returns-refunds",
+      "concern": "Returns, refunds, and exchange policy",
+      "severity": "HIGH",
+      "indicators": [
+        "\\breturns?\\b",
+        "\\brefunds?\\b",
+        "\\bexchanges?\\b",
+        "\\bRMA\\b",
+        "return polic"
+      ],
+      "prerequisite_note": null,
+      "seed_question": "What is the returns and refund policy, who pays return shipping, and what happens to returned stock?"
+    },
+    {
+      "id": "fraud-prevention",
+      "concern": "Payment fraud and chargeback handling",
+      "severity": "HIGH",
+      "indicators": [
+        "\\bfraud\\b",
+        "chargebacks?",
+        "3[- ]?D[- ]?Secure",
+        "\\bAVS\\b",
+        "\\bCVV\\b",
+        "risk scor"
+      ],
+      "prerequisite_note": null,
+      "seed_question": "How are fraudulent orders detected before shipment, and who absorbs chargeback losses?"
+    },
+    {
+      "id": "customer-acquisition",
+      "concern": "Marketing and customer acquisition channels",
+      "severity": "HIGH",
+      "indicators": [
+        "marketing",
+        "\\bSEO\\b",
+        "advertis",
+        "social media",
+        "Instagram",
+        "acquisition",
+        "traffic",
+        "campaign"
+      ],
+      "prerequisite_note": null,
+      "seed_question": "Which channels bring buyers to the store, at what acquisition cost, and how is that measured?"
+    },
+    {
+      "id": "sales-tax",
+      "concern": "Sales tax / VAT registration and collection",
+      "severity": "MEDIUM",
+      "indicators": [
+        "sales tax",
+        "\\bVAT\\b",
+        "\\bGST\\b",
+        "tax (registration|compliance|collection)"
+      ],
+      "prerequisite_note": "VAT/sales-tax registration thresholds can require registration BEFORE the first cross-border sale (e.g. EU OSS). Verify against current jurisdiction.",
+      "seed_question": "Where must the store register for VAT or sales tax before selling, and who files the returns?"
+    },
+    {
+      "id": "inventory",
+      "concern": "Inventory and stock management",
+      "severity": "MEDIUM",
+      "indicators": [
+        "\\binventory\\b",
+        "stock (levels?|management|control)",
+        "\\bSKU\\b",
+        "restock",
+        "out[- ]of[- ]stock"
+      ],
+      "prerequisite_note": null,
+      "seed_question": "How is stock tracked across channels, and what happens when an item sells out mid-order?"
+    }
+  ]
+}

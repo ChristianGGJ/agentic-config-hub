@@ -1,0 +1,31 @@
+{
+  "name": "crm-launch",
+  "version": "0.1.0",
+  "tasks": [
+    {
+      "id": "T1",
+      "description": "Design customer database schema for storing customer records and purchase history",
+      "depends_on": []
+    },
+    {
+      "id": "T2",
+      "description": "Build sign-up flow collecting name, email address, and postal address",
+      "depends_on": ["T1"]
+    },
+    {
+      "id": "T3",
+      "description": "Import existing customer email list from spreadsheets",
+      "depends_on": ["T1"]
+    },
+    {
+      "id": "T4",
+      "description": "Integrate third-party email marketing platform",
+      "depends_on": ["T3"]
+    },
+    {
+      "id": "T5",
+      "description": "Launch customer database to production",
+      "depends_on": ["T2", "T3", "T4"]
+    }
+  ]
+}
