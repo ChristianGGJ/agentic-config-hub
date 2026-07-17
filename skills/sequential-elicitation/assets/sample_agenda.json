@@ -1,0 +1,44 @@
+{
+  "brief": "customer-portal-launch",
+  "budget": {
+    "max_questions": 12
+  },
+  "areas": [
+    {
+      "id": "BS-01",
+      "criticality": "CRITICAL",
+      "concern": "Payment handling and PCI-DSS obligations are absent from the brief",
+      "expected_questions": 2,
+      "source_status": "missing"
+    },
+    {
+      "id": "BS-02",
+      "criticality": "CRITICAL",
+      "concern": "Personal-data retention and deletion policy is undefined",
+      "expected_questions": 2,
+      "source_status": "missing",
+      "prerequisite_note": "DPA review must complete before go-live"
+    },
+    {
+      "id": "BS-03",
+      "criticality": "HIGH",
+      "concern": "Rollback and incident path for a failed go-live is only hinted at",
+      "expected_questions": 2,
+      "source_status": "partial"
+    },
+    {
+      "id": "BS-04",
+      "criticality": "MEDIUM",
+      "concern": "Support-staff workflows after launch are not described",
+      "expected_questions": 1,
+      "source_status": "missing"
+    },
+    {
+      "id": "BS-05",
+      "criticality": "LOW",
+      "concern": "Localization scope is ambiguous: two markets named, one language",
+      "expected_questions": 1,
+      "source_status": "partial"
+    }
+  ]
+}

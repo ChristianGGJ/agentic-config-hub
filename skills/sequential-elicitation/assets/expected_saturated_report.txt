@@ -1,0 +1,24 @@
+ELICITATION LOOP GOVERNOR (sequential-elicitation)
+Brief   : customer-portal-launch
+Records : 7 | question budget: 12 | saturation window: 3 | oscillation window: 4 | wall-clock ceiling: off
+
+AGENDA COVERAGE
+  area   crit       questions  facts  coverage  status
+  BS-01  CRITICAL           2      4      100%  resolved
+  BS-02  CRITICAL           4      3      100%  open
+  BS-03  HIGH               0      0        0%  untouched
+  BS-04  MEDIUM             1      0      100%  open
+  BS-05  LOW                0      0        0%  untouched
+  closed 1 of 5 area(s) (20%)
+
+EXIT-CONDITION CHECKS (six-type taxonomy; authority: loop_engineering_patterns.md, agentic-system-architect)
+  [clear] max_iterations     7 of 12 question(s) used
+  [FIRED] no_progress        last 3 record(s) (seq 5, 6, 7) yielded zero new_facts - the dialogue is saturated
+  [clear] oscillation        no decision key revisits an abandoned value within its last 4 assignment(s)
+  [clear] budget             wall-clock ceiling not configured (--max-minutes)
+  [clear] success_predicate  CRITICAL area(s) still open: BS-02
+  [clear] escalation_trigger no record carries an escalation marker
+
+VERDICT: STOP - fired: no_progress
+Exit code 1: STOP means stop and report. Hand the ledger and this
+report to the consuming workflow's gate. Do not ask another question.

@@ -1,0 +1,24 @@
+ELICITATION LOOP GOVERNOR (sequential-elicitation)
+Brief   : customer-portal-launch
+Records : 3 | question budget: 12 | saturation window: 3 | oscillation window: 4 | wall-clock ceiling: off
+
+AGENDA COVERAGE
+  area   crit       questions  facts  coverage  status
+  BS-01  CRITICAL           0      0        0%  untouched
+  BS-02  CRITICAL           3      3      100%  open
+  BS-03  HIGH               0      0        0%  untouched
+  BS-04  MEDIUM             0      0        0%  untouched
+  BS-05  LOW                0      0        0%  untouched
+  closed 0 of 5 area(s) (0%)
+
+EXIT-CONDITION CHECKS (six-type taxonomy; authority: loop_engineering_patterns.md, agentic-system-architect)
+  [clear] max_iterations     3 of 12 question(s) used
+  [clear] no_progress        at least one of the last 3 record(s) yielded new facts
+  [FIRED] oscillation        key 'retention_period' revisits an abandoned value: 24-months -> 12-months -> 24-months (seq 1, 2, 3) - freeze the key(s), present both prior answers, and escalate for an explicit override; do not re-ask
+  [clear] budget             wall-clock ceiling not configured (--max-minutes)
+  [clear] success_predicate  CRITICAL area(s) still open: BS-01, BS-02
+  [clear] escalation_trigger no record carries an escalation marker
+
+VERDICT: STOP - fired: oscillation
+Exit code 1: STOP means stop and report. Hand the ledger and this
+report to the consuming workflow's gate. Do not ask another question.

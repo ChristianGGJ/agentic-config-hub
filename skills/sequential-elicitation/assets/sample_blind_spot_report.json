@@ -1,0 +1,59 @@
+{
+  "brief": "customer-portal-launch",
+  "findings": [
+    {
+      "id": "BS-01",
+      "domain": "compliance",
+      "concern": "Payment handling and PCI-DSS obligations are absent from the brief",
+      "status": "missing",
+      "severity": "CRITICAL",
+      "evidence": "brief describes a checkout UI but never names a payment provider or a card-data boundary",
+      "prerequisite_note": null
+    },
+    {
+      "id": "BS-02",
+      "domain": "data-protection",
+      "concern": "Personal-data retention and deletion policy is undefined",
+      "status": "missing",
+      "severity": "CRITICAL",
+      "evidence": "signup collects personal fields; no retention or deletion language found in the brief",
+      "prerequisite_note": "DPA review must complete before go-live"
+    },
+    {
+      "id": "BS-03",
+      "domain": "operations",
+      "concern": "Rollback and incident path for a failed go-live is only hinted at",
+      "status": "partial",
+      "severity": "HIGH",
+      "evidence": "brief says 'we can revert if needed' with no mechanism or owner",
+      "prerequisite_note": null
+    },
+    {
+      "id": "BS-04",
+      "domain": "operations",
+      "concern": "Support-staff workflows after launch are not described",
+      "status": "missing",
+      "severity": "MEDIUM",
+      "evidence": "no mention of the support team anywhere in the brief",
+      "prerequisite_note": null
+    },
+    {
+      "id": "BS-05",
+      "domain": "scope",
+      "concern": "Localization scope is ambiguous: two markets named, one language",
+      "status": "partial",
+      "severity": "LOW",
+      "evidence": "brief names the DE and FR markets but only English content",
+      "prerequisite_note": null
+    },
+    {
+      "id": "BS-06",
+      "domain": "scope",
+      "concern": "Browser support matrix",
+      "status": "covered",
+      "severity": "LOW",
+      "evidence": "brief pins evergreen browsers explicitly",
+      "prerequisite_note": null
+    }
+  ]
+}
