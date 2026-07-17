@@ -10,7 +10,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Current Scope
 
-- **29 atomic skill packages** in `skills/` (agent design, framework integration - LangGraph/CrewAI/MS Agent Framework, RAG & memory, MCP, prompt engineering, evals, guardrails, observability, cost control, autonomous loops)
+- **40 atomic skill packages** in `skills/` (agent design, framework integration - LangGraph/CrewAI/MS Agent Framework, RAG & memory, MCP, prompt engineering, evals, guardrails, observability, cost control, autonomous loops, project planning & requirements elicitation)
 - **1 flagship skill**: `skills/agentic-system-architect/` - four-pillar ecosystem design plus 4 Python quality-gate tools
 - **1 flagship agent**: `agents/cs-agentic-system-architect.md` plus reviewer personas in `agents/personas/`
 - **4 pillars** at repo root: `context/`, `skills/`, `agents/`, `workflows/`
@@ -23,7 +23,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 | Area | Location | Focus |
 |------|----------|-------|
 | **Context** | [context/](context/) | Project ground truth; read-only for agents |
-| **Skills** | [skills/](skills/) + [skills/CLAUDE.md](skills/CLAUDE.md) | 29 atomic, self-contained skill packages |
+| **Skills** | [skills/](skills/) + [skills/CLAUDE.md](skills/CLAUDE.md) | 40 atomic, self-contained skill packages |
 | **Agents** | [agents/](agents/) + [agents/CLAUDE.md](agents/CLAUDE.md) | cs-* role agents and reviewer personas |
 | **Workflows** | [workflows/](workflows/) | Gated multi-agent orchestrations with HITL blocks |
 | **Ecosystems** | [ecosystems/](ecosystems/) + [ecosystems/README.md](ecosystems/README.md) | **Product plane**: generated four-pillar configs per target project; `_local/` is git-ignored for private work |
@@ -203,4 +203,4 @@ Full definitions, patterns, and scoring live in the flagship skill: [skills/agen
 
 **Last Updated:** 2026-07-10
 **Version:** v0.1.0
-**Status:** Initial release - 29 skills, 4 hardened agents, four-pillar architecture, quality gates active
+**Status:** Initial release - 40 skills, 5 hardened agents, four-pillar architecture, quality gates active

@@ -84,7 +84,7 @@ mentioned in `SKILL.md` exist, and `--json` output is valid JSON (pipe it throug
 `python -m json.tool`). Record eval iterations in `evals/` (see
 [../evals/README.md](../evals/README.md)).
 
-## Catalog: The 29 Current Skills
+## Catalog: The 40 Current Skills
 
 ### Core agentic design
 
@@ -113,6 +113,7 @@ mentioned in `SKILL.md` exist, and `--json` output is valid JSON (pipe it throug
 | Skill | Capability |
 |-------|-----------|
 | [self-improving-agent](self-improving-agent/SKILL.md) | Bounded self-improvement loops with guardrails |
+| [agent-self-optimization](agent-self-optimization/SKILL.md) | Human-gated prompt/policy optimization from error, audit, or eval signals (DSPy-style optimizers) |
 | [ai-security](ai-security/SKILL.md) | LLM threat modeling: prompt injection, data exfiltration, misuse |
 | [adversarial-reviewer](adversarial-reviewer/SKILL.md) | Red-team style review of configs and outputs |
 | [skill-security-auditor](skill-security-auditor/SKILL.md) | Auditing skill packages for malicious or unsafe patterns |
@@ -139,6 +140,26 @@ mentioned in `SKILL.md` exist, and `--json` output is valid JSON (pipe it throug
 | [crewai-role-engineering](crewai-role-engineering/SKILL.md) | CrewAI team design: roles, backstories, task scopes, manager coordination |
 | [microsoft-agent-framework](microsoft-agent-framework/SKILL.md) | Mapping hub skills/agents onto Microsoft Agent Framework 1.0 (C#/.NET) |
 | [ms-agent-framework-enterprise](ms-agent-framework-enterprise/SKILL.md) | Enterprise C# integrations and native tool plugins with dependency injection |
+
+### Project planning & requirements elicitation
+
+Atomic capabilities for a project-planning + requirements-elicitation agent. Each
+is self-contained and chains via the shared canonical plan JSON (`tasks[]` with
+`id` / `depends_on`, the same shape `hitl_gate_validator.py` rule R5 validates
+acyclic). Orchestrated by [cs-project-planner](../agents/cs-project-planner.md).
+
+| Skill | Capability |
+|-------|-----------|
+| [wbs-decomposition](wbs-decomposition/SKILL.md) | Decompose a macro objective into a deliverable-oriented work breakdown structure; structural validator (100%-rule proxy) emits the canonical tasks array |
+| [critical-path-scheduler](critical-path-scheduler/SKILL.md) | Dependency-DAG validation (cycles/topology, R5 semantics) plus CPM forward/backward pass with working-day calendars and holidays |
+| [plan-critique](plan-critique/SKILL.md) | Severity-classified plan self-review: forgotten lifecycle phases, optimism-bias estimates, and assumption-register lints |
+| [plan-premortem](plan-premortem/SKILL.md) | Prospective-hindsight scenario expansion and a validated premortem risk register (the hub canonical risk artifact) |
+| [plan-baseline-tracking](plan-baseline-tracking/SKILL.md) | Baseline-vs-actual schedule variance with DCMA-style health checks from a status ledger |
+| [slip-driven-replanning](slip-driven-replanning/SKILL.md) | Apply a slip event to a plan and compute the deadline-impact / replan decision (ABSORB / COMPRESS / ESCALATE) |
+| [blind-spot-audit](blind-spot-audit/SKILL.md) | Detect omitted concern domains and hidden prerequisites (e.g. GDPR before a customer database) against domain profiles |
+| [sequential-elicitation](sequential-elicitation/SKILL.md) | Govern a bounded, adaptive two-way questioning loop (saturation, oscillation, budget) for requirements elicitation |
+| [stakeholder-inference](stakeholder-inference/SKILL.md) | Infer and validate a classified stakeholder register (users, operators, suppliers, regulators, sponsors) |
+| [plan-ticket-export](plan-ticket-export/SKILL.md) | BYOK, export-only Jira v3 / Asana / Trello ticket-payload generation (offline; zero network calls in scripts) |
 
 ## Adding a New Skill
 
