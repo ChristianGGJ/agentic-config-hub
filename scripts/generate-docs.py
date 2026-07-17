@@ -15,6 +15,7 @@ DOMAINS = {
     "prompts-quality": ("Prompts & Quality", 2, ":material-clipboard-check:", "prompts-quality"),
     "autonomy-security": ("Autonomy & Security", 3, ":material-shield-lock:", "autonomy-security"),
     "infrastructure": ("Infrastructure", 4, ":material-server:", "infrastructure"),
+    "project-planning": ("Project Planning & Elicitation", 5, ":material-clipboard-text-clock:", "project-planning"),
 }
 
 # Mapping flat skills to domains
@@ -55,7 +56,19 @@ SKILL_DOMAINS = {
     "agentic-observability-telemetry": "infrastructure",
     "agentic-evals-benchmarking": "prompts-quality",
     "hybrid-rag-memory": "infrastructure",
-    "agentic-guardrails-security": "autonomy-security"
+    "agentic-guardrails-security": "autonomy-security",
+
+    # Project Planning & Elicitation
+    "wbs-decomposition": "project-planning",
+    "critical-path-scheduler": "project-planning",
+    "plan-critique": "project-planning",
+    "plan-premortem": "project-planning",
+    "plan-baseline-tracking": "project-planning",
+    "slip-driven-replanning": "project-planning",
+    "blind-spot-audit": "project-planning",
+    "sequential-elicitation": "project-planning",
+    "stakeholder-inference": "project-planning",
+    "plan-ticket-export": "project-planning"
 }
 
 # SEO keyword mapping: domain_key -> differentiating keywords for <title> tags
@@ -64,6 +77,7 @@ DOMAIN_SEO_SUFFIX = {
     "prompts-quality": "Prompts Optimization & Quality Rubrics",
     "autonomy-security": "Autonomous Guardrails & Threat Modeling",
     "infrastructure": "MCP Servers & RAG Architectures",
+    "project-planning": "Project Planning & Requirements Elicitation",
 }
 
 # Domain-specific description context for pages without frontmatter descriptions
@@ -72,6 +86,7 @@ DOMAIN_SEO_CONTEXT = {
     "prompts-quality": "prompt engineering optimization, validation test suites, and quality scoring rubrics",
     "autonomy-security": "adversarial review, prompt injection mitigation, and skill package safety auditing",
     "infrastructure": "model-routing optimization, browser automation, and model context protocol server design",
+    "project-planning": "work breakdown, critical-path scheduling, plan critique and premortem, requirements elicitation, stakeholder analysis, and PM-tool export",
 }
 
 

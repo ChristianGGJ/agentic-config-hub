@@ -1,13 +1,13 @@
 ---
 title: "AI Coding Agents — Agent-Native Orchestrators"
-description: "4 agent-native orchestrators for Claude Code, Codex, and Gemini CLI."
+description: "5 agent-native orchestrators for Claude Code, Codex, and Gemini CLI."
 ---
 
 <div class="domain-header" markdown>
 
 # :material-robot: Agents
 
-<p class="domain-count">4 agents that orchestrate skills across domains</p>
+<p class="domain-count">5 agents that orchestrate skills across domains</p>
 
 </div>
 
@@ -26,6 +26,12 @@ description: "4 agent-native orchestrators for Claude Code, Codex, and Gemini CL
     Role-bound Agentic Orchestrator
 
 -   :material-robot:{ .lg .middle } **[Agentic System Architect](cs-agentic-system-architect.md)**
+
+    ---
+
+    Role-bound Agentic Orchestrator
+
+-   :material-robot:{ .lg .middle } **[Project Planner](cs-project-planner.md)**
 
     ---
 

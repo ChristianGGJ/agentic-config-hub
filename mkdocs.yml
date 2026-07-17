@@ -82,12 +82,25 @@ nav:
     - "Multi-LLM Routing": skills/infrastructure/multi-llm-routing.md
     - "Agentic Observability & Telemetry": skills/infrastructure/agentic-observability-telemetry.md
     - "Hybrid RAG & Memory": skills/infrastructure/hybrid-rag-memory.md
+  - "Project Planning & Elicitation":
+    - "Project Planning & Elicitation Skills": skills/project-planning/index.md
+    - "WBS Decomposition": skills/project-planning/wbs-decomposition.md
+    - "Critical Path Scheduler": skills/project-planning/critical-path-scheduler.md
+    - "Plan Critique": skills/project-planning/plan-critique.md
+    - "Plan Premortem": skills/project-planning/plan-premortem.md
+    - "Plan Baseline Tracking": skills/project-planning/plan-baseline-tracking.md
+    - "Slip-Driven Replanning": skills/project-planning/slip-driven-replanning.md
+    - "Blind-Spot Audit": skills/project-planning/blind-spot-audit.md
+    - "Sequential Elicitation": skills/project-planning/sequential-elicitation.md
+    - "Stakeholder Inference": skills/project-planning/stakeholder-inference.md
+    - "Plan Ticket Export": skills/project-planning/plan-ticket-export.md
   - "Agents":
     - "AI Coding Agents": agents/index.md
     - "Agentic System Architect": agents/cs-agentic-system-architect.md
     - "Agent Designer": agents/cs-agent-designer.md
     - "Prompt Engineer": agents/cs-prompt-engineer.md
     - "Agent Security Auditor": agents/cs-agent-security-auditor.md
+    - "Project Planner": agents/cs-project-planner.md
   - "Commands":
     - "Slash Commands": commands/index.md
     - "Audit Agent": commands/audit-agent.md

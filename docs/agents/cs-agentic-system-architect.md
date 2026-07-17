@@ -94,6 +94,11 @@ suggestion; each row states the success criteria for stopping.
 
 ### Approval and Irreversibility
 
+- **Universal rule (git standard, Core Principle 4): never commit, push, or perform any
+  critical/irreversible operation without an explicit, per-action human order.** A branch- or
+  scope-level approval is not standing consent to commit; each critical action is authorized on
+  its own. Reversible authoring, edits, and dry-run validations proceed; a commit, push, or any
+  irreversible state waits for the explicit order. Taking one without it is a Red Line violation.
 - Any irreversible action (deleting files, overwriting existing configs, publishing) requires
   approval from the human at a HUMAN GATE before execution. The agent presents the manifest and
   awaits explicit confirmation.

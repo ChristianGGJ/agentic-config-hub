@@ -5,6 +5,19 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Added
+
+- Project planning & requirements elicitation capability set (10 atomic skills): `wbs-decomposition` (work breakdown structure + structural validator), `critical-path-scheduler` (dependency-DAG validation + CPM date computation with working calendars), `plan-critique` (plan self-review + assumption-register lints), `plan-premortem` (prospective-hindsight scenarios + risk register), `plan-baseline-tracking` (schedule variance with DCMA-style checks), `slip-driven-replanning` (slip injection + deadline-impact decisions), `blind-spot-audit` (omitted-concern and hidden-prerequisite detection, e.g. GDPR before a customer database), `sequential-elicitation` (bounded two-way questioning loop governor), `stakeholder-inference` (classified stakeholder register), and `plan-ticket-export` (BYOK, export-only Jira v3 / Asana / Trello payload generation with zero network calls in scripts).
+- `cs-project-planner` agent (100 HARDENED) orchestrating the 10 planning skills; delegates RAG ingestion to `rag-architect` + `hybrid-rag-memory`, critique loops to `adversarial-reviewer`, and premortem fan-out to `agenthub`.
+- `project-planning-pipeline` workflow (HITL gate validator PASS): elicit -> decompose -> schedule -> critique/premortem -> plan-approval gate -> payload generation -> push-approval gate -> ticket push (sole irreversible step, dual-gated, idempotency-marker rollback) -> bounded monitor/replan loop -> final review.
+- Git workflow Core Principle 4 (Human Authorization for Commits and Critical Operations): no agent commits, pushes, or performs any critical/irreversible operation without an explicit, per-action human order; mirrored into the Approval and Irreversibility section of all `cs-*` agents.
+
+### Changed
+
+- Skill catalog grew from 29 to 40 documented packages (also restored the previously undocumented `agent-self-optimization` catalog entry); counts updated in `CLAUDE.md`, `skills/CLAUDE.md`, `README.md`, `context/architecture.md`, and `.claude-plugin/marketplace.json`.
+
 ## [0.1.0] - 2026-07-10
 
 ### Added

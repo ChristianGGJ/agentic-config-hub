@@ -4,11 +4,11 @@
     "name": "ChristianGGJ",
     "url": "https://github.com/ChristianGGJ"
   },
-  "description": "Production-ready AI configurations for agents and agentic systems: 19 atomic skill packages, cs-* role agents, gated multi-agent workflows, and project context, anchored by the agentic-system-architect flagship with 4 loop-safety audit tools.",
+  "description": "Production-ready AI configurations for agents and agentic systems: 40 atomic skill packages, cs-* role agents, gated multi-agent workflows, and project context, anchored by the agentic-system-architect flagship with 4 loop-safety audit tools.",
   "homepage": "https://github.com/ChristianGGJ/agentic-config-hub",
   "repository": "https://github.com/ChristianGGJ/agentic-config-hub",
   "metadata": {
-    "description": "19 production-ready agentic skills organized in a four-pillar structure (context, skills, agents, workflows) with loop-engineering audit tooling, HITL gate validation, and quality-gate CI.",
+    "description": "40 production-ready agentic skills organized in a four-pillar structure (context, skills, agents, workflows) with loop-engineering audit tooling, HITL gate validation, and quality-gate CI.",
     "version": "0.1.0"
   },
   "plugins": [

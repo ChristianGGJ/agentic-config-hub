@@ -201,6 +201,6 @@ Full definitions, patterns, and scoring live in the flagship skill: [skills/agen
 
 ---
 
-**Last Updated:** 2026-07-10
+**Last Updated:** 2026-07-16
 **Version:** v0.1.0
 **Status:** Initial release - 40 skills, 5 hardened agents, four-pillar architecture, quality gates active

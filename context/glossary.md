@@ -16,7 +16,7 @@ type: "context"
 | Term | Canonical form | Never write | Meaning |
 |---|---|---|---|
 | Context pillar | `context/` | "config folder", "docs" | Read-only ground truth agents load before any work |
-| Skills pillar | `skills/` | "skill library", "packages" | 19 atomic, self-contained skill packages, each with a `SKILL.md` |
+| Skills pillar | `skills/` | "skill library", "packages" | 40 atomic, self-contained skill packages, each with a `SKILL.md` |
 | Agents pillar | `agents/` | "bots", "roles folder" | `cs-*` role agents (plus `personas/`) that orchestrate skills via `../skills/<name>/` |
 | Workflows pillar | `workflows/` | "pipelines folder" | Gated multi-agent orchestrations with embedded HITL json blocks |
 

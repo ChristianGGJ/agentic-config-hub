@@ -19,7 +19,7 @@ type: "context"
    `templates/`, `standards/`, `evals/`, `scripts/`, `docs/`, and
    `documentation/`. No new root directory is added without an approved
    Change Manifest.
-3. `skills/` contains exactly 19 atomic skill packages; each skill directory
+3. `skills/` contains exactly 40 atomic skill packages; each skill directory
    contains a `SKILL.md` at its root.
 4. Every skill package follows the layout `SKILL.md` + optional `scripts/`,
    `references/`, `assets/` subdirectories; no other subdirectory names are

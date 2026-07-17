@@ -58,6 +58,7 @@ Every refinement loop this agent executes is bounded by strict exit conditions, 
 
 ### Approval and Irreversibility
 
+- **Universal rule (git standard, Core Principle 4): never commit, push, or perform any critical/irreversible operation without an explicit, per-action human order.** A branch- or scope-level approval is not standing consent to commit; each critical action is authorized on its own. Reversible authoring proceeds; a commit, push, or any irreversible state waits for the explicit order. Taking one without it is a Red Line violation.
 - Any **irreversible action** (such as promoting a prompt version in the registry, overwriting production files, or archiving versions) requires a hard stop at a **HUMAN GATE** for explicit approval.
 - The agent presents the change manifest and awaits human confirmation.
 

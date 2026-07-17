@@ -4,7 +4,7 @@ description: "Curated library of production-ready configurations for AI agents a
 ---
 
 
-**agentic-config-hub** is a library of production-ready AI configurations for agents and agentic systems. It packages 29 self-contained skills, hardened role agents, and gated multi-agent workflows that you copy straight into Claude Code, OpenAI Codex, Gemini CLI, or OpenClaw. Every agent in the hub ships with loop-engineering controls (exit conditions, iteration budgets, self-reflection checkpoints) and every workflow embeds a human approval gate that is machine-validated before merge - autonomy with brakes, verified by deterministic tooling rather than vibes.
+**agentic-config-hub** is a library of production-ready AI configurations for agents and agentic systems. It packages 40 self-contained skills, hardened role agents, and gated multi-agent workflows that you copy straight into Claude Code, OpenAI Codex, Gemini CLI, or OpenClaw. Every agent in the hub ships with loop-engineering controls (exit conditions, iteration budgets, self-reflection checkpoints) and every workflow embeds a human approval gate that is machine-validated before merge - autonomy with brakes, verified by deterministic tooling rather than vibes.
 
 ## The Four Pillars
 
@@ -15,7 +15,7 @@ context/  ->  skills/  ->  agents/  ->  workflows/
 ```
 
 - **context/** - project ground truth; read-only for agents
-- **skills/** - 29 atomic skill packages; each one stands alone
+- **skills/** - 40 atomic skill packages; each one stands alone
 - **agents/** - cs-* role agents and reviewer personas that compose skills
 - **workflows/** - multi-agent orchestrations with hard human-in-the-loop gates
 
@@ -125,7 +125,7 @@ Private client work goes in `ecosystems/_local/` (git-ignored). See
 ```
 agentic-config-hub/
 |-- context/          # Project ground truth (read-only for agents)
-|-- skills/           # 29 atomic skill packages
+|-- skills/           # 40 atomic skill packages
 |-- agents/           # cs-* role agents + personas/
 |-- workflows/        # Gated multi-agent orchestrations
 |-- ecosystems/       # PRODUCT PLANE: generated configs per target project (_local/ git-ignored)
